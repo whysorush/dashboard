@@ -1,10 +1,15 @@
-// src/components/Sidebar.jsx
+import { Link, useLocation } from 'react-router-dom';
 import {
   FaChartPie, FaPlug, FaRobot, FaChartLine,
-  FaLightbulb, FaChartBar, FaCog, FaQuestionCircle
+  FaLightbulb, FaChartBar, FaCog, FaQuestionCircle,
+  FaTools
 } from 'react-icons/fa';
 
 export default function Sidebar() {
+  const location = useLocation();
+
+  const isActive = (path) => location.pathname === path;
+
   return (
     <>
       <div className="logo">
@@ -15,7 +20,16 @@ export default function Sidebar() {
         <div className="nav-section">
           <p className="nav-title">Home</p>
           <ul>
-            <li className="active"><FaChartPie /> Overview</li>
+            <li className={isActive('/dashboard') ? 'active' : ''}>
+              <Link to="/dashboard" className="flex items-center gap-2">
+                <FaChartPie /> Overview
+              </Link>
+            </li>
+            <li className={isActive('/dashboard-builder') ? 'active' : ''}>
+              <Link to="/dashboard-builder" className="flex items-center gap-2">
+                <FaTools /> Dashboard Builder
+              </Link>
+            </li>
             <li><FaPlug /> Integrations</li>
             <li><FaRobot /> AI Assistant</li>
             <li><FaChartLine /> Custom Dashboard</li>
