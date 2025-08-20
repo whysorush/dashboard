@@ -1,33 +1,54 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+// src/context/ThemeContext.jsx
+import React, { createContext, useState, useContext, useEffect } from 'react';
 
-const ThemeContext = createContext();
+// Create and export the context
+export const ThemeContext = createContext();
 
-export function ThemeProvider({ children }) {
-  const [isDark, setIsDark] = useState(() => {
-    const savedTheme = localStorage.getItem('theme');
-    return savedTheme ? savedTheme === 'dark' : true; // Default to dark theme
+// Custom hook to use theme
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    throw new Error('useTheme must be used within ThemeProvider');
+  }
+  return context;
+};
+
+// Theme Provider Component
+export const ThemeProvider = ({ children }) => {
+  const [theme, setTheme] = useState(() => {
+    // Get theme from localStorage or default to 'light'
+    return localStorage.getItem('theme') || 'light';
   });
 
+  // Update localStorage and document class when theme changes
   useEffect(() => {
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-  }, [isDark]);
+    localStorage.setItem('theme', theme);
+    
+    // Update document class for Tailwind dark mode
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
 
+  // Toggle theme function
   const toggleTheme = () => {
-    setIsDark(prev => !prev);
+    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+  };
+
+  const value = {
+    theme,
+    setTheme,
+    toggleTheme
   };
 
   return (
-    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );
-}
+};
 
-export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
-}
+// Export default provider
+export default ThemeProvider;
