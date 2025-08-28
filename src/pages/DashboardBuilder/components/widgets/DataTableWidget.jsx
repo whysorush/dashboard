@@ -107,15 +107,16 @@ const DataTableWidget = ({ widget, isSelected, onClick }) => {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-gray-200 dark:border-gray-700">
+      <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+        <table className="w-full text-sm" style={{ fontFamily: "'Figtree', sans-serif" }}>
+          <thead className="bg-gray-50 dark:bg-gray-700">
+            <tr>
               {columns.map(column => (
                 <th
                   key={column.key}
-                  className={`text-left py-2 px-3 font-medium text-gray-700 dark:text-gray-300 
-                            ${column.sortable ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700' : ''}`}
+                  className={`text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 
+                            ${column.sortable ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600' : ''}
+                            first:rounded-tl-lg last:rounded-tr-lg`}
                   onClick={() => column.sortable && handleSort(column.key)}
                 >
                   <div className="flex items-center gap-1">
@@ -130,15 +131,16 @@ const DataTableWidget = ({ widget, isSelected, onClick }) => {
               ))}
             </tr>
           </thead>
-          <tbody>
+          <tbody className="bg-white dark:bg-gray-800">
             {paginatedData.map((row, index) => (
               <tr 
                 key={row.id}
                 className={`border-b border-gray-100 dark:border-gray-700 
-                          hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors`}
+                          hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200
+                          ${index === paginatedData.length - 1 ? 'last:border-b-0' : ''}`}
               >
                 {columns.map(column => (
-                  <td key={column.key} className="py-2 px-3">
+                  <td key={column.key} className="py-3 px-4 text-gray-900 dark:text-gray-100">
                     {column.key === 'status' ? (
                       <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
                         row[column.key] === 'active' 

@@ -1,120 +1,115 @@
-# Stack Logix Dashboard
+## Dashboard Builder
 
-A modern, responsive admin dashboard built with React and Vite, featuring a beautiful dark/light theme, interactive charts, and real-time data visualization.
+A drag-and-drop dashboard builder built with React and Vite. Create custom dashboards using a library of widgets (charts, KPI cards, tables), arrange them on a responsive grid, preview the result, and export reusable code.
 
-![Stack Logix Dashboard](./src/assets/man.png)
+![Dashboard Builder](./src/assets/man.png)
 
-## Features
+### Highlights
 
-- 🌓 Dark/Light Theme Support
-- 📊 Interactive Charts (using Recharts)
-- 📱 Fully Responsive Design
-- 🎯 Real-time Data Visualization
-- 🔍 Search Functionality
-- 🎨 Modern UI/UX
-- 📊 Data Tables
-- 🎛️ Advanced Filters
+- **Drag & drop layout**: Powered by `react-grid-layout` with resize and move support
+- **Widget library**: Line, Bar, Area, Pie, Funnel, KPI Card, Data Table
+- **Keyboard shortcuts**: Undo/redo, duplicate, move, delete, toggle grid/properties, and more
+- **Preview & export**: Live preview modal and code export helpers
+- **Theme support**: Light/dark via app `ThemeContext`
+- **Responsive**: Grid-based layout scales across screen sizes
 
-## Tech Stack
+### Tech Stack
 
-- React 19
-- Vite 7
-- Tailwind CSS 4
-- React Icons
-- Recharts
-- Modern CSS (CSS Variables, Grid, Flexbox)
+- **React 19** + **Vite 7**
+- **Tailwind CSS 4**
+- **react-dnd** + **react-grid-layout**
+- **react-router-dom 7**
+- **recharts** for sample charts
+- **react-icons**
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js (v18 or higher recommended)
-- npm or yarn
+- Node.js v18+ and npm (or yarn/pnpm)
 
-### Installation
+### Install and run
 
-1. Clone the repository:
-```bash
-git clone https://github.com/your-username/stacklogix-Dashboard.git
-cd stacklogix-Dashboard
-```
-
-2. Install dependencies:
 ```bash
 npm install
-# or
-yarn
-```
-
-3. Start the development server:
-```bash
 npm run dev
-# or
-yarn dev
 ```
 
-4. Open your browser and visit `http://localhost:5173`
+Open `http://localhost:5173` and navigate to `/dashboard-builder` to use the builder.
 
-### Build for Production
+### Build for production
 
 ```bash
 npm run build
-# or
-yarn build
 ```
 
-The build artifacts will be stored in the `dist/` directory.
+Artifacts will be generated in the `dist/` directory. Preview with:
+
+```bash
+npm run preview
+```
+
+## Usage
+
+1. Go to the builder at `/dashboard-builder`.
+2. Drag widgets from the palette onto the canvas, or click the quick-add button on the canvas.
+3. Click a widget to select it and edit properties in the right panel (title, color, size, etc.).
+4. Resize or drag widgets to rearrange; use controls to duplicate, lock, or delete.
+5. Use Preview to see a modal of the dashboard; use Export to generate code you can copy.
+
+### Keyboard Shortcuts
+
+- **Ctrl/Cmd + Z**: Undo
+- **Ctrl/Cmd + Y** or **Ctrl/Cmd + Shift + Z**: Redo
+- **Ctrl/Cmd + S**: Save (placeholder)
+- **Ctrl/Cmd + E**: Export
+- **Ctrl/Cmd + P**: Preview
+- **Ctrl/Cmd + A**: Select all
+- **Ctrl/Cmd + D**: Duplicate selected widget
+- **Ctrl/Cmd + C / V**: Copy / Paste widget
+- **Ctrl/Cmd + G**: Toggle grid
+- **Ctrl/Cmd + I**: Toggle properties panel
+- **Delete / Backspace**: Delete selected widget
+- **Escape**: Deselect
+- **Arrow keys**: Move selected widget (hold Shift for larger steps)
 
 ## Project Structure
 
 ```
-stacklogix-Dashboard/
-├── src/
-│   ├── components/         # React components
-│   ├── context/           # React context (theme, etc.)
-│   ├── assets/           # Images and static assets
-│   ├── App.jsx           # Main App component
-│   └── main.jsx          # Entry point
-├── public/               # Public assets
-└── package.json         # Project dependencies and scripts
+src/
+├── App.jsx                          # App shell and routes (`/dashboard-builder`)
+├── context/ThemeContext.jsx         # Theme provider (light/dark)
+├── pages/DashboardBuilder/
+│   ├── index.jsx                    # Builder page wrapper
+│   ├── context/BuilderContext.jsx   # Core state: widgets, history, actions
+│   ├── hooks/
+│   │   ├── useGridLayout.js         # Grid helpers and RGL integration
+│   │   └── useKeyboardShortcuts.js  # Global keyboard handling
+│   ├── components/
+│   │   ├── Canvas.jsx               # Canvas with `react-grid-layout`
+│   │   ├── ComponentPalette.jsx     # Draggable widget palette (react-dnd)
+│   │   ├── WidgetControls.jsx       # Actions (duplicate, lock, delete)
+│   │   ├── PropertiesPanel/         # General/Style/Data/KPI panels
+│   │   ├── PreviewModal/            # Preview modal
+│   │   ├── ExportDialog.jsx         # Export UI
+│   │   └── widgets/                 # Widget implementations
+│   └── utils/                       # Grid, export, code, mock data helpers
+└── styles/                          # Global and grid styles
 ```
 
-## Features in Detail
+## Scripts
 
-### Theme Support
-- Seamless dark/light mode switching
-- Persistent theme preference
-- CSS variables for consistent theming
-- Smooth theme transitions
+- `npm run dev`: Start dev server
+- `npm run build`: Production build
+- `npm run preview`: Preview built app
+- `npm run lint`: Run ESLint
 
-### Components
-- **StatCards**: Display key metrics with icons
-- **Charts**: Interactive bar and funnel charts
-- **DataTable**: Sortable and filterable data grid
-- **Filters**: Advanced filtering options
-- **Sidebar**: Responsive navigation menu
-- **Header**: Search and user profile section
+## Notes
 
-### Responsive Design
-- Mobile-first approach
-- Adaptive layouts
-- Collapsible sidebar
-- Responsive data visualization
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- The export functionality uses helpers in `src/pages/DashboardBuilder/utils/`; adapt code generation to your target framework as needed.
+- Routes are defined in `src/App.jsx`. The builder is accessible at `/dashboard-builder`.
 
 ## Acknowledgments
 
-- React Icons for the beautiful icon set
-- Recharts for the charting library
-- Tailwind CSS for the utility-first CSS framework
+- `react-grid-layout`, `react-dnd`, and `recharts` for the ecosystem building blocks
+- `react-icons` for icons

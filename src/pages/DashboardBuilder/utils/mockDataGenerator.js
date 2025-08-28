@@ -1,212 +1,287 @@
 // src/pages/DashboardBuilder/utils/mockDataGenerator.js
 
-export const generateMockData = (type, config = {}) => {
-    switch (type) {
-      case 'time-series':
-        return generateTimeSeriesData(config);
-      case 'categories':
-        return generateCategoryData(config);
-      case 'pie':
-        return generatePieData(config);
-      case 'funnel':
-        return generateFunnelData(config);
+// Generate mock data for charts
+export const generateMockData = (type, options = {}) => {
+  switch (type) {
+    case 'time-series':
+      return generateTimeSeriesData(options);
+    case 'categories':
+      return generateCategoryData(options);
+    case 'pie':
+      return generatePieData(options);
+    case 'funnel':
+      return generateFunnelData(options);
+    default:
+      return [];
+  }
+};
+
+// Generate time series data (for line/area charts)
+const generateTimeSeriesData = (options) => {
+  const { 
+    points = 12, 
+    trend = 'up', 
+    timeRange = 'monthly',
+    includeComparison = false
+  } = options;
+  
+  const data = [];
+  const baseValue = 1000 + Math.random() * 2000;
+  const volatility = 0.2;
+  let currentValue = baseValue;
+  
+  // Generate time labels based on timeRange
+  const getTimeLabel = (index) => {
+    switch (timeRange) {
+      case 'daily':
+        const date = new Date();
+        date.setDate(date.getDate() - (points - index - 1));
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      case 'weekly':
+        const weekDate = new Date();
+        weekDate.setDate(weekDate.getDate() - (points - index - 1) * 7);
+        return `Week ${index + 1}`;
+      case 'monthly':
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const currentMonth = new Date().getMonth();
+        return months[(currentMonth - (points - index - 1)) % 12];
+      case 'quarterly':
+        return `Q${(index % 4) + 1}`;
+      case 'yearly':
+        const currentYear = new Date().getFullYear();
+        return `${currentYear - (points - index - 1)}`;
       default:
-        return [];
+        return `Point ${index + 1}`;
     }
   };
   
-  const generateTimeSeriesData = (config) => {
-    const { points = 12, trend = 'random', baseValue = 5000 } = config;
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const data = [];
-    
-    for (let i = 0; i < points; i++) {
-      let value;
-      
-      switch (trend) {
-        case 'increasing':
-          value = baseValue + (i * 500) + Math.random() * 1000;
-          break;
-        case 'decreasing':
-          value = baseValue - (i * 300) + Math.random() * 500;
-          break;
-        case 'seasonal':
-          value = baseValue + Math.sin(i / 2) * 2000 + Math.random() * 500;
-          break;
-        default:
-          value = baseValue + Math.random() * 3000 - 1500;
-      }
-      
-      data.push({
-        name: months[i % 12],
-        value: Math.floor(Math.max(0, value)),
-        previousValue: Math.floor(Math.max(0, value * 0.9 + Math.random() * value * 0.2))
-      });
+  for (let i = 0; i < points; i++) {
+    // Apply trend direction
+    let change;
+    switch (trend) {
+      case 'up':
+        change = (Math.random() * volatility) * baseValue;
+        currentValue = i === 0 ? baseValue : data[i - 1].value + change;
+        break;
+      case 'down':
+        change = (Math.random() * volatility) * baseValue;
+        currentValue = i === 0 ? baseValue : data[i - 1].value - change;
+        break;
+      case 'stable':
+        change = (Math.random() * volatility - volatility/2) * baseValue;
+        currentValue = i === 0 ? baseValue : data[i - 1].value + change;
+        break;
+      case 'volatile':
+        change = (Math.random() * volatility * 2 - volatility) * baseValue;
+        currentValue = i === 0 ? baseValue : data[i - 1].value + change;
+        break;
+      default:
+        change = (Math.random() * volatility * 2 - volatility) * baseValue;
+        currentValue = i === 0 ? baseValue : data[i - 1].value + change;
     }
     
-    return data;
-  };
+    // Ensure value is positive
+    currentValue = Math.max(currentValue, baseValue * 0.1);
+    
+    const dataPoint = {
+      name: getTimeLabel(i),
+      value: Math.round(currentValue)
+    };
+    
+    // Add comparison data if requested
+    if (includeComparison) {
+      dataPoint.previousValue = Math.round(currentValue * (0.7 + Math.random() * 0.6));
+    }
+    
+    data.push(dataPoint);
+  }
   
-  const generateCategoryData = (config) => {
-    const { categories = 5, includeComparison = false } = config;
-    const categoryNames = ['Category A', 'Category B', 'Category C', 'Category D', 'Category E', 
-                          'Category F', 'Category G', 'Category H'];
-    const data = [];
-    
-    for (let i = 0; i < Math.min(categories, categoryNames.length); i++) {
-      const value = Math.floor(Math.random() * 10000) + 1000;
-      data.push({
-        name: categoryNames[i],
-        value,
-        value2: includeComparison ? Math.floor(value * 0.8 + Math.random() * value * 0.4) : undefined
-      });
-    }
-    
-    return data;
-  };
+  return data;
+};
+
+// Generate category data (for bar charts)
+const generateCategoryData = (options) => {
+  const { 
+    categories = 5, 
+    includeComparison = false,
+    timeRange = 'monthly',
+    trend = 'random'
+  } = options;
   
-  const generatePieData = (config) => {
-    const { segments = 5 } = config;
-    const segmentNames = ['Segment A', 'Segment B', 'Segment C', 'Segment D', 'Segment E'];
-    const data = [];
-    let remaining = 100;
+  const data = [];
+  const baseValue = 1000 + Math.random() * 2000;
+  
+  const categoryNames = getCategoryNames(categories, timeRange);
+  
+  for (let i = 0; i < categories; i++) {
+    let value;
     
-    for (let i = 0; i < Math.min(segments - 1, segmentNames.length); i++) {
-      const value = Math.floor(Math.random() * remaining * 0.6) + 10;
-      remaining -= value;
-      data.push({
-        name: segmentNames[i],
-        value: value * 100 // Scale up for display
-      });
+    switch (trend) {
+      case 'up':
+        value = baseValue * (0.5 + (i / categories) * 1.5);
+        break;
+      case 'down':
+        value = baseValue * (2 - (i / categories) * 1.5);
+        break;
+      case 'bell':
+        value = baseValue * (0.5 + Math.sin((i / categories) * Math.PI) * 1.5);
+        break;
+      case 'random':
+      default:
+        value = baseValue * (0.2 + Math.random() * 1.8);
     }
     
-    // Add last segment with remaining value
+    const dataPoint = {
+      name: categoryNames[i],
+      value: Math.round(value)
+    };
+    
+    // Add secondary value for stacked charts
+    dataPoint.value2 = Math.round(value * (0.2 + Math.random() * 0.3));
+    
+    // Add comparison data if requested
+    if (includeComparison) {
+      dataPoint.previousValue = Math.round(value * (0.7 + Math.random() * 0.6));
+    }
+    
+    data.push(dataPoint);
+  }
+  
+  return data;
+};
+
+// Generate pie chart data
+const generatePieData = (options) => {
+  const { segments = 5 } = options;
+  
+  const data = [];
+  const total = 100;
+  let remaining = total;
+  
+  const categoryNames = getCategoryNames(segments);
+  
+  for (let i = 0; i < segments; i++) {
+    const isLast = i === segments - 1;
+    const value = isLast ? remaining : Math.round(remaining * (0.1 + Math.random() * 0.4));
+    
     data.push({
-      name: segmentNames[segments - 1],
-      value: remaining * 100
+      name: categoryNames[i],
+      value: value
     });
     
-    return data;
+    remaining -= value;
+  }
+  
+  return data;
+};
+
+// Generate funnel data
+const generateFunnelData = (options) => {
+  const { stages = 4 } = options;
+  
+  const data = [];
+  let currentValue = 1000 + Math.random() * 2000;
+  
+  const stageNames = [
+    'Visitors', 'Leads', 'Opportunities', 'Proposals', 'Negotiations', 'Closed'
+  ].slice(0, stages);
+  
+  for (let i = 0; i < stages; i++) {
+    data.push({
+      name: stageNames[i],
+      value: Math.round(currentValue)
+    });
+    
+    // Each stage drops by 20-50%
+    currentValue = currentValue * (0.5 - Math.random() * 0.3);
+  }
+  
+  return data;
+};
+
+// Helper to get category names
+const getCategoryNames = (count, type = 'category') => {
+  if (type === 'monthly') {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return months.slice(0, count);
+  }
+  
+  const categories = {
+    products: ['Laptops', 'Phones', 'Tablets', 'Monitors', 'Accessories', 'Software', 'Services', 'Storage'],
+    regions: ['North', 'South', 'East', 'West', 'Central', 'International', 'Online', 'Partners'],
+    departments: ['Sales', 'Marketing', 'Engineering', 'Support', 'Operations', 'Finance', 'HR', 'Legal'],
+    segments: ['Enterprise', 'SMB', 'Consumer', 'Government', 'Education', 'Healthcare', 'Retail', 'Technology']
   };
   
-  const generateFunnelData = (config) => {
-    const { stages = 5 } = config;
-    const stageNames = ['Awareness', 'Interest', 'Consideration', 'Intent', 'Purchase'];
-    const data = [];
-    let currentValue = 10000;
-    
-    for (let i = 0; i < Math.min(stages, stageNames.length); i++) {
-      data.push({
-        name: stageNames[i],
-        value: Math.floor(currentValue)
-      });
-      currentValue *= 0.6 + Math.random() * 0.2; // 60-80% conversion between stages
-    }
-    
-    return data;
-  };
+  // Pick a random category type
+  const categoryType = Object.keys(categories)[Math.floor(Math.random() * Object.keys(categories).length)];
+  return categories[categoryType].slice(0, count);
+};
+
+// Calculate KPIs from data
+export const calculateKPIs = (data, config) => {
+  if (!data || data.length === 0) return [];
   
-  export const calculateKPIs = (data, config = {}) => {
-    if (!data || data.length === 0) {
-      return {
-        total: { value: 0, label: 'Total' },
-        average: { value: 0, label: 'Average' },
-        growth: { value: 0, label: 'Growth' },
-        max: { value: 0, label: 'Max' },
-        min: { value: 0, label: 'Min' }
-      };
-    }
-    
-    const values = data.map(d => d.value || 0);
-    const total = values.reduce((sum, val) => sum + val, 0);
-    const average = total / values.length;
-    const max = Math.max(...values);
-    const min = Math.min(...values);
-    
-    // Calculate growth (comparing last value to first)
-    const growth = values.length > 1 
-      ? ((values[values.length - 1] - values[0]) / values[0]) * 100
-      : 0;
-    
-    // Calculate trend (simplified)
-    const trend = values.length > 1
-      ? values[values.length - 1] > values[0] ? 'up' : 'down'
-      : 'neutral';
-    
-    return {
-      total: {
-        value: total,
-        label: 'Total',
-        comparison: 12.5 // Mock comparison
-      },
-      average: {
-        value: Math.floor(average),
-        label: 'Average',
-        comparison: -3.2
-      },
-      growth: {
-        value: growth,
-        label: 'Growth',
-        comparison: growth
-      },
-      max: {
-        value: max,
-        label: 'Maximum'
-      },
-      min: {
-        value: min,
-        label: 'Minimum'
-      },
-      trend: {
-        value: trend,
-        label: 'Trend'
-      },
-      count: {
-        value: data.length,
-        label: 'Count'
-      }
-    };
-  };
+  const values = data.map(d => d.value);
+  const total = values.reduce((sum, val) => sum + val, 0);
+  const average = total / values.length;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
   
-  export const applyTimeFilter = (data, filter) => {
-    if (!data || !filter) return data;
-    
-    switch (filter) {
-      case 'daily':
-        return data.slice(-7);
-      case 'weekly':
-        return data.slice(-4);
-      case 'monthly':
-        return data;
-      case 'quarterly':
-        return data.filter((_, i) => i % 3 === 0);
-      case 'yearly':
-        return data.filter((_, i) => i % 12 === 0);
-      default:
-        return data;
-    }
-  };
+  // Calculate growth (last value vs first value)
+  const growth = data.length > 1 
+    ? ((data[data.length - 1].value - data[0].value) / data[0].value) * 100
+    : 0;
   
-  export const formatNumber = (num, format = 'number') => {
-    if (num === null || num === undefined) return '—';
-    
-    switch (format) {
-      case 'currency':
-        return new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'USD',
-          minimumFractionDigits: 0
-        }).format(num);
-      case 'percentage':
-        return `${num.toFixed(1)}%`;
-      case 'abbreviated':
-        if (num >= 1000000) {
-          return `${(num / 1000000).toFixed(1)}M`;
-        } else if (num >= 1000) {
-          return `${(num / 1000).toFixed(1)}K`;
-        }
-        return num.toString();
-      default:
-        return num.toLocaleString();
-    }
-  };
+  const kpis = [];
+  
+  // Only include requested KPI metrics
+  const metrics = config?.kpiMetrics || ['total', 'average', 'growth'];
+  
+  if (metrics.includes('total')) {
+    kpis.push({
+      label: 'Total',
+      value: total,
+      format: config?.numberFormat || 'number',
+      icon: '📊'
+    });
+  }
+  
+  if (metrics.includes('average')) {
+    kpis.push({
+      label: 'Average',
+      value: average,
+      format: config?.numberFormat || 'number',
+      icon: '📈'
+    });
+  }
+  
+  if (metrics.includes('growth')) {
+    kpis.push({
+      label: 'Growth',
+      value: growth,
+      format: 'percentage',
+      icon: growth >= 0 ? '📈' : '📉'
+    });
+  }
+  
+  if (metrics.includes('min')) {
+    kpis.push({
+      label: 'Min',
+      value: min,
+      format: config?.numberFormat || 'number',
+      icon: '⬇️'
+    });
+  }
+  
+  if (metrics.includes('max')) {
+    kpis.push({
+      label: 'Max',
+      value: max,
+      format: config?.numberFormat || 'number',
+      icon: '⬆️'
+    });
+  }
+  
+  return kpis;
+};

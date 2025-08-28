@@ -58,7 +58,7 @@ const KPICardWidget = ({ widget, isSelected, onClick }) => {
 
         {/* Value */}
         <div className="mb-2">
-          <div className="text-3xl font-bold text-gray-900 dark:text-white">
+          <div className="text-3xl font-bold text-gray-900 dark:text-white" style={{ fontFamily: "'Figtree', sans-serif" }}>
             {formatValue(kpiData.value)}
           </div>
         </div>

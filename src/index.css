@@ -5,6 +5,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Figtree font for professional widgets */
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap');
+
 @import 'react-grid-layout/css/styles.css';
 @import 'react-resizable/css/styles.css';
 :root[data-theme="dark"] {

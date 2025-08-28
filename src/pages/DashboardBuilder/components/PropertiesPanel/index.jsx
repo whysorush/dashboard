@@ -2,10 +2,14 @@
 import React, { useState } from 'react';
 import { FiX, FiChevronDown, FiChevronRight } from 'react-icons/fi';
 import { useBuilder } from '../../context/BuilderContext';
+import { WIDGET_TYPES } from '../../constants';
 import GeneralProperties from './GeneralProperties';
 import DataProperties from './DataProperties';
 import StyleProperties from './StyleProperties';
 import KPIProperties from './KPIProperties';
+import GradientChartProperties from './GradientChartProperties';
+import ProfessionalBarChartProperties from './ProfessionalBarChartProperties';
+import ProfessionalKPIProperties from './ProfessionalKPIProperties';
 
 const PropertiesPanel = ({ onClose }) => {
   const { widgets, selectedWidget, updateWidgetProperty } = useBuilder();
@@ -13,7 +17,9 @@ const PropertiesPanel = ({ onClose }) => {
     general: true,
     data: true,
     style: true,
-    kpi: true
+    kpi: true,
+    professionalBar: true,
+    professionalKPI: true
   });
 
   const widget = widgets.find(w => w.id === selectedWidget);
@@ -31,6 +37,31 @@ const PropertiesPanel = ({ onClose }) => {
     updateWidgetProperty(selectedWidget, path, value);
   };
 
+  // Determine which sections to show based on widget type
+  const isProfessionalKPI = [
+    WIDGET_TYPES.PROFESSIONAL_KPI,
+    WIDGET_TYPES.REVENUE_KPI,
+    WIDGET_TYPES.ORDERS_KPI,
+    WIDGET_TYPES.CUSTOMERS_KPI
+  ].includes(widget.type);
+  
+  const isGradientChart = [
+    WIDGET_TYPES.GRADIENT_BAR_CHART,
+    WIDGET_TYPES.SMOOTH_FUNNEL_CHART
+  ].includes(widget.type);
+  
+  const isBasicChart = [
+    WIDGET_TYPES.LINE_CHART,
+    WIDGET_TYPES.BAR_CHART,
+    WIDGET_TYPES.AREA_CHART,
+    WIDGET_TYPES.PIE_CHART,
+    WIDGET_TYPES.FUNNEL_CHART
+  ].includes(widget.type);
+  
+  // New exact design widgets
+  const isProfessionalBarChart = widget.type === WIDGET_TYPES.PROFESSIONAL_BAR_CHART;
+  const isProfessionalKPICard = widget.type === WIDGET_TYPES.PROFESSIONAL_KPI_CARD;
+  
   const sections = [
     {
       id: 'general',
@@ -39,23 +70,53 @@ const PropertiesPanel = ({ onClose }) => {
       component: GeneralProperties
     },
     {
+      id: 'professionalBar',
+      title: 'Professional Bar Chart',
+      icon: '📊',
+      component: ProfessionalBarChartProperties,
+      show: isProfessionalBarChart
+    },
+    {
+      id: 'professionalKPI',
+      title: 'Professional KPI',
+      icon: '💰',
+      component: ProfessionalKPIProperties,
+      show: isProfessionalKPICard
+    },
+    {
+      id: 'kpi',
+      title: 'KPI Properties',
+      icon: '💰',
+      component: KPIProperties,
+      show: isProfessionalKPI
+    },
+    {
+      id: 'gradient',
+      title: 'Chart Properties',
+      icon: '🎨',
+      component: GradientChartProperties,
+      show: isGradientChart
+    },
+    {
       id: 'data',
       title: 'Data',
       icon: '📊',
-      component: DataProperties
+      component: DataProperties,
+      show: !isProfessionalKPI && !isProfessionalBarChart && !isProfessionalKPICard // Hide for professional widgets
     },
     {
       id: 'style',
       title: 'Style',
       icon: '🎨',
-      component: StyleProperties
+      component: StyleProperties,
+      show: !isProfessionalKPI && !isGradientChart && !isProfessionalBarChart && !isProfessionalKPICard // Hide for professional widgets
     },
     {
-      id: 'kpi',
+      id: 'basicKpi',
       title: 'KPIs',
       icon: '📈',
       component: KPIProperties,
-      show: widget.type.includes('chart') || widget.type === 'kpi-card'
+      show: isBasicChart || widget.type === 'kpi-card'
     }
   ];
 

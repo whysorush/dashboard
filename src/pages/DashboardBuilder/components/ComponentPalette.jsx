@@ -1,15 +1,16 @@
 // src/pages/DashboardBuilder/components/ComponentPalette.jsx
 import React, { useState } from 'react';
 import { useDrag } from 'react-dnd';
-import { FiSearch, FiChevronDown, FiChevronRight } from 'react-icons/fi';
-import { WIDGET_CATEGORIES } from '../constants';
+import { FiGrid, FiPlus, FiChevronDown, FiChevronUp, FiLayout } from 'react-icons/fi';
+import { WIDGET_CATEGORIES, WIDGET_TYPES } from '../constants';
+import { useBuilder } from '../context/BuilderContext';
 
-const DraggableWidget = ({ widget }) => {
+const DraggableWidgetItem = ({ widget }) => {
   const [{ isDragging }, drag] = useDrag({
     type: 'widget',
-    item: {
+    item: { 
       type: widget.type,
-      defaultSize: widget.defaultSize
+      defaultSize: widget.defaultSize || { w: 4, h: 3 }
     },
     collect: (monitor) => ({
       isDragging: monitor.isDragging()
@@ -17,141 +18,141 @@ const DraggableWidget = ({ widget }) => {
   });
 
   return (
-    <div
+    <div 
       ref={drag}
-      className={`widget-card p-3 bg-white dark:bg-gray-700 rounded-lg border-2 
-                border-gray-200 dark:border-gray-600 cursor-move transition-all
-                hover:border-blue-400 hover:shadow-md ${
-                  isDragging ? 'opacity-50 scale-95' : ''
-                }`}
+      className={`widget-card cursor-move flex items-center p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md hover:border-blue-500 dark:hover:border-blue-400 ${isDragging ? 'opacity-50 border-blue-500' : ''}`}
+      style={{ opacity: isDragging ? 0.5 : 1 }}
     >
-      <div className="flex items-center gap-3">
-        <div className="text-2xl">{widget.icon}</div>
-        <div className="flex-1">
-          <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
-            {widget.label}
-          </h4>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            {widget.description}
-          </p>
-        </div>
-      </div>
-      <div className="mt-2 text-xs text-gray-400 dark:text-gray-500">
-        Size: {widget.defaultSize.w}×{widget.defaultSize.h}
+      <div className="widget-icon text-xl mr-3">{widget.icon}</div>
+      <div className="widget-info flex-1">
+        <h4 className="text-sm font-medium text-gray-800 dark:text-gray-200">{widget.label}</h4>
+        <p className="text-xs text-gray-500 dark:text-gray-400">{widget.description}</p>
       </div>
     </div>
   );
 };
 
 const ComponentPalette = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [expandedCategories, setExpandedCategories] = useState(
-    Object.keys(WIDGET_CATEGORIES).reduce((acc, key) => {
-      acc[key] = true;
-      return acc;
-    }, {})
-  );
+  const { addRow } = useBuilder();
+  const [expandedCategories, setExpandedCategories] = useState({
+    PROFESSIONAL_KPIS: true,
+    PROFESSIONAL_CHARTS: true,
+    PROFESSIONAL_TABLES: true,
+    PROFESSIONAL_FILTERS: true
+  });
 
-  const toggleCategory = (category) => {
+  const toggleCategory = (categoryKey) => {
     setExpandedCategories(prev => ({
       ...prev,
-      [category]: !prev[category]
+      [categoryKey]: !prev[categoryKey]
     }));
   };
 
-  // Filter widgets based on search
-  const filteredCategories = Object.entries(WIDGET_CATEGORIES).reduce((acc, [key, category]) => {
-    const filteredWidgets = category.widgets.filter(widget =>
-      widget.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      widget.description.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    
-    if (filteredWidgets.length > 0) {
-      acc[key] = {
-        ...category,
-        widgets: filteredWidgets
-      };
-    }
-    
-    return acc;
-  }, {});
+  // Quick add buttons for common widgets
+  const quickAddWidgets = [
+    { type: WIDGET_TYPES.REVENUE_KPI, icon: '💰', label: 'Revenue' },
+    { type: WIDGET_TYPES.GRADIENT_BAR_CHART, icon: '📊', label: 'Bar Chart' },
+    { type: WIDGET_TYPES.PROFESSIONAL_TABLE, icon: '📋', label: 'Table' }
+  ];
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-          Widget Library
+    <div className="component-palette overflow-y-auto h-full flex flex-col">
+      {/* Quick Actions - Always Visible */}
+      <div className="sticky top-0 z-10 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 mb-4 flex-shrink-0">
+        <h2 className="font-bold text-lg mb-3 flex items-center">
+          <FiLayout className="mr-2" /> Dashboard Builder
         </h2>
         
-        {/* Search */}
-        <div className="relative">
-          <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 
-                             text-gray-400 dark:text-gray-500" />
-          <input
-            type="text"
-            placeholder="Search widgets..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-3 py-2 bg-gray-50 dark:bg-gray-700 
-                     border border-gray-200 dark:border-gray-600 rounded-lg
-                     text-gray-900 dark:text-white placeholder-gray-500
-                     focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+        <button
+          onClick={addRow}
+          className="w-full flex items-center justify-center px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 mb-2 transition-colors"
+        >
+          <FiPlus className="mr-2" /> Add Row
+        </button>
+        
+        <div className="grid grid-cols-3 gap-2 mt-3">
+          {quickAddWidgets.map(widget => (
+            <button
+              key={widget.type}
+              className="flex flex-col items-center justify-center p-2 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              onClick={() => {
+                // If no rows, add one first
+                if (!document.querySelector('.row-container')) {
+                  const rowId = addRow();
+                  // Need to wait for the row to be rendered
+                  setTimeout(() => {
+                    const event = new CustomEvent('quickadd', { 
+                      detail: { type: widget.type, rowId }
+                    });
+                    document.querySelector('.canvas-container').dispatchEvent(event);
+                  }, 100);
+                } else {
+                  // Find a row with space
+                  const rows = document.querySelectorAll('.row-container');
+                  let targetRowId = null;
+                  
+                  // Find first row that's not full
+                  for (const row of rows) {
+                    const rowId = row.getAttribute('data-row-id');
+                    if (rowId) {
+                      targetRowId = rowId;
+                      break;
+                    }
+                  }
+                  
+                  if (targetRowId) {
+                    const event = new CustomEvent('quickadd', { 
+                      detail: { type: widget.type, rowId: targetRowId }
+                    });
+                    document.querySelector('.canvas-container').dispatchEvent(event);
+                  }
+                }
+              }}
+            >
+              <span className="text-xl mb-1">{widget.icon}</span>
+              <span className="text-xs">{widget.label}</span>
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Widget Categories */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {Object.entries(filteredCategories).length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-gray-500 dark:text-gray-400">
-              No widgets found matching "{searchTerm}"
-            </p>
+      {/* Widget Categories - Scrollable Area */}
+      <div className="px-3 flex-grow overflow-y-auto">
+        {Object.entries(WIDGET_CATEGORIES).map(([key, category]) => (
+          <div key={key} className="mb-4">
+            <button
+              onClick={() => toggleCategory(key)}
+              className="w-full flex items-center justify-between p-2 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 mb-2 transition-colors"
+            >
+              <div className="flex items-center">
+                <span className="text-xl mr-2">{category.icon}</span>
+                <span className="font-medium">{category.label}</span>
+              </div>
+              {expandedCategories[key] ? <FiChevronUp /> : <FiChevronDown />}
+            </button>
+            
+            {expandedCategories[key] && (
+              <div className="pl-2 space-y-2 mb-2">
+                {category.widgets.map(widget => (
+                  <DraggableWidgetItem key={widget.type} widget={widget} />
+                ))}
+              </div>
+            )}
           </div>
-        ) : (
-          Object.entries(filteredCategories).map(([key, category]) => (
-            <div key={key} className="category-section">
-              {/* Category Header */}
-              <button
-                onClick={() => toggleCategory(key)}
-                className="w-full flex items-center justify-between mb-3 
-                         hover:bg-gray-50 dark:hover:bg-gray-700 p-2 -mx-2 rounded"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">{category.icon}</span>
-                  <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    {category.label}
-                  </h3>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    ({category.widgets.length})
-                  </span>
-                </div>
-                {expandedCategories[key] ? (
-                  <FiChevronDown className="text-gray-400" />
-                ) : (
-                  <FiChevronRight className="text-gray-400" />
-                )}
-              </button>
-
-              {/* Category Widgets */}
-              {expandedCategories[key] && (
-                <div className="space-y-2">
-                  {category.widgets.map((widget) => (
-                    <DraggableWidget key={widget.type} widget={widget} />
-                  ))}
-                </div>
-              )}
-            </div>
-          ))
-        )}
+        ))}
       </div>
 
-      {/* Footer Tips */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-        <p className="text-xs text-gray-500 dark:text-gray-400">
-          <strong>Tip:</strong> Drag widgets to the canvas or use the + buttons
-        </p>
+      {/* Help Section - Always Visible at Bottom */}
+      <div className="mt-auto mx-3 p-3 mb-3 bg-blue-50 dark:bg-blue-900/20 rounded-md flex-shrink-0 sticky bottom-0">
+        <h4 className="text-sm font-medium text-blue-700 dark:text-blue-300 flex items-center">
+          <FiGrid className="mr-2" /> Row-Based Layout
+        </h4>
+        <ul className="text-xs text-blue-600 dark:text-blue-400 mt-2 space-y-1 list-disc pl-4">
+          <li>1 chart = 100% width</li>
+          <li>2 charts = 50% each</li>
+          <li>3 charts = 33.33% each</li>
+          <li>Max 3 charts per row</li>
+        </ul>
       </div>
     </div>
   );

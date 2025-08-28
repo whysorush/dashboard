@@ -32,12 +32,16 @@ const BaseWidget = ({
   return (
     <div
       className={`widget-wrapper group relative h-full bg-white dark:bg-gray-800 rounded-lg 
-                shadow-sm hover:shadow-md transition-all cursor-pointer
+                shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer
                 ${getBorderStyle()} border-gray-200 dark:border-gray-700
-                ${isSelected ? 'ring-2 ring-blue-500' : ''}
-                ${widget.locked ? 'cursor-not-allowed' : ''}`}
+                ${isSelected ? 'ring-2 ring-blue-500 shadow-lg' : ''}
+                ${widget.locked ? 'cursor-not-allowed' : ''}
+                hover:transform hover:scale-[1.02]`}
       onClick={onClick}
-      style={{ opacity: getOpacity() }}
+      style={{ 
+        opacity: getOpacity(),
+        fontFamily: "'Figtree', sans-serif"
+      }}
     >
       {/* Widget Header */}
       {(widget.config?.title || widget.config?.subtitle) && (

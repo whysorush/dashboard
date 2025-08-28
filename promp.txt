@@ -1,0 +1,382 @@
+Missing Preview & Export Features 🔧
+I need to check what happened to your preview and export functionality. Let me search our previous conversations:Relevant chats1 resultDynamic React Dashboard BuilderI see that we built preview and export features before, but they seem to be missing from your current setup. Let me provide you with the complete enhanced prompt for Cursor that includes:
+
+Row/column layout system (corrected understanding)
+Professional widgets matching your reference image
+Preview and Export functionality restoration
+Complete feature set
+
+📋 Complete Cursor Prompt - Enhanced Dashboard Builder
+Context: Dynamic Dashboard Builder Enhancement
+I have a React Dashboard Builder using react-grid-layout + react-dnd. I need to enhance it with professional widgets matching the uploaded reference images, plus restore missing preview/export features.
+Current Issues to Fix:
+
+Missing Preview Modal - Need preview functionality
+Missing Export Dialog - Need code generation/export
+Basic widgets - Need professional components matching reference images
+Row/Column confusion - Need proper row-based layout where each row can contain multiple chart columns
+
+Reference Image Analysis:
+Based on the uploaded dashboard images, create these exact components:
+Row 1: Filter Bar (1 column, full width)
+
+Date range picker, Transaction amount input, Product dropdown, Status dropdown, Order quantity input
+
+Row 2: KPI Cards (3 columns, 33.33% each)
+
+Revenue KPI: $847,293 (+4.1% with green arrow)
+Orders KPI: 2,847 (+2.6% with green arrow)
+Customers KPI: 12,483 (+2.8% with green arrow)
+
+Row 3: Charts (2 columns, 50% each)
+
+Bar Chart: $242,673 with teal gradient bars
+Funnel Chart: Smooth blue gradient with 3 stages ($30K, $35K, $35K)
+
+Row 4: Data Table (1 column, full width)
+
+Customer data with status badges (Pending/Approved/In Review), order amounts, dates
+
+Implementation Requirements:
+1. Enhanced Constants (constants.js)
+javascriptexport const WIDGET_TYPES = {
+  // Professional Components
+  FILTER_BAR: 'filter-bar',
+  REVENUE_KPI: 'revenue-kpi',
+  ORDERS_KPI: 'orders-kpi', 
+  CUSTOMERS_KPI: 'customers-kpi',
+  GRADIENT_BAR_CHART: 'gradient-bar-chart',
+  SMOOTH_FUNNEL_CHART: 'smooth-funnel-chart',
+  PROFESSIONAL_TABLE: 'professional-table'
+};
+
+export const WIDGET_CATEGORIES = {
+  DASHBOARD_COMPONENTS: {
+    label: 'Dashboard Components',
+    icon: '🎛️',
+    widgets: [
+      {
+        type: WIDGET_TYPES.FILTER_BAR,
+        label: 'Filter Bar',
+        description: 'Complete filter controls',
+        defaultSize: { w: 12, h: 2 } // Full row
+      },
+      {
+        type: WIDGET_TYPES.REVENUE_KPI,
+        label: 'Revenue KPI Card',
+        description: 'Professional revenue display',
+        defaultSize: { w: 4, h: 3 } // 1/3 of row
+      }
+      // ... more widgets
+    ]
+  }
+};
+2. Row-Based Canvas Logic (enhance existing Canvas.jsx)
+javascript// Add row intelligence to existing Canvas.jsx
+const handleRowBasedDrop = (item, dropPosition) => {
+  const { row, column } = dropPosition;
+  
+  // Calculate width based on how many widgets will be in this row
+  const existingInRow = widgets.filter(w => w.position.y === row);
+  const newColumnCount = existingInRow.length + 1;
+  
+  let widgetWidth;
+  if (newColumnCount === 1) widgetWidth = 12; // Full width
+  else if (newColumnCount === 2) widgetWidth = 6; // Half width  
+  else if (newColumnCount === 3) widgetWidth = 4; // Third width
+  else widgetWidth = 3; // Quarter width
+  
+  // Resize existing widgets in the row
+  existingInRow.forEach((widget, index) => {
+    updateWidgetPosition(widget.id, {
+      ...widget.position,
+      x: index * widgetWidth,
+      w: widgetWidth
+    });
+  });
+  
+  // Add new widget
+  addWidget(item.type, {
+    x: existingInRow.length * widgetWidth,
+    y: row,
+    w: widgetWidth,
+    h: item.defaultSize.h
+  });
+};
+3. Professional Widget Components
+FilterBarWidget.jsx:
+jsximport React from 'react';
+import { CalendarIcon, FilterIcon } from '@heroicons/react/outline';
+
+const FilterBarWidget = ({ widget, isSelected, onClick }) => {
+  const { config } = widget;
+  
+  return (
+    <div className={`filter-bar-widget p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border ${isSelected ? 'ring-2 ring-blue-500' : ''}`} onClick={onClick}>
+      <div className="flex flex-wrap gap-4 items-center">
+        {/* Date Filter */}
+        <div className="flex items-center gap-2">
+          <CalendarIcon className="w-4 h-4 text-gray-500" />
+          <input type="date" className="px-3 py-2 border rounded-md text-sm" />
+          <span className="text-sm text-gray-500">to</span>
+          <input type="date" className="px-3 py-2 border rounded-md text-sm" />
+        </div>
+        
+        {/* Transaction Amount */}
+        <div>
+          <label className="block text-xs text-gray-500 mb-1">Transaction Amount</label>
+          <input type="number" placeholder="0.00" className="px-3 py-2 border rounded-md text-sm w-32" />
+        </div>
+        
+        {/* Product Dropdown */}
+        <div>
+          <label className="block text-xs text-gray-500 mb-1">Product</label>
+          <select className="px-3 py-2 border rounded-md text-sm w-40">
+            <option>All Products</option>
+            <option>Product A</option>
+            <option>Product B</option>
+          </select>
+        </div>
+        
+        {/* Status Dropdown */}
+        <div>
+          <label className="block text-xs text-gray-500 mb-1">Status</label>
+          <select className="px-3 py-2 border rounded-md text-sm w-32">
+            <option>All Status</option>
+            <option>Pending</option>
+            <option>Approved</option>
+            <option>In Review</option>
+          </select>
+        </div>
+        
+        {/* Order Quantity */}
+        <div>
+          <label className="block text-xs text-gray-500 mb-1">Order Quantity</label>
+          <input type="number" placeholder="100" className="px-3 py-2 border rounded-md text-sm w-24" />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default FilterBarWidget;
+RevenueKPIWidget.jsx:
+jsximport React from 'react';
+import { TrendingUpIcon } from '@heroicons/react/solid';
+
+const RevenueKPIWidget = ({ widget, isSelected, onClick }) => {
+  const { config } = widget;
+  
+  return (
+    <div className={`kpi-widget p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border ${isSelected ? 'ring-2 ring-blue-500' : ''}`} onClick={onClick}>
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 bg-teal-100 dark:bg-teal-900 rounded-lg flex items-center justify-center">
+              <span className="text-lg">💰</span>
+            </div>
+            <span className="text-sm text-gray-500 dark:text-gray-400">Total Revenue</span>
+          </div>
+          
+          <div className="mb-1">
+            <span className="text-3xl font-bold text-gray-900 dark:text-white">
+              ${config.value?.toLocaleString() || '847,293'}
+            </span>
+          </div>
+          
+          <div className="flex items-center gap-1">
+            <TrendingUpIcon className="w-4 h-4 text-green-500" />
+            <span className="text-sm text-green-600 font-medium">
+              +{config.growth || '4.1'}%
+            </span>
+            <span className="text-xs text-gray-500">from last week</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default RevenueKPIWidget;
+4. Preview Modal (components/PreviewModal/index.jsx)
+jsximport React, { useState } from 'react';
+import { XIcon, DesktopComputerIcon, DeviceMobileIcon } from '@heroicons/react/outline';
+
+const PreviewModal = ({ isOpen, onClose, widgets }) => {
+  const [viewMode, setViewMode] = useState('desktop');
+  
+  if (!isOpen) return null;
+  
+  return (
+    <div className="fixed inset-0 z-50 overflow-hidden">
+      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
+      <div className="relative h-full flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-7xl w-full h-full max-h-[90vh] flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold">Dashboard Preview</h3>
+            <div className="flex items-center gap-4">
+              {/* View Mode Toggle */}
+              <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode('desktop')}
+                  className={`px-3 py-1 rounded text-sm flex items-center gap-1 ${
+                    viewMode === 'desktop' ? 'bg-white dark:bg-gray-600 shadow-sm' : ''
+                  }`}
+                >
+                  <DesktopComputerIcon className="w-4 h-4" />
+                  Desktop
+                </button>
+                <button
+                  onClick={() => setViewMode('mobile')}
+                  className={`px-3 py-1 rounded text-sm flex items-center gap-1 ${
+                    viewMode === 'mobile' ? 'bg-white dark:bg-gray-600 shadow-sm' : ''
+                  }`}
+                >
+                  <DeviceMobileIcon className="w-4 h-4" />
+                  Mobile
+                </button>
+              </div>
+              <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                <XIcon className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+          
+          {/* Preview Content */}
+          <div className="flex-1 overflow-auto p-4">
+            <div className={`mx-auto bg-gray-50 dark:bg-gray-900 rounded-lg p-4 ${
+              viewMode === 'mobile' ? 'max-w-sm' : 'max-w-full'
+            }`}>
+              <DashboardPreview widgets={widgets} viewMode={viewMode} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const DashboardPreview = ({ widgets, viewMode }) => {
+  // Render widgets in preview mode without edit controls
+  return (
+    <div className="space-y-4">
+      {/* Render widgets grouped by rows */}
+      {widgets.map(widget => (
+        <div key={widget.id} className="widget-preview">
+          {/* Render widget without controls */}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default PreviewModal;
+5. Export Dialog (components/ExportDialog.jsx)
+jsximport React, { useState } from 'react';
+import { CodeIcon, DownloadIcon, CopyIcon } from '@heroicons/react/outline';
+
+const ExportDialog = ({ isOpen, onClose, widgets }) => {
+  const [exportType, setExportType] = useState('react');
+  const [generatedCode, setGeneratedCode] = useState('');
+  
+  const generateCode = () => {
+    // Generate complete React component code
+    const code = `
+import React from 'react';
+
+const GeneratedDashboard = () => {
+  return (
+    <div className="dashboard-container p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <div className="max-w-7xl mx-auto space-y-6">
+        ${widgets.map(widget => generateWidgetCode(widget)).join('\n')}
+      </div>
+    </div>
+  );
+};
+
+export default GeneratedDashboard;
+    `;
+    setGeneratedCode(code);
+  };
+  
+  if (!isOpen) return null;
+  
+  return (
+    <div className="fixed inset-0 z-50 overflow-hidden">
+      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
+      <div className="relative h-full flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full h-full max-h-[90vh] flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b">
+            <h3 className="text-lg font-semibold">Export Dashboard</h3>
+            <div className="flex gap-2">
+              <button
+                onClick={generateCode}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2"
+              >
+                <CodeIcon className="w-4 h-4" />
+                Generate Code
+              </button>
+              <button onClick={onClose} className="px-4 py-2 border rounded-lg">
+                Cancel
+              </button>
+            </div>
+          </div>
+          
+          {/* Code Display */}
+          <div className="flex-1 overflow-auto p-4">
+            <pre className="bg-gray-900 text-white p-4 rounded-lg text-sm overflow-auto">
+              <code>{generatedCode}</code>
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ExportDialog;
+6. Main Dashboard Builder Integration
+Update your main index.jsx to include preview and export buttons:
+jsx// Add these to your main dashboard builder component
+const [showPreview, setShowPreview] = useState(false);
+const [showExport, setShowExport] = useState(false);
+
+// In your header/toolbar:
+<div className="flex gap-2">
+  <button
+    onClick={() => setShowPreview(true)}
+    className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2"
+  >
+    <EyeIcon className="w-4 h-4" />
+    Preview
+  </button>
+  <button
+    onClick={() => setShowExport(true)}
+    className="px-4 py-2 bg-green-600 text-white rounded-lg flex items-center gap-2"
+  >
+    <DownloadIcon className="w-4 h-4" />
+    Export
+  </button>
+</div>
+
+// Add the modals:
+<PreviewModal 
+  isOpen={showPreview} 
+  onClose={() => setShowPreview(false)} 
+  widgets={widgets} 
+/>
+<ExportDialog 
+  isOpen={showExport} 
+  onClose={() => setShowExport(false)} 
+  widgets={widgets} 
+/>
+Success Criteria:
+✅ Row-based layout: Multiple chart columns per row
+✅ Professional widgets: Exact match to reference images
+✅ Preview functionality: Working preview modal
+✅ Export functionality: Complete code generation
+✅ Theme support: Light/dark modes
+✅ Drag & drop: Enhanced with row intelligence
+Start with: FilterBarWidget and RevenueKPIWidget, then add preview/export functionality.

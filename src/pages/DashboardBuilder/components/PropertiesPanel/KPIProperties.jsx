@@ -1,193 +1,163 @@
 // src/pages/DashboardBuilder/components/PropertiesPanel/KPIProperties.jsx
 import React from 'react';
-import { KPI_METRICS, NUMBER_FORMATS } from '../../constants';
+import { useBuilder } from '../../context/BuilderContext';
+import { NUMBER_FORMATS } from '../../constants';
 
-const KPIProperties = ({ widget, onChange }) => {
-  const handleMetricToggle = (metric) => {
-    const currentMetrics = widget.config?.kpiMetrics || [];
-    const updated = currentMetrics.includes(metric)
-      ? currentMetrics.filter(m => m !== metric)
-      : [...currentMetrics, metric];
-    onChange('config.kpiMetrics', updated);
+/**
+ * Properties panel for professional KPI widgets
+ */
+const KPIProperties = ({ widget }) => {
+  const { updateWidgetProperty } = useBuilder();
+  
+  // Handle property changes
+  const handleChange = (property, value) => {
+    updateWidgetProperty(widget.id, `config.${property}`, value);
   };
-
+  
   return (
     <div className="space-y-4">
-      {/* Show KPIs Toggle */}
-      <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          Display KPIs
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Title
         </label>
-        <button
-          type="button"
-          onClick={() => onChange('config.showKPIs', !widget.config?.showKPIs)}
-          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-            widget.config?.showKPIs !== false 
-              ? 'bg-blue-500' 
-              : 'bg-gray-300 dark:bg-gray-600'
-          }`}
-        >
-          <span
-            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-              widget.config?.showKPIs !== false ? 'translate-x-6' : 'translate-x-1'
-            }`}
-          />
-        </button>
+        <input
+          type="text"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+          value={widget.config?.title || ''}
+          onChange={(e) => handleChange('title', e.target.value)}
+        />
       </div>
-
-      {widget.config?.showKPIs !== false && (
-        <>
-          {/* KPI Position */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              KPI Position
-            </label>
-            <select
-              value={widget.config?.kpiPosition || 'top'}
-              onChange={(e) => onChange('config.kpiPosition', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
-                       bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                       focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="top">Top</option>
-              <option value="bottom">Bottom</option>
-              <option value="left">Left</option>
-              <option value="right">Right</option>
-              <option value="overlay">Overlay</option>
-            </select>
-          </div>
-
-          {/* Select Metrics */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Select Metrics to Display
-            </label>
-            <div className="space-y-2">
-              {KPI_METRICS.map(metric => (
-                <label
-                  key={metric.value}
-                  className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
-                >
-                  <input
-                    type="checkbox"
-                    checked={(widget.config?.kpiMetrics || []).includes(metric.value)}
-                    onChange={() => handleMetricToggle(metric.value)}
-                    className="rounded border-gray-300 dark:border-gray-600 text-blue-500 
-                             focus:ring-blue-500 focus:ring-2"
-                  />
-                  <span className="text-lg">{metric.icon}</span>
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    {metric.label}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Number Format */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Number Format
-            </label>
-            <select
-              value={widget.config?.numberFormat || 'number'}
-              onChange={(e) => onChange('config.numberFormat', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
-                       bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                       focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              {NUMBER_FORMATS.map(format => (
-                <option key={format.value} value={format.value}>
-                  {format.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Decimal Places */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Decimal Places
-            </label>
-            <input
-              type="number"
-              min="0"
-              max="4"
-              value={widget.config?.decimalPlaces || 0}
-              onChange={(e) => onChange('config.decimalPlaces', parseInt(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
-                       bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                       focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          {/* Show Comparison */}
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Show Comparison
-            </label>
-            <button
-              type="button"
-              onClick={() => onChange('config.showComparison', !widget.config?.showComparison)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                widget.config?.showComparison 
-                  ? 'bg-blue-500' 
-                  : 'bg-gray-300 dark:bg-gray-600'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  widget.config?.showComparison ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
-
-          {/* Show Trend Arrow */}
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Show Trend Arrow
-            </label>
-            <button
-              type="button"
-              onClick={() => onChange('config.showTrendArrow', !widget.config?.showTrendArrow)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                widget.config?.showTrendArrow !== false 
-                  ? 'bg-blue-500' 
-                  : 'bg-gray-300 dark:bg-gray-600'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  widget.config?.showTrendArrow !== false ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
-
-          {/* Sparkline */}
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Show Sparkline
-            </label>
-            <button
-              type="button"
-              onClick={() => onChange('config.showSparkline', !widget.config?.showSparkline)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                widget.config?.showSparkline 
-                  ? 'bg-blue-500' 
-                  : 'bg-gray-300 dark:bg-gray-600'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  widget.config?.showSparkline ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
-        </>
+      
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Subtitle
+        </label>
+        <input
+          type="text"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+          value={widget.config?.subtitle || ''}
+          onChange={(e) => handleChange('subtitle', e.target.value)}
+        />
+      </div>
+      
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Value
+        </label>
+        <input
+          type="number"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+          value={widget.config?.value || 0}
+          onChange={(e) => handleChange('value', Number(e.target.value))}
+        />
+      </div>
+      
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Format Type
+        </label>
+        <select
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+          value={widget.config?.formatType || 'number'}
+          onChange={(e) => handleChange('formatType', e.target.value)}
+        >
+          {NUMBER_FORMATS.map((format) => (
+            <option key={format.value} value={format.value}>
+              {format.label}
+            </option>
+          ))}
+        </select>
+      </div>
+      
+      {widget.config?.formatType === 'currency' && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Currency Symbol
+          </label>
+          <input
+            type="text"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            value={widget.config?.currency || '$'}
+            onChange={(e) => handleChange('currency', e.target.value)}
+          />
+        </div>
       )}
+      
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Growth Percentage
+        </label>
+        <input
+          type="number"
+          step="0.1"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+          value={widget.config?.growth || 0}
+          onChange={(e) => handleChange('growth', Number(e.target.value))}
+        />
+      </div>
+      
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Icon
+        </label>
+        <input
+          type="text"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+          value={widget.config?.icon || ''}
+          onChange={(e) => handleChange('icon', e.target.value)}
+        />
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          Enter an emoji or icon name
+        </p>
+      </div>
+      
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Icon Color
+        </label>
+        <div className="flex items-center">
+          <input
+            type="color"
+            className="w-10 h-10 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm cursor-pointer"
+            value={widget.config?.iconColor || '#3B82F6'}
+            onChange={(e) => handleChange('iconColor', e.target.value)}
+          />
+          <input
+            type="text"
+            className="flex-1 ml-2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            value={widget.config?.iconColor || '#3B82F6'}
+            onChange={(e) => handleChange('iconColor', e.target.value)}
+          />
+        </div>
+      </div>
+      
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Icon Background Color
+        </label>
+        <div className="flex items-center">
+          <input
+            type="color"
+            className="w-10 h-10 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm cursor-pointer"
+            value={widget.config?.iconBgColor?.replace(/rgba\((.*),\s*[\d\.]+\)/, 'rgb($1)') || '#E6F5FF'}
+            onChange={(e) => {
+              // Convert RGB to RGBA with opacity
+              const rgb = e.target.value;
+              const rgba = rgb.replace(
+                /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i, 
+                (_, r, g, b) => `rgba(${parseInt(r, 16)}, ${parseInt(g, 16)}, ${parseInt(b, 16)}, 0.1)`
+              );
+              handleChange('iconBgColor', rgba);
+            }}
+          />
+          <input
+            type="text"
+            className="flex-1 ml-2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            value={widget.config?.iconBgColor || 'rgba(59, 130, 246, 0.1)'}
+            onChange={(e) => handleChange('iconBgColor', e.target.value)}
+          />
+        </div>
+      </div>
     </div>
   );
 };

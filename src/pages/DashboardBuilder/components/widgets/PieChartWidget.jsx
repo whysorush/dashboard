@@ -6,7 +6,7 @@ import {
 import BaseWidget from './BaseWidget';
 import KPIDisplay from './KPIDisplay';
 import FilterBar from './FilterBar';
-import { generateMockData, calculateKPIs } from '../utils/mockDataGenerator';
+import { generateMockData, calculateKPIs } from '../../utils/mockDataGenerator';
 
 const PieChartWidget = ({ widget, isSelected, onClick }) => {
   const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];

@@ -6,7 +6,7 @@ import {
 import BaseWidget from './BaseWidget';
 import KPIDisplay from './KPIDisplay';
 import FilterBar from './FilterBar';
-import { generateMockData, calculateKPIs } from '../utils/mockDataGenerator';
+import { generateMockData, calculateKPIs } from '../../utils/mockDataGenerator';
 
 const FunnelChartWidget = ({ widget, isSelected, onClick }) => {
   const data = useMemo(() => {
