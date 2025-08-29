@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
 import DashboardBuilder from "./pages/DashboardBuilder";
 import BarChartBox from "./components/BarChart";
@@ -11,8 +16,7 @@ import StatCards from "./components/StatCard";
 import "./index.css";
 import "./App.css";
 
-import React from 'react';
-
+import React from "react";
 
 function DashboardLayout() {
   return (
@@ -53,24 +57,30 @@ function DashboardLayout() {
 //   );
 // }
 
-
 function App() {
   return (
     <ThemeProvider>
       <Router>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={
-            <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-              <Sidebar />
-              <div className="flex-1 flex flex-col">
-                <Header />
-                <main className="flex-1 overflow-auto">
-                  <DashboardLayout />
-                </main>
-              </div>
-            </div>
-          } />
+          <Route
+            path="/dashboard"
+            element={
+              <main className="flex-1 overflow-auto">
+                <DashboardLayout />
+              </main>
+
+              // <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+              //   <Sidebar />
+              //   <div className="flex-1 flex flex-col">
+              //     <Header />
+              //     <main className="flex-1 overflow-auto">
+              //       <DashboardLayout />
+              //     </main>
+              //   </div>
+              // </div>
+            }
+          />
           <Route path="/dashboard-builder" element={<DashboardBuilder />} />
         </Routes>
       </Router>
@@ -79,4 +89,3 @@ function App() {
 }
 
 export default App;
-
