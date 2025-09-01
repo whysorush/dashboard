@@ -10,14 +10,20 @@ import FilterBar from './FilterBar';
 import { generateMockData, calculateKPIs } from '../../utils/mockDataGenerator';
 
 const LineChartWidget = ({ widget, isSelected, onClick }) => {
+  console.log('LineChartWidget - Widget props:', { widget, isSelected, onClick });
+  console.log('LineChartWidget - Widget type:', widget?.type);
+  console.log('LineChartWidget - Widget config:', widget?.config);
+  
   // Generate mock data based on configuration
   const data = useMemo(() => {
-    return generateMockData('time-series', {
+    const mockData = generateMockData('time-series', {
       points: widget.config?.dataPoints || 12,
       trend: widget.config?.trend || 'up',
       timeRange: widget.config?.timeRange || 'monthly',
       includeComparison: widget.config?.comparisonPeriod
     });
+    console.log('LineChartWidget - Generated data:', mockData);
+    return mockData;
   }, [widget.config]);
 
   // Calculate KPIs from data
@@ -32,7 +38,9 @@ const LineChartWidget = ({ widget, isSelected, onClick }) => {
   // Calculate height based on widget size
   const chartHeight = useMemo(() => {
     const size = widget.position?.size || 'medium';
-    return size === 'large' ? 350 : size === 'medium' ? 300 : 250;
+    const height = size === 'large' ? 350 : size === 'medium' ? 300 : 250;
+    console.log('LineChartWidget - Chart height:', height);
+    return Math.max(height, 200); // Ensure minimum height
   }, [widget.position?.size]);
   
   // Determine line colors and styles
@@ -44,6 +52,18 @@ const LineChartWidget = ({ widget, isSelected, onClick }) => {
     if (!widget.config?.showAverage) return null;
     return data.reduce((sum, item) => sum + item.value, 0) / data.length;
   }, [data, widget.config?.showAverage]);
+
+  // Simple test data if mock data fails
+  const testData = [
+    { name: 'Jan', value: 1000 },
+    { name: 'Feb', value: 1200 },
+    { name: 'Mar', value: 1100 },
+    { name: 'Apr', value: 1400 },
+    { name: 'May', value: 1300 },
+    { name: 'Jun', value: 1600 }
+  ];
+
+  const chartData = data && data.length > 0 ? data : testData;
 
   return (
     <BaseWidget widget={widget} isSelected={isSelected} onClick={onClick}>
@@ -57,93 +77,121 @@ const LineChartWidget = ({ widget, isSelected, onClick }) => {
       )}
 
       {/* Chart */}
-      <div style={{ width: '100%', height: chartHeight }}>
-        <ResponsiveContainer>
-          <LineChart
-            data={data}
-            margin={{ top: 10, right: 10, left: 0, bottom: 5 }}
-          >
-            {widget.config?.showGrid !== false && (
-              <CartesianGrid 
-                strokeDasharray="3 3" 
-                className="stroke-gray-200 dark:stroke-gray-700"
-                horizontal={true}
-                vertical={false}
+      <div style={{ 
+        width: '100%', 
+        height: chartHeight, 
+        border: '1px solid #e5e7eb', 
+        borderRadius: '8px', 
+        padding: '16px',
+        backgroundColor: '#ffffff',
+        minWidth: '300px',
+        minHeight: '200px'
+      }}>
+        <div style={{ marginBottom: '8px', fontSize: '14px', color: '#6b7280' }}>
+          Chart Data: {chartData.length} points | Widget Type: {widget?.type}
+        </div>
+        
+        {chartData && chartData.length > 0 ? (
+          <ResponsiveContainer width="100%" height="100%" minHeight={200}>
+            <LineChart
+              data={chartData}
+              margin={{ top: 10, right: 10, left: 0, bottom: 5 }}
+            >
+              {widget.config?.showGrid !== false && (
+                <CartesianGrid 
+                  strokeDasharray="3 3" 
+                  stroke="#e5e7eb"
+                  horizontal={true}
+                  vertical={false}
+                />
+              )}
+              <XAxis 
+                dataKey="name"
+                tick={{ fontSize: 12, fill: '#6b7280' }}
+                axisLine={{ stroke: '#e5e7eb' }}
+                tickLine={false}
+                padding={{ left: 10, right: 10 }}
               />
-            )}
-            <XAxis 
-              dataKey="name"
-              tick={{ fontSize: 12 }}
-              className="text-gray-600 dark:text-gray-400"
-              axisLine={{ stroke: '#e5e7eb' }}
-              tickLine={false}
-              padding={{ left: 10, right: 10 }}
-            />
-            <YAxis 
-              tick={{ fontSize: 12 }}
-              className="text-gray-600 dark:text-gray-400"
-              axisLine={false}
-              tickLine={false}
-              width={30}
-            />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                border: '1px solid #e5e7eb',
-                borderRadius: '0.375rem',
-                boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
-              }}
-              cursor={{ stroke: '#9CA3AF', strokeWidth: 1, strokeDasharray: '3 3' }}
-              formatter={(value) => [`${value.toLocaleString()}`, '']}
-            />
-            {widget.config?.showLegend !== false && (
-              <Legend 
-                wrapperStyle={{ paddingTop: 10 }}
-                iconType="circle"
+              <YAxis 
+                tick={{ fontSize: 12, fill: '#6b7280' }}
+                axisLine={false}
+                tickLine={false}
+                width={30}
               />
-            )}
-            
-            {/* Average reference line */}
-            {average !== null && (
-              <ReferenceLine 
-                y={average} 
-                stroke="#F59E0B" 
-                strokeDasharray="3 3"
-                label={{ 
-                  value: 'Average', 
-                  position: 'insideTopRight',
-                  fill: '#F59E0B',
-                  fontSize: 12
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '0.375rem',
+                  boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
                 }}
+                cursor={{ stroke: '#9CA3AF', strokeWidth: 1, strokeDasharray: '3 3' }}
+                formatter={(value) => [`${value.toLocaleString()}`, '']}
               />
-            )}
-            
-            <Line
-              name="Current Period"
-              type={widget.config?.smoothCurves !== false ? 'monotone' : 'linear'}
-              dataKey="value"
-              stroke={primaryColor}
-              strokeWidth={3}
-              dot={widget.config?.showDataPoints !== false ? { fill: primaryColor, strokeWidth: 2, r: 4 } : false}
-              activeDot={{ r: 6, stroke: primaryColor, strokeWidth: 2, fill: 'white' }}
-              animationDuration={widget.config?.animations !== false ? 1500 : 0}
-            />
-            
-            {/* Second line for comparison if needed */}
-            {widget.config?.comparisonPeriod && (
+              {widget.config?.showLegend !== false && (
+                <Legend 
+                  wrapperStyle={{ paddingTop: 10 }}
+                  iconType="circle"
+                />
+              )}
+              
+              {/* Average reference line */}
+              {average !== null && (
+                <ReferenceLine 
+                  y={average} 
+                  stroke="#F59E0B" 
+                  strokeDasharray="3 3"
+                  label={{ 
+                    value: 'Average', 
+                    position: 'insideTopRight',
+                    fill: '#F59E0B',
+                    fontSize: 12
+                  }}
+                />
+              )}
+              
               <Line
-                name="Previous Period"
+                name="Current Period"
                 type={widget.config?.smoothCurves !== false ? 'monotone' : 'linear'}
-                dataKey="previousValue"
-                stroke={secondaryColor}
-                strokeWidth={2}
-                strokeDasharray="5 5"
-                dot={false}
-                activeDot={{ r: 5, stroke: secondaryColor, strokeWidth: 1, fill: 'white' }}
+                dataKey="value"
+                stroke={primaryColor}
+                strokeWidth={3}
+                dot={widget.config?.showDataPoints !== false ? { fill: primaryColor, strokeWidth: 2, r: 4 } : false}
+                activeDot={{ r: 6, stroke: primaryColor, strokeWidth: 2, fill: 'white' }}
+                animationDuration={widget.config?.animations !== false ? 1500 : 0}
               />
-            )}
-          </LineChart>
-        </ResponsiveContainer>
+              
+              {/* Second line for comparison if needed */}
+              {widget.config?.comparisonPeriod && (
+                <Line
+                  name="Previous Period"
+                  type={widget.config?.smoothCurves !== false ? 'monotone' : 'linear'}
+                  dataKey="previousValue"
+                  stroke={secondaryColor}
+                  strokeWidth={2}
+                  strokeDasharray="5 5"
+                  dot={false}
+                  activeDot={{ r: 5, stroke: secondaryColor, strokeWidth: 1, fill: 'white' }}
+                />
+              )}
+            </LineChart>
+          </ResponsiveContainer>
+        ) : (
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            height: '100%',
+            color: '#6b7280',
+            fontSize: '14px'
+          }}>
+            <div>
+              <div>📊</div>
+              <div>No data available</div>
+              <div style={{ fontSize: '12px', marginTop: '4px' }}>Data points: {chartData?.length || 0}</div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Filters */}

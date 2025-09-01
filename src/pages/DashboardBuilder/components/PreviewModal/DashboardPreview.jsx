@@ -46,26 +46,19 @@ const DashboardPreview = ({
   }, [widgets, rows]);
 
   // Width class logic replaced by inline-friendly tokens (no class names returned)
-  const getWidgetSizeClass = () => ""; // intentionally empty (no class names)
-
-  // Flex-basis style (kept)
-  const getWidgetFlexBasis = (rowWidgets) => {
-    const widgetsInRow = rowWidgets.length;
-
-    if (viewMode === "mobile") {
-      return { flexBasis: "calc(100% - 8px)" };
-    }
-
-    if (viewMode === "tablet") {
-      if (widgetsInRow === 1) return { flexBasis: "calc(100% - 8px)" };
-      return { flexBasis: "calc(50% - 16px)" };
-    }
-
-    if (widgetsInRow === 1) return { flexBasis: "calc(100% - 8px)" };
-    if (widgetsInRow === 2) return { flexBasis: "calc(50% - 16px)" };
-    return { flexBasis: "calc(33.333% - 16px)" };
+  const GAP_PX = 8;
+  const getColumnsForRow = (count) => {
+    if (viewMode === "mobile") return 1;
+    if (viewMode === "tablet") return Math.min(2, count);
+    return Math.min(3, count);
   };
+  // Flex-basis style (kept)
 
+  const getWidgetFlexBasis = (rowWidgets) => {
+    const cols = getColumnsForRow(rowWidgets.length);
+    const totalGap = (cols - 1) * GAP_PX;
+    return { flexBasis: `calc((100% - ${totalGap}px) / ${cols})` };
+  };
   // Render widget based on type
   const renderWidget = (widget) => {
     const props = {
@@ -90,6 +83,8 @@ const DashboardPreview = ({
         return <OrdersKPIWidget {...props} />;
       case WIDGET_TYPES.CUSTOMERS_KPI:
         return <CustomersKPIWidget {...props} />;
+      case WIDGET_TYPES.LINE_CHART:
+        return <LineChartWidget {...props} />;
       case WIDGET_TYPES.GRADIENT_BAR_CHART:
         return <GradientBarChartWidget {...props} />;
       case WIDGET_TYPES.SMOOTH_FUNNEL_CHART:
@@ -100,8 +95,8 @@ const DashboardPreview = ({
         return <AdvancedFilterBarWidget {...props} />;
 
       // Basic widgets
-      case WIDGET_TYPES.LINE_CHART:
-        return <LineChartWidget {...props} />;
+      // case WIDGET_TYPES.LINE_CHART:
+      //   return <LineChartWidget {...props} />;
       case WIDGET_TYPES.BAR_CHART:
         return <BarChartWidget {...props} />;
       case WIDGET_TYPES.AREA_CHART:
@@ -124,7 +119,6 @@ const DashboardPreview = ({
   };
 
   // No-op spacing helper (since all class names removed)
-  const getLayoutSpacing = () => "";
 
   return (
     <div>
@@ -155,36 +149,34 @@ const DashboardPreview = ({
       {/* Rows */}
       <div>
         {rows.map((row) => {
-          const rowWidgets = widgetsByRow[row.id] || [];
+          const rowWidgets = (widgetsByRow[row.id] || []).sort(
+            (a, b) => a.position.index - b.position.index
+          );
           if (rowWidgets.length === 0) return null;
-
-          rowWidgets.sort((a, b) => a.position.index - b.position.index);
 
           return (
             <div key={row.id}>
               {/* Row container */}
-              <div>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    flexWrap: "nowrap",
-                    alignItems: "stretch",
-                  }}
-                >
-                  {rowWidgets.map((widget) => (
-                    <div
-                      key={widget.id}
-                      style={{
-                        ...getWidgetFlexBasis(rowWidgets),
-                        height: "100%",
-                        margin: "0 4px",
-                      }}
-                    >
-                      <div data-theme={theme}>{renderWidget(widget)}</div>
-                    </div>
-                  ))}
-                </div>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "stretch",
+                  margin: "24px 0px",
+                  gap: `${GAP_PX}px`, // ✅ use gap instead of per-item margins
+                }}
+              >
+                {rowWidgets.map((widget) => (
+                  <div
+                    key={widget.id}
+                    style={{
+                      ...getWidgetFlexBasis(rowWidgets),
+                      height: "100%",
+                    }}
+                  >
+                    <div data-theme={theme}>{renderWidget(widget)}</div>
+                  </div>
+                ))}
               </div>
             </div>
           );
