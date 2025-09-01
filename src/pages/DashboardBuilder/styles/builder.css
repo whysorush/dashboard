@@ -259,23 +259,23 @@
   font-family: 'Figtree', sans-serif;
 }
 
-.row-container-preview {
+/* .row-container-preview {
   transition: all 0.2s ease-in-out;
   min-height: 120px;
 }
 
 .row-container-preview:hover {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
+} */
+/* 
 .row-content-preview {
   min-height: 100px;
   overflow-x: auto;
   align-items: stretch;
   padding: 8px 0;
-}
+} */
 
-.widget-container-preview {
+/* .widget-container-preview {
   min-width: 0;
   overflow: hidden;
   display: flex;
@@ -293,7 +293,7 @@
 .widget-container-preview.flex-1.w-full {
   flex: 1 1 100%;
   max-width: calc(100% - 8px);
-}
+} */
 
 .widget-container-preview.flex-1.w-1\/2 {
   flex: 1 1 calc(50% - 16px);
@@ -414,14 +414,14 @@
   }
   
   /* Dark mode for preview components */
-  .dashboard-preview.dark .row-container-preview {
+  /* .dashboard-preview.dark .row-container-preview {
     background: #1f2937;
     border-color: #374151;
-  }
+  } */
   
-  .dashboard-preview.dark .row-container-preview:hover {
+  /* .dashboard-preview.dark .row-container-preview:hover {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-  }
+  } */
   
   .dashboard-preview.dark .widget-container-preview:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
@@ -610,7 +610,7 @@
     gap: 8px;
   }
   
-  .row-content-preview {
+  /* .row-content-preview {
     gap: 8px;
-  }
+  } */
 }

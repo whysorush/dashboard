@@ -14,6 +14,8 @@ import BaseWidget from "./BaseWidget";
  * - Responsive design
  */
 const AdvancedFilterBarWidget = ({ widget, isSelected, onClick }) => {
+  console.log("advanced filter widget", widget);
+
   const config = widget.config || {};
 
   // State for filter values
@@ -138,76 +140,80 @@ const AdvancedFilterBarWidget = ({ widget, isSelected, onClick }) => {
     //     </div>
     //   </div>
     // </BaseWidget>
-   <div className="main-body-section">
-    <section className="filters">
-      <div className="filter-group">
-        <label>Date Filter</label>
-        <div className="date-inputs">
-          <input
-            type="date"
-            placeholder="From"
-            // className="filter-input"
-            value={dateRange.from}
-            onChange={(e) =>
-              setDateRange({ ...dateRange, from: e.target.value })
-            }
-          />
-          <input
-            type="date"
-            placeholder="To"
-            // className="filter-input"
-            value={dateRange.to}
-            onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
-          />
+    <div
+
+    //  className="main-body-section"
+    >
+      <section className="filters">
+        <div className="filter-group">
+          <label>Date Filter</label>
+          <div className="date-inputs">
+            <input
+              type="date"
+              placeholder="From"
+              // className="filter-input"
+              value={dateRange.from}
+              onChange={(e) =>
+                setDateRange({ ...dateRange, from: e.target.value })
+              }
+            />
+            <input
+              type="date"
+              placeholder="To"
+              // className="filter-input"
+              value={dateRange.to}
+              onChange={(e) =>
+                setDateRange({ ...dateRange, to: e.target.value })
+              }
+            />
+          </div>
         </div>
-      </div>
-      <div className="filter-group">
-        <label>Transaction Amount</label>
-        <select
-          value={transactionAmount}
-          onChange={(e) => setTransactionAmount(e.target.value)}
-        >
-          <option>$0-10K</option>
-          <option>$10K-50K</option>
-          <option>$50K-100K</option>
-          <option>$100K+</option>
-        </select>
-      </div>
+        <div className="filter-group">
+          <label>Transaction Amount</label>
+          <select
+            value={transactionAmount}
+            onChange={(e) => setTransactionAmount(e.target.value)}
+          >
+            <option>$0-10K</option>
+            <option>$10K-50K</option>
+            <option>$50K-100K</option>
+            <option>$100K+</option>
+          </select>
+        </div>
 
-      <div className="filter-group">
-        <label>Product</label>
-        <select value={product} onChange={(e) => setProduct(e.target.value)}>
-          <option>All Type</option>
-          <option>Manufacturing</option>
-          <option>Marketing</option>
-          <option>Branding</option>
-        </select>
-      </div>
+        <div className="filter-group">
+          <label>Product</label>
+          <select value={product} onChange={(e) => setProduct(e.target.value)}>
+            <option>All Type</option>
+            <option>Manufacturing</option>
+            <option>Marketing</option>
+            <option>Branding</option>
+          </select>
+        </div>
 
-      <div className="filter-group">
-        <label>Status</label>
-        <select value={status} onChange={(e) => setStatus(e.target.value)}>
-          <option>All</option>
-          <option>Pending</option>
-          <option>Delivered</option>
-          <option>In-Transit</option>
-        </select>
-      </div>
+        <div className="filter-group">
+          <label>Status</label>
+          <select value={status} onChange={(e) => setStatus(e.target.value)}>
+            <option>All</option>
+            <option>Pending</option>
+            <option>Delivered</option>
+            <option>In-Transit</option>
+          </select>
+        </div>
 
-      <div className="filter-group">
-        <label>Order Quantity</label>
-        <select
-          value={orderQuantity}
-          onChange={(e) => setOrderQuantity(e.target.value)}
-        >
-          <option>1-100</option>
-          <option>101-500</option>
-          <option>500+</option>
-        </select>
-      </div>
-    </section>
-   </div>
-
+        <div className="filter-group">
+          <label>Order Quantity</label>
+          <select
+            value={orderQuantity}
+            onChange={(e) => setOrderQuantity(e.target.value)}
+          >
+            <option>1-100</option>
+            <option>101-500</option>
+            <option>500+</option>
+          </select>
+        </div>
+      </section>
+    </div>
   );
 };
 

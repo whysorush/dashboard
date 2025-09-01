@@ -319,7 +319,12 @@ const Canvas = () => {
           </div>
         </div>
       ) : (
-        <div className="rows-container space-y-6">
+        <div 
+        
+        // className="rows-container space-y-6"
+        
+        
+        >
           {rows.map(row => {
             const rowWidgets = widgetsByRow[row.id] || [];
             const isRowSelected = selectedRow === row.id;

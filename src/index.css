@@ -115,10 +115,10 @@ body {
 /* .main-content {
   transition: background 0.2s ease, color 0.2s ease;
 } */
-.main-body-section {
+/* .main-body-section {
   padding: 20px 22px;
   transition: color 0.2s ease, background 0.2s ease;
-}
+} */
 
 /* ================= HEADER ================= */
 .header {
@@ -251,7 +251,7 @@ body {
   margin-top: 18px;
 }
 .stat-card {
-  /* display: grid; */
+  display: grid;
   grid-template-columns: 54px 1fr;
   gap: 14px;
   background: linear-gradient(
@@ -263,6 +263,7 @@ body {
   border-radius: 14px;
   padding: 16px;
 }
+
 .stat-icon {
   width: 54px;
   height: 54px;
