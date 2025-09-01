@@ -165,7 +165,7 @@ const PreviewModal = ({ isOpen, onClose, widgets, rows }) => {
             <DashboardPreview 
               widgets={widgets} 
               rows={rows} 
-              viewMode={viewMode} 
+              viewMode={""} 
               theme={theme}
               layout={layout}
             />

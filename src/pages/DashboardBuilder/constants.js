@@ -364,7 +364,7 @@ export const PROFESSIONAL_WIDGET_CONFIGS = {
       id: 'sales-dashboard',
       name: 'Sales Dashboard',
       description: 'Track sales performance and revenue',
-      thumbnail: '💰',
+      // thumbnail: '💰',
       widgets: [
         {
           type: WIDGET_TYPES.KPI_CARD,

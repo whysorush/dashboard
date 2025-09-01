@@ -1,10 +1,11 @@
 // src/pages/DashboardBuilder/components/widgets/ProfessionalKPIWidget.jsx
-import React from 'react';
-import { PROFESSIONAL_WIDGET_CONFIGS } from '../../constants';
+import React from "react";
+import { PROFESSIONAL_WIDGET_CONFIGS } from "../../constants";
+import { FaArrowDown, FaArrowUp, FaPercent } from "react-icons/fa";
 
 /**
  * Professional KPI Widget with exact design standards
- * 
+ *
  * Features:
  * - White background, 32px border radius, 24px padding
  * - Icon with colored background
@@ -14,58 +15,44 @@ import { PROFESSIONAL_WIDGET_CONFIGS } from '../../constants';
  */
 const ProfessionalKPIWidget = ({ widget, isSelected, onClick }) => {
   const config = widget.config || {};
-  
+
   // Use default config or merge with widget config
   const title = config.title || PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.title;
   const value = config.value || PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.value;
   const prefix = config.prefix || PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.prefix;
   const growth = config.growth || PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.growth;
-  const growthDirection = config.growthDirection || PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.growthDirection;
-  const growthText = config.growthText || PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.growthText;
+  const growthDirection =
+    config.growthDirection ||
+    PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.growthDirection;
+  const growthText =
+    config.growthText || PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.growthText;
   const icon = config.icon || PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.icon;
   const iconBg = config.iconBg || PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.iconBg;
-  const growthColor = config.growthColor || PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.growthColor;
-  const growthTextColor = config.growthTextColor || PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.growthTextColor;
-  
+  const growthColor =
+    config.growthColor || PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.growthColor;
+  const growthTextColor =
+    config.growthTextColor ||
+    PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.growthTextColor;
+
   return (
-    <div 
-      className="professional-widget-container professional-kpi-widget"
-      onClick={onClick}
-    >
-      {/* Icon and Title */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-        <div 
-          className="professional-kpi-icon"
-          style={{
-            background: iconBg
-          }}
-        >
-          {icon}
-        </div>
-        <div className="chart-title">
-          {title}
-        </div>
+    <div className="stat-card">
+      <div className={`stat-icon ${title.toLowerCase().split(" ")[0]}`}>
+        {icon}
       </div>
-      
-      {/* Main Value */}
-      <div className="main-value" style={{ marginBottom: '8px' }}>
-        {prefix}{value?.toLocaleString()}
-      </div>
-      
-      {/* Growth Indicator */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <div 
-          className="professional-kpi-growth"
-          style={{
-            background: growthColor
-          }}
-        >
-          <span style={{ color: growthTextColor, fontSize: '12px' }}>
-            {growthDirection === 'up' ? '↗' : '↘'} +{growth}%
-          </span>
-        </div>
-        <div className="axis-label">
-          {growthText}
+      <div className="stat-content">
+        <h3>{title}</h3>
+
+        <div className="stat-change positive">
+          <div className="stat-value">
+            {prefix}
+            {value?.toLocaleString()}
+          </div>
+          <div className="stat-change-info">
+            {growthDirection === "up" ? <FaArrowUp /> : <FaArrowDown />} +{" "}
+            {growth} <FaPercent />
+            {/* <span>{changeText}</span> */}
+            <p> {growthText}</p>
+          </div>
         </div>
       </div>
     </div>
