@@ -67,15 +67,15 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
           <div>{total}</div>
         </div>
 
-        {/* <select
+        <select
             className="time-filter"
-            value={range}
-            onChange={(e) => setRange(e.target.value)}
+            // value={range}
+            // onChange={(e) => setRange(e.target.value)}
           >
             <option>Week</option>
             <option>Month</option>
             <option>Year</option>
-          </select> */}
+          </select>
       </div>
 
       <div className="bar-chart" style={{ height: 260 }}>

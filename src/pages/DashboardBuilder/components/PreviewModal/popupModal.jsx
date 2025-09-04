@@ -1,5 +1,5 @@
 // Modal.jsx
-import React from "react";
+import React, { useState } from "react";
 import "./Modal.css";
 import DashboardPreview from "./DashboardPreview";
 
@@ -7,7 +7,7 @@ const PopupModal = ({
   isOpen,
   onClose,
   title,
-//   children,
+  //   children,
   widgets,
   rows,
   showCloseButton = true,
@@ -20,7 +20,12 @@ const PopupModal = ({
       onClose();
     }
   };
+  const [theme, setTheme] = useState("light"); // 'light' or 'dark'
+  const [layout, setLayout] = useState("standard"); // 'standard', 'compact', or 'spacious'
 
+  const toggleTheme = () => {
+    setTheme(theme === "light" ? "dark" : "light");
+  };
   return (
     <div className="modal-overlay" onClick={handleOverlayClick}>
       <div className="modal-content">
@@ -41,8 +46,8 @@ const PopupModal = ({
             widgets={widgets}
             rows={rows}
             viewMode={""}
-            // theme={theme}
-            // layout={layout}
+            theme={theme}
+            layout={layout}
           />
           {/* {children} */}
         </div>
