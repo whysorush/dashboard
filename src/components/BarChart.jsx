@@ -30,7 +30,7 @@ export default function BarChartBox() {
   return (
     <div className="chart-container">
       <div className="chart-header">
-        {/* <h3>Bar Chart</h3> */}
+        <h3>Bar Chart</h3>
         <select className="time-filter" value={range} onChange={(e) => setRange(e.target.value)}>
           <option>Week</option>
           <option>Month</option>

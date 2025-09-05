@@ -220,7 +220,7 @@ const getCategoryNames = (count, type = 'category') => {
 
 // Calculate KPIs from data
 export const calculateKPIs = (data, config) => {
-  if (!data || data.length === 0) return {};
+  if (!data || data.length === 0) return [];
   
   const values = data.map(d => d.value);
   const total = values.reduce((sum, val) => sum + val, 0);
@@ -233,54 +233,54 @@ export const calculateKPIs = (data, config) => {
     ? ((data[data.length - 1].value - data[0].value) / data[0].value) * 100
     : 0;
   
-  const kpis = {};
+  const kpis = [];
   
   // Only include requested KPI metrics
   const metrics = config?.kpiMetrics || ['total', 'average', 'growth'];
   
   if (metrics.includes('total')) {
-    kpis.total = {
+    kpis.push({
       label: 'Total',
       value: total,
       format: config?.numberFormat || 'number',
       icon: '📊'
-    };
+    });
   }
   
   if (metrics.includes('average')) {
-    kpis.average = {
+    kpis.push({
       label: 'Average',
       value: average,
       format: config?.numberFormat || 'number',
       icon: '📈'
-    };
+    });
   }
   
   if (metrics.includes('growth')) {
-    kpis.growth = {
+    kpis.push({
       label: 'Growth',
       value: growth,
       format: 'percentage',
       icon: growth >= 0 ? '📈' : '📉'
-    };
+    });
   }
   
   if (metrics.includes('min')) {
-    kpis.min = {
+    kpis.push({
       label: 'Min',
       value: min,
       format: config?.numberFormat || 'number',
       icon: '⬇️'
-    };
+    });
   }
   
   if (metrics.includes('max')) {
-    kpis.max = {
+    kpis.push({
       label: 'Max',
       value: max,
       format: config?.numberFormat || 'number',
       icon: '⬆️'
-    };
+    });
   }
   
   return kpis;

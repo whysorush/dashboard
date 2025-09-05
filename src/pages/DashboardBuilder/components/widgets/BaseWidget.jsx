@@ -74,7 +74,7 @@ const BaseWidget = ({
       )}
 
       {/* Widget Content */}
-      <div className="widget-content p-4 h-full overflow-auto" style={{ minHeight: '200px' }}>
+      <div className="widget-content p-4 h-full overflow-auto">
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
