@@ -190,7 +190,7 @@ const updateWidgetRowPosition = useCallback((widgetId, newRow, newIndex) => {
       });
     } else if (widgetsCount === 2) {
       // If two widgets left, make them medium (50% width each)
-      newWidgets = newWidgets.map(w => {
+     const newWidgets = newWidgets.map(w => {
         if (w.position.rowId === rowId && w.position.size !== 'medium') {
           return {
             ...w,
