@@ -156,7 +156,7 @@ const ExportDialog = ({ widgets, isOpen, onClose }) => {
           
           {activeTab === 'code' ? (
             <div className="flex-1 bg-gray-100 dark:bg-gray-900 p-4 overflow-auto">
-              <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-auto text-sm font-mono">
+              <pre className="text-black-100 p-4 rounded-lg overflow-auto text-sm font-mono">
                 <code>{code}</code>
               </pre>
             </div>

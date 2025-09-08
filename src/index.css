@@ -24,6 +24,33 @@
   --search-bar-border: #e7e7e7; /* light gray border for search bar */
 }
 
+/* Dark mode variables (activated when <html> has class .dark) */
+.dark:root {
+  --bg: #0b1020;
+  --panel: #0f172a;
+  --stat-card-bg: #0f172a;
+  --stat-change-info: #ffffff66;
+  --sidebar: #0f172a;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --table-th-font: #0b1020;
+  --table-td-font: #e5e7eb;
+  --primary: #22d3ee;
+  --border: rgba(255, 255, 255, 0.1);
+  --bar-track: #0b1020;
+
+  --status-pending-bg: #402d12;
+  --status-pending-text: #ffb74a;
+  --status-delivered-bg: #12351a;
+  --status-delivered-text: #4ade80;
+  --status-in-transit-bg: #102a3a;
+  --status-in-transit-text: #38bdf8;
+  --icon-stat-bg: #0b1324;
+  --icon-stat-font: #22d3ee;
+  --search-bar-bg: #0b1324;
+  --search-bar-border: rgba(255, 255, 255, 0.08);
+}
+
 /* ================= BASE ================= */
 * {
   box-sizing: border-box;
