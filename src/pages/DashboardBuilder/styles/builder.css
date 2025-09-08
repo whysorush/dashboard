@@ -41,14 +41,14 @@
   background: white;
   border-right: 1px solid #e5e7eb;
   overflow-y: auto;
-  padding: 16px;
+  /* padding: ; */
 }
 
 .db-canvas {
   flex: 1;
   background: #f9fafb;
   overflow: auto;
-  padding: 20px;
+  /* padding: 20px; */
   position: relative;
 }
 
@@ -134,7 +134,7 @@
 
 .row-container {
   margin-bottom: 24px;
-  padding: 16px;
+  /* padding: 16px; */
   border-radius: 8px;
   border: 2px dashed #e5e7eb;
   background: white;

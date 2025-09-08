@@ -29,14 +29,14 @@ const emergencyStyles = `
   
   .dashboard-builder-container {
     min-height: 100vh;
-    background: #f3f4f6;
+    background: var(--bg);
     display: flex;
     flex-direction: column;
   }
   
   .db-header {
-    background: white;
-    border-bottom: 1px solid #e5e7eb;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
     padding: 12px 16px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   }
@@ -53,7 +53,7 @@ const emergencyStyles = `
     gap: 8px;
     font-size: 20px;
     font-weight: bold;
-    color: #111827;
+    color: var(--text);
   }
   
   .db-toolbar {
@@ -95,12 +95,12 @@ const emergencyStyles = `
   .db-button-icon {
     padding: 8px;
     background: transparent;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border);
     border-radius: 6px;
   }
   
   .db-button-icon:hover {
-    background: #f3f4f6;
+    background: color-mix(in oklab, var(--text) 8%, transparent);
   }
   
   .db-main {
@@ -112,15 +112,15 @@ const emergencyStyles = `
   
   .db-sidebar-left {
     width: 250px;
-    background: white;
-    border-right: 1px solid #e5e7eb;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
     overflow-y: auto;
     padding: 16px;
   }
   
   .db-canvas {
     flex: 1;
-    background: #f9fafb;
+    background: var(--bg);
     overflow: auto;
     padding: 20px;
     position: relative;
@@ -128,8 +128,8 @@ const emergencyStyles = `
   
   .db-sidebar-right {
     width: 320px;
-    background: white;
-    border-left: 1px solid #e5e7eb;
+    background: var(--panel);
+    border-left: 1px solid var(--border);
     overflow-y: auto;
     padding: 16px;
   }
@@ -138,12 +138,12 @@ const emergencyStyles = `
     font-size: 18px;
     font-weight: 600;
     margin-bottom: 16px;
-    color: #111827;
+    color: var(--text);
   }
   
   .widget-card {
-    background: white;
-    border: 2px solid #e5e7eb;
+    background: var(--panel);
+    border: 2px solid var(--border);
     border-radius: 8px;
     padding: 12px;
     margin-bottom: 12px;
@@ -152,7 +152,7 @@ const emergencyStyles = `
   }
   
   .widget-card:hover {
-    border-color: #3b82f6;
+    border-color: color-mix(in oklab, var(--primary) 60%, var(--border));
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     transform: translateY(-2px);
   }
@@ -170,12 +170,12 @@ const emergencyStyles = `
   .widget-info h4 {
     font-size: 14px;
     font-weight: 600;
-    color: #111827;
+    color: var(--text);
   }
   
   .widget-info p {
     font-size: 12px;
-    color: #6b7280;
+    color: var(--muted);
     margin-top: 2px;
   }
   
@@ -201,12 +201,12 @@ const emergencyStyles = `
   .canvas-empty-title {
     font-size: 20px;
     font-weight: 600;
-    color: #4b5563;
+    color: var(--text);
     margin-bottom: 8px;
   }
   
   .canvas-empty-text {
-    color: #6b7280;
+    color: var(--muted);
     margin-bottom: 20px;
   }
   
@@ -216,13 +216,13 @@ const emergencyStyles = `
     align-items: center;
     margin-bottom: 20px;
     padding-bottom: 12px;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--border);
   }
   
   .properties-title {
     font-size: 18px;
     font-weight: 600;
-    color: #111827;
+    color: var(--text);
   }
   
   .close-button {
@@ -234,7 +234,7 @@ const emergencyStyles = `
   }
   
   .close-button:hover {
-    background: #f3f4f6;
+    background: color-mix(in oklab, var(--text) 8%, transparent);
   }
   
   .property-group {
@@ -245,22 +245,24 @@ const emergencyStyles = `
     display: block;
     font-size: 14px;
     font-weight: 500;
-    color: #374151;
+    color: var(--text);
     margin-bottom: 6px;
   }
   
   .property-input {
     width: 100%;
     padding: 8px 12px;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--border);
     border-radius: 6px;
     font-size: 14px;
+    color: var(--text);
+    background: var(--panel);
   }
   
   .property-input:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: color-mix(in oklab, var(--primary) 60%, var(--border));
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 20%, transparent);
   }
   
   .modal-overlay {
@@ -277,7 +279,7 @@ const emergencyStyles = `
   }
   
   .modal-content {
-    background: white;
+    background: var(--panel);
     border-radius: 12px;
     width: 90%;
     max-width: 1200px;
@@ -289,7 +291,7 @@ const emergencyStyles = `
   
   .modal-header {
     padding: 20px;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -299,19 +301,19 @@ const emergencyStyles = `
     flex: 1;
     overflow: auto;
     padding: 20px;
-    background: #f9fafb;
+    background: var(--bg);
   }
   
   .preview-content {
-    background: white;
+    background: var(--panel);
     border-radius: 8px;
     padding: 24px;
     min-height: 500px;
   }
   
   .widget-container {
-    background: white;
-    border: 1px solid #e5e7eb;
+    background: var(--panel);
+    border: 1px solid var(--border);
     border-radius: 8px;
     padding: 16px;
     margin-bottom: 16px;
@@ -322,13 +324,13 @@ const emergencyStyles = `
     font-size: 16px;
     font-weight: 600;
     margin-bottom: 12px;
-    color: #111827;
+    color: var(--text);
   }
   
   .divider {
     width: 1px;
     height: 24px;
-    background: #d1d5db;
+    background: var(--border);
     margin: 0 8px;
   }
   
@@ -340,8 +342,8 @@ const emergencyStyles = `
   }
   
   .grid-item {
-    background: white;
-    border: 1px solid #e5e7eb;
+    background: var(--panel);
+    border: 1px solid var(--border);
     border-radius: 8px;
     padding: 16px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -374,7 +376,7 @@ const DashboardBuilderContent = () => {
       <div className="db-header sticky top-0 z-50">
         <div className="db-header-content flex-wrap md:flex-nowrap">
           <div className="db-title mb-2 md:mb-0">
-            <FiGrid style={{ color: "#3b82f6" }} />
+            <FiGrid style={{ color: "var(--primary)" }} />
             <span className="hidden sm:inline">
               Row-Based Dashboard Builder
             </span>
@@ -448,7 +450,10 @@ const DashboardBuilderContent = () => {
       {/* Main Content */}
       <div className="db-main flex flex-col md:flex-row h-[calc(100vh-60px)]">
         {/* Left Sidebar - Component Palette */}
-        <div className="db-sidebar-left w-full md:w-64 lg:w-72 border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700 md:h-full overflow-y-auto">
+        <div
+          className="db-sidebar-left"
+          //  className="db-sidebar-left w-full md:w-64 lg:w-72 border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700 md:h-full overflow-y-auto"
+        >
           <ComponentPalette />
         </div>
 
@@ -457,14 +462,6 @@ const DashboardBuilderContent = () => {
           <Canvas />
         </div>
       </div>
-
-      {/* Modals */}
-      {/* <PreviewModal 
-        isOpen={showPreview}
-        onClose={() => setShowPreview(false)}
-        widgets={widgets}
-        rows={rows}
-      /> */}
 
       {showPreview && (
         <PopupModal

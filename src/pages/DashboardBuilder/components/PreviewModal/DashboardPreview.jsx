@@ -174,7 +174,7 @@ const DashboardPreview = ({
                       height: "100%",
                     }}
                   >
-                    <div data-theme={theme}>{renderWidget(widget)}</div>
+                    <div className={theme === 'dark' ? 'dark' : ''}>{renderWidget(widget)}</div>
                   </div>
                 ))}
               </div>

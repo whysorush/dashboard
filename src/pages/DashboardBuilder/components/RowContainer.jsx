@@ -53,9 +53,15 @@ const RowContainer = ({ row, children, isSelected, onAddWidget, canAddMore = tru
       </div>
       
       {/* Row content - widgets container */}
-      <div className="row-content flex flex-row flex-nowrap gap-4 justify-center items-stretch">
-        {children}
-      </div>
+      {/* <div 
+      // className="row-content flex flex-row flex-nowrap gap-4 justify-center items-stretch"
+      > */}
+
+<div class="row-content">
+{children}
+
+</div>
+      {/* </div> */}
       
       {/* Empty state */}
       {React.Children.count(children) === 0 && (

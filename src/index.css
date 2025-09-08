@@ -26,9 +26,9 @@
 
 /* Dark mode variables (activated when <html> has class .dark) */
 .dark:root {
-  --bg: #0b1020;
-  --panel: #0f172a;
-  --stat-card-bg: #0f172a;
+  --bg: #0f121a;
+  --panel: #1f2937;
+  --stat-card-bg: #1f2937;
   --stat-change-info: #ffffff66;
   --sidebar: #0f172a;
   --text: #e5e7eb;
@@ -45,7 +45,7 @@
   --status-delivered-text: #4ade80;
   --status-in-transit-bg: #102a3a;
   --status-in-transit-text: #38bdf8;
-  --icon-stat-bg: #0b1324;
+  --icon-stat-bg: #005366;
   --icon-stat-font: #22d3ee;
   --search-bar-bg: #0b1324;
   --search-bar-border: rgba(255, 255, 255, 0.08);
@@ -77,7 +77,7 @@ body {
 
 /* Sidebar */
 .sidebar {
-  background: var(--sidebar);
+  background: var(--panel);
   border-right: 1px solid var(--border);
   padding: 20px 16px;
   position: relative;
@@ -283,8 +283,8 @@ body {
   gap: 14px;
   background: linear-gradient(
     180deg,
-    color-mix(in oklab, var(--stat-card-bg) 92%, transparent),
-    color-mix(in oklab, var(--stat-card-bg) 100%, transparent)
+    color-mix(in oklab, var(--panel) 92%, transparent),
+    color-mix(in oklab, var(--panel) 100%, transparent)
   );
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -714,6 +714,15 @@ body {
   border: 0;
 }
 
+.row-content {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 1rem; /* 16px */
+  justify-content: center;
+  align-items: stretch;
+}
+
 /* ≤ 420px: single-column filters; smaller text */
 @media (max-width: 420px) {
   .filters {
@@ -1066,5 +1075,53 @@ body {
   }
   .table-actions {
     justify-content: flex-end;
+  }
+}
+
+.db-sidebar-left {
+  width: 100%; /* w-full */
+  border-bottom: 1px solid #e5e7eb; /* border-b border-gray-200 */
+  height: auto;
+  overflow-y: auto;
+}
+
+/* Medium screens and up (768px+) */
+@media (min-width: 768px) {
+  .db-sidebar-left {
+    width: 16rem; /* md:w-64 (256px) */
+    border-bottom: none; /* md:border-b-0 */
+    border-right: 1px solid #e5e7eb; /* md:border-r border-gray-200 */
+    height: 100%; /* md:h-full */
+  }
+}
+
+/* Large screens and up (1024px+) */
+@media (min-width: 1024px) {
+  .db-sidebar-left {
+    width: 18rem; /* lg:w-72 (288px) */
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .db-sidebar-left {
+    border-bottom-color: #374151; /* dark:border-gray-700 */
+  }
+
+  @media (min-width: 768px) {
+    .db-sidebar-left {
+      border-right-color: #374151; /* dark:border-gray-700 */
+    }
+  }
+}
+
+/* Alternative dark mode using class-based approach */
+.dark .db-sidebar-left {
+  border-bottom-color: #374151; /* dark:border-gray-700 */
+}
+
+@media (min-width: 768px) {
+  .dark .db-sidebar-left {
+    border-right-color: #374151; /* dark:border-gray-700 */
   }
 }

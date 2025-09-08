@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { FiCode, FiCopy, FiDownload, FiCheck, FiX, FiFileText } from 'react-icons/fi';
 import { generateDashboardCode } from '../utils/codeGenerator';
-import { downloadFile } from '../utils/exportHelpers';
+import { downloadFile, createDataExportFile, createReadmeFile } from '../utils/exportHelpers';
 
 const ExportDialog = ({ widgets, isOpen, onClose }) => {
   const [componentName, setComponentName] = useState('MyDashboard');
@@ -10,14 +10,17 @@ const ExportDialog = ({ widgets, isOpen, onClose }) => {
   const [includeStyles, setIncludeStyles] = useState(true);
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState('code');
+  const [exportMode, setExportMode] = useState('single'); // 'single' | 'multiple'
   
   const code = useMemo(() => {
     if (!isOpen || !widgets.length) return '';
+    // For single-file export, force inline data unless explicitly set to none
+    const effectiveIncludeData = exportMode === 'single' && includeData !== 'none' ? 'inline' : includeData;
     return generateDashboardCode(widgets, componentName, {
-      includeData,
+      includeData: effectiveIncludeData,
       includeStyles
     });
-  }, [widgets, componentName, includeData, includeStyles, isOpen]);
+  }, [widgets, componentName, includeData, includeStyles, isOpen, exportMode]);
   
   if (!isOpen) return null;
 
@@ -47,7 +50,26 @@ const ExportDialog = ({ widgets, isOpen, onClose }) => {
   };
 
   const handleDownload = () => {
-    downloadFile(code, `${componentName}.jsx`);
+    // Single-file mode: download only the component file
+    if (exportMode === 'single') {
+      downloadFile(code, `${componentName}.jsx`, 'text/jsx;charset=utf-8');
+      return;
+    }
+
+    // Multiple-files mode
+    const filesToExport = [
+      { name: `${componentName}.jsx`, content: code, mime: 'text/jsx;charset=utf-8' }
+    ];
+
+    if (includeData === 'separate') {
+      const dataFileContent = createDataExportFile(widgets);
+      filesToExport.push({ name: 'mockData.js', content: dataFileContent, mime: 'text/javascript;charset=utf-8' });
+    }
+
+    const readmeContent = createReadmeFile(componentName, widgets);
+    filesToExport.push({ name: 'README.md', content: readmeContent, mime: 'text/markdown;charset=utf-8' });
+
+    filesToExport.forEach((f) => downloadFile(f.content, f.name, f.mime));
   };
 
   const handleComponentNameChange = (e) => {
@@ -106,8 +128,29 @@ const ExportDialog = ({ widgets, isOpen, onClose }) => {
                 <option value="separate">Separate file</option>
                 <option value="none">No mock data</option>
               </select>
+              {exportMode === 'single' && includeData === 'separate' && (
+                <p className="mt-1 text-xs text-yellow-700 dark:text-yellow-300">
+                  Single file export forces inline data. "Separate file" will be ignored.
+                </p>
+              )}
             </div>
             
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Export Type
+              </label>
+              <select
+                value={exportMode}
+                onChange={(e) => setExportMode(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
+                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                         focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="single">Single file (.jsx)</option>
+                <option value="multiple">Multiple files (.jsx, README, mockData)</option>
+              </select>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Options
