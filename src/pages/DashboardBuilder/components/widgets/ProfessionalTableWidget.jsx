@@ -1,4 +1,3 @@
-// src/pages/DashboardBuilder/components/widgets/ProfessionalTableWidget.jsx
 import React, { useState, useMemo } from "react";
 import { FiChevronUp, FiChevronDown, FiSearch } from "react-icons/fi";
 import BaseWidget from "./BaseWidget";
