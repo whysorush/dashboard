@@ -1,4 +1,4 @@
-// src/pages/DashboardBuilder/components/widgets/GradientBarChartWidget.jsx
+// src/pages/DashboardBuilder/components/widgets/GradientBarChartWidget?.jsx
 import React, { useMemo } from "react";
 import {
   BarChart,
@@ -17,7 +17,7 @@ import { generateMockData, calculateKPIs } from "../../utils/mockDataGenerator";
 import { GRADIENT_CHART_COLORS } from "../../constants";
 
 const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
-  const config = widget.config || {};
+  const config = widget?.config || {};
 
   const data = useMemo(() => {
     return generateMockData("categories", {
@@ -46,9 +46,9 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
   };
 
   const chartHeight = useMemo(() => {
-    const size = widget.position?.size || "medium";
+    const size = widget?.position?.size || "medium";
     return size === "large" ? 350 : size === "medium" ? 300 : 250;
-  }, [widget.position?.size]);
+  }, [widget?.position?.size]);
 
   const gradientColors = useMemo(() => {
     return {

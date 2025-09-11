@@ -1,4 +1,4 @@
-// src/pages/DashboardBuilder/components/widgets/AdvancedFilterBarWidget.jsx
+// src/pages/DashboardBuilder/components/widgets/AdvancedFilterBarWidget?.jsx
 import React, { useState } from "react";
 import { FiCalendar, FiChevronDown, FiFilter } from "react-icons/fi";
 import BaseWidget from "./BaseWidget";
@@ -16,7 +16,7 @@ import BaseWidget from "./BaseWidget";
 const AdvancedFilterBarWidget = ({ widget, isSelected, onClick }) => {
   console.log("advanced filter widget", widget);
 
-  const config = widget.config || {};
+  const config = widget?.config || {};
 
   // State for filter values
   const [dateRange, setDateRange] = useState({ from: "", to: "" });

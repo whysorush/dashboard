@@ -17,6 +17,9 @@ import "./App.css";
 
 import React from "react";
 import SmoothFunnelChartWidget from "./pages/DashboardBuilder/components/widgets/SmoothFunnelChartWidget";
+import GradientBarChartWidget from "./pages/DashboardBuilder/components/widgets/GradientBarChartWidget";
+import AdvancedFilterBarWidget from "./pages/DashboardBuilder/components/widgets/AdvancedFilterBarWidget";
+import ProfessionalTableWidget from "./pages/DashboardBuilder/components/widgets/ProfessionalTableWidget";
 
 function DashboardLayout() {
   return (
@@ -27,15 +30,19 @@ function DashboardLayout() {
 
       <main className="main-content">
         <Header />
-        <Filters />
+        {/* <Filters /> */}
+        <AdvancedFilterBarWidget />
         <StatCards />
 
         <section className="charts-section">
-          <BarChartBox />
+          {/* <BarChartBox /> */}
+          <GradientBarChartWidget />
           <SmoothFunnelChartWidget />
         </section>
 
-        <DataTable />
+        {/* <DataTable /> */}
+
+        <ProfessionalTableWidget />
       </main>
     </div>
   );

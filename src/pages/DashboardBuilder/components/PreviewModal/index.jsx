@@ -2,12 +2,13 @@
 import React, { useState } from "react";
 import "./Modal.css";
 import DashboardPreview from "./DashboardPreview";
+import Canvas from "../Canvas";
 
 const PopupModal = ({
   isOpen,
   onClose,
   title,
-  //   children,
+  children,
   widgets,
   rows,
   showCloseButton = true,
@@ -49,7 +50,14 @@ const PopupModal = ({
             theme={theme}
             layout={layout}
           />
-          {/* {children} */}
+          {children}
+
+          {/* <Canvas /> */}
+
+          {console.log("widgetsssssssssssssss", widgets)}
+          {console.log("rowssssssssssssssss", rows)}
+          {console.log("themeeeeeeeeeeeeeeeeeeeeeee", theme)}
+          {console.log("layoutttttttttttttttttttttttttttttttt", layout)}
         </div>
       </div>
     </div>

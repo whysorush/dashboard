@@ -476,6 +476,7 @@ const DashboardBuilderContent = () => {
         isOpen={showExport}
         onClose={() => setShowExport(false)}
         widgets={widgets}
+        rows={rows}
       />
     </div>
   );

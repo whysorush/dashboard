@@ -4,7 +4,7 @@ import { FiChevronUp, FiChevronDown, FiSearch } from "react-icons/fi";
 import BaseWidget from "./BaseWidget";
 
 const ProfessionalTableWidget = ({ widget, isSelected, onClick }) => {
-  const config = widget.config || {};
+  const config = widget?.config || {};
   const [sortField, setSortField] = useState("");
   const [sortDirection, setSortDirection] = useState("asc");
   const [searchTerm, setSearchTerm] = useState("");

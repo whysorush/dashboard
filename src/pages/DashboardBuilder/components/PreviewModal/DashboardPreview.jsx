@@ -69,34 +69,24 @@ const DashboardPreview = ({
 
     switch (widget.type) {
       // Exact Design Professional Widgets
-      case WIDGET_TYPES.PROFESSIONAL_BAR_CHART:
-        return <ProfessionalBarChartWidget {...props} />;
-      case WIDGET_TYPES.PROFESSIONAL_KPI_CARD:
-        return <ProfessionalKPIWidget {...props} />;
-
-      // Professional widgets
-      case WIDGET_TYPES.PROFESSIONAL_KPI:
-        return <ProfessionalKPIWidget {...props} />;
+      case WIDGET_TYPES.ADVANCED_FILTER_BAR:
+        return <AdvancedFilterBarWidget {...props} />;
       case WIDGET_TYPES.REVENUE_KPI:
         return <RevenueKPIWidget {...props} />;
       case WIDGET_TYPES.ORDERS_KPI:
         return <OrdersKPIWidget {...props} />;
       case WIDGET_TYPES.CUSTOMERS_KPI:
         return <CustomersKPIWidget {...props} />;
-      case WIDGET_TYPES.LINE_CHART:
-        return <LineChartWidget {...props} />;
       case WIDGET_TYPES.GRADIENT_BAR_CHART:
         return <GradientBarChartWidget {...props} />;
       case WIDGET_TYPES.SMOOTH_FUNNEL_CHART:
         return <SmoothFunnelChartWidget {...props} />;
       case WIDGET_TYPES.PROFESSIONAL_TABLE:
         return <ProfessionalTableWidget {...props} />;
-      case WIDGET_TYPES.ADVANCED_FILTER_BAR:
-        return <AdvancedFilterBarWidget {...props} />;
 
-      // Basic widgets
-      // case WIDGET_TYPES.LINE_CHART:
-      //   return <LineChartWidget {...props} />;
+      // Basic othetrs widgets
+      case WIDGET_TYPES.LINE_CHART:
+        return <LineChartWidget {...props} />;
       case WIDGET_TYPES.BAR_CHART:
         return <BarChartWidget {...props} />;
       case WIDGET_TYPES.AREA_CHART:
@@ -109,10 +99,20 @@ const DashboardPreview = ({
         return <KPICardWidget {...props} />;
       case WIDGET_TYPES.DATA_TABLE:
         return <DataTableWidget {...props} />;
+
+      //optional widgets
+      case WIDGET_TYPES.PROFESSIONAL_BAR_CHART:
+        return <ProfessionalBarChartWidget {...props} />;
+      case WIDGET_TYPES.PROFESSIONAL_KPI_CARD:
+        return <ProfessionalKPIWidget {...props} />;
+
+      // Professional widgets
+      case WIDGET_TYPES.PROFESSIONAL_KPI:
+        return <ProfessionalKPIWidget {...props} />;
       default:
         return (
-          <div>
-            <p>Unknown widget type: {widget.type}</p>
+          <div className="widget-placeholder p-4 border-2 border-dashed border-gray-300 rounded-lg">
+            <p className="text-gray-500">Unknown widget type: {widget.type}</p>
           </div>
         );
     }
@@ -174,7 +174,9 @@ const DashboardPreview = ({
                       height: "100%",
                     }}
                   >
-                    <div className={theme === 'dark' ? 'dark' : ''}>{renderWidget(widget)}</div>
+                    <div className={theme === "dark" ? "dark" : ""}>
+                      {renderWidget(widget)}
+                    </div>
                   </div>
                 ))}
               </div>
