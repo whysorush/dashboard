@@ -9,7 +9,6 @@ import DashboardBuilder from "./pages/DashboardBuilder";
 import BarChartBox from "./components/BarChart";
 import DataTable from "./components/DataTable";
 import Filters from "./components/Filters";
-import FunnelChartBox from "./components/FunnelChart";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 import StatCards from "./components/StatCard";
@@ -17,6 +16,7 @@ import "./index.css";
 import "./App.css";
 
 import React from "react";
+import SmoothFunnelChartWidget from "./pages/DashboardBuilder/components/widgets/SmoothFunnelChartWidget";
 
 function DashboardLayout() {
   return (
@@ -32,7 +32,7 @@ function DashboardLayout() {
 
         <section className="charts-section">
           <BarChartBox />
-          <FunnelChartBox />
+          <SmoothFunnelChartWidget />
         </section>
 
         <DataTable />

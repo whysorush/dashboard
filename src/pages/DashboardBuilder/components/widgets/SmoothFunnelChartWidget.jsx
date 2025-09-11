@@ -1,4 +1,4 @@
-// src/pages/DashboardBuilder/components/widgets/SmoothFunnelChartWidget.jsx
+// src/pages/DashboardBuilder/components/widgets/SmoothFunnelChartWidget?.jsx
 import React, { useMemo } from "react";
 import {
   ResponsiveContainer,
@@ -19,7 +19,25 @@ import { GRADIENT_CHART_COLORS } from "../../constants";
  * - Legend below the chart (matches your previous layout)
  */
 const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
-  const config = widget.config || {};
+  console.log("widgettttttttttttttt", widget);
+  const config = widget?.config || {
+    id: "widget-1757576664743-8kc63guf7",
+    type: "smooth-funnel-chart",
+    position: {
+      rowId: "row-widget-1757576664743-hkiu1k3ul",
+      row: 2,
+      index: 1,
+      size: "medium",
+    },
+    config: {
+      title: "Funnel Chart",
+      startColor: "#00E5FF",
+      endColor: "#00FF85",
+      showGrid: false,
+      showLegend: true,
+      animations: true,
+    },
+  };
 
   // Stage data for the funnel (top -> bottom)
   const stageData = useMemo(
@@ -57,9 +75,9 @@ const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
 
   // Height by widget size
   const chartHeight = useMemo(() => {
-    const size = widget.position?.size || "medium";
+    const size = widget?.position?.size || "medium";
     return size === "large" ? 350 : size === "medium" ? 300 : 250;
-  }, [widget.position?.size]);
+  }, [widget?.position?.size]);
 
   return (
     <div className="chart-container">
