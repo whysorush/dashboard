@@ -41,22 +41,6 @@ function DashboardLayout() {
   );
 }
 
-// export default function App() {
-//   return (
-//     <ThemeProvider>
-//       <Router>
-//         <div className="min-h-screen bg-[var(--bg)]">
-//           <Routes>
-//             <Route path="/" element={<Navigate to="/dashboard" replace />} />
-//             <Route path="/dashboard" element={<DashboardLayout />} />
-//             <Route path="/dashboard-builder" element={<DashboardBuilder />} />
-//           </Routes>
-//         </div>
-//       </Router>
-//     </ThemeProvider>
-//   );
-// }
-
 function App() {
   return (
     <ThemeProvider>
@@ -69,16 +53,6 @@ function App() {
               <main className="flex-1 overflow-auto">
                 <DashboardLayout />
               </main>
-
-              // <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-              //   <Sidebar />
-              //   <div className="flex-1 flex flex-col">
-              //     <Header />
-              //     <main className="flex-1 overflow-auto">
-              //       <DashboardLayout />
-              //     </main>
-              //   </div>
-              // </div>
             }
           />
           <Route path="/dashboard-builder" element={<DashboardBuilder />} />

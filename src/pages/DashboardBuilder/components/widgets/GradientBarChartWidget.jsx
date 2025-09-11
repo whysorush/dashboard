@@ -61,6 +61,7 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
   return (
     // <BaseWidget widget={widget} isSelected={isSelected} onClick={onClick}>
     <div className="chart-container">
+      {console.log("dddddddddddddddddddddddddddddddddd", data)}
       <div className="chart-header bar-chart-header">
         <div className="figma-heading">
           <h3>Bar Chart</h3>
@@ -68,14 +69,14 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
         </div>
 
         <select
-            className="time-filter"
-            // value={range}
-            // onChange={(e) => setRange(e.target.value)}
-          >
-            <option>Week</option>
-            <option>Month</option>
-            <option>Year</option>
-          </select>
+          className="time-filter"
+          // value={range}
+          // onChange={(e) => setRange(e.target.value)}
+        >
+          <option>Week</option>
+          <option>Month</option>
+          <option>Year</option>
+        </select>
       </div>
 
       <div className="bar-chart" style={{ height: 260 }}>
