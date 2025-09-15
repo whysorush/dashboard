@@ -5,31 +5,75 @@ const rows = [
   { id: 3, customer: 'Brooklyn Simmons', orderId: '100086-CBN', product: 'White chocolate', qty: 150, amount: 100, status: 'Processing' },
 ];
 
+const styles = {
+  wrapper: {
+    background: "var(--panel)",
+    border: "1px solid var(--border)",
+    borderRadius: 14,
+    marginTop: 18,
+    overflowX: "auto",
+  },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+  },
+  thead: {
+    background: "var(--primary)",
+    borderRadius: 8,
+  },
+  th: {
+    textAlign: "left",
+    fontWeight: 600,
+    color: "var(--table-th-font)",
+    padding: "10px 12px",
+    borderBottom: "1px solid var(--border)",
+    whiteSpace: "nowrap",
+  },
+  td: {
+    padding: 12,
+    borderBottom: "1px solid var(--border)",
+    color: "var(--table-td-font)",
+  },
+};
+
+const statusStyle = (status) => {
+  const base = { padding: "4px 8px", borderRadius: 999, fontSize: 12, fontWeight: 600 };
+  const map = {
+    pending: { background: "var(--status-pending-bg)", color: "var(--status-pending-text)" },
+    delivered: { background: "var(--status-delivered-bg)", color: "var(--status-delivered-text)" },
+    'in-transit': { background: "var(--status-in-transit-bg)", color: "var(--status-in-transit-text)" },
+    processing: { background: "#e5e7eb", color: "#6b7280" },
+  };
+  return { ...base, ...(map[status.toLowerCase()] || {}) };
+};
+
 export default function DataTable() {
   return (
-    <section className="data-table">
-      <table>
-        <thead>
+    <section style={styles.wrapper}>
+      <table style={styles.table}>
+        <thead style={styles.thead}>
           <tr>
-            <th>Sr No.</th>
-            <th>Customer</th>
-            <th>Order ID</th>
-            <th>Product Name</th>
-            <th>Order Qty</th>
-            <th>Order Amount</th>
-            <th>Status</th>
+            <th style={styles.th}>Sr No.</th>
+            <th style={styles.th}>Customer</th>
+            <th style={styles.th}>Order ID</th>
+            <th style={styles.th}>Product Name</th>
+            <th style={styles.th}>Order Qty</th>
+            <th style={styles.th}>Order Amount</th>
+            <th style={styles.th}>Status</th>
           </tr>
         </thead>
         <tbody>
-          {rows.map(r => (
+          {rows.map((r) => (
             <tr key={r.id}>
-              <td>{r.id}</td>
-              <td>{r.customer}</td>
-              <td>{r.orderId}</td>
-              <td>{r.product}</td>
-              <td>{r.qty}</td>
-              <td>₹ {r.amount}</td>
-              <td><span className={`status ${r.status.toLowerCase()}`}>{r.status}</span></td>
+              <td style={styles.td}>{r.id}</td>
+              <td style={styles.td}>{r.customer}</td>
+              <td style={styles.td}>{r.orderId}</td>
+              <td style={styles.td}>{r.product}</td>
+              <td style={styles.td}>{r.qty}</td>
+              <td style={styles.td}>₹ {r.amount}</td>
+              <td style={styles.td}>
+                <span style={statusStyle(r.status)}>{r.status}</span>
+              </td>
             </tr>
           ))}
         </tbody>

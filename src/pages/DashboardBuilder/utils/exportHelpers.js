@@ -183,32 +183,75 @@ export const generateExportOptions = (widgets) => {
  * @returns {string} - Mock data file content
  */
 export const createDataExportFile = (widgets) => {
-  const dataExports = [];
+  // We export named constants that match generator variable names: data_<widgetId>
+  // Data is serialized using the same fallbacks as the generator to keep output consistent.
+  const entries = widgets.map((w) => ({
+    varName: `data_${String(w.id || '').replace(/-/g, '_')}`,
+    type: w.type,
+    data: Array.isArray(w.data) ? w.data : (w.config && Array.isArray(w.config.data) ? w.config.data : null),
+  }));
 
-  widgets.forEach((widget, index) => {
-    const dataName = `${widget.type.replace("-", "")}Data${index}`;
-    dataExports.push(dataName);
+  // Build a minimal fallback map identical to generator expectations
+  const fallbackMap = {
+    'line-chart': [
+      { name: 'Jan', value: 40 },
+      { name: 'Feb', value: 32 },
+      { name: 'Mar', value: 50 },
+      { name: 'Apr', value: 45 },
+      { name: 'May', value: 62 },
+      { name: 'Jun', value: 55 },
+    ],
+    'bar-chart': [
+      { name: 'A', value: 24 },
+      { name: 'B', value: 18 },
+      { name: 'C', value: 32 },
+      { name: 'D', value: 28 },
+    ],
+    'area-chart': [
+      { name: 'Mon', value: 12 },
+      { name: 'Tue', value: 20 },
+      { name: 'Wed', value: 18 },
+      { name: 'Thu', value: 26 },
+      { name: 'Fri', value: 22 },
+    ],
+    'pie-chart': [
+      { name: 'Group A', value: 400 },
+      { name: 'Group B', value: 300 },
+      { name: 'Group C', value: 300 },
+      { name: 'Group D', value: 200 },
+    ],
+    'funnel-chart': [
+      { name: 'Leads', value: 1000 },
+      { name: 'Qualified', value: 650 },
+      { name: 'Proposal', value: 420 },
+      { name: 'Closed', value: 250 },
+    ],
+    'gradient-bar-chart': [
+      { name: 'A', value: 24 },
+      { name: 'B', value: 18 },
+      { name: 'C', value: 32 },
+      { name: 'D', value: 28 },
+    ],
+    'smooth-funnel-chart': [
+      { name: 'Leads', value: 1000 },
+      { name: 'Qualified', value: 650 },
+      { name: 'Proposal', value: 420 },
+      { name: 'Closed', value: 250 },
+    ],
+    'professional-bar-chart': [
+      { name: 'A', value: 24 },
+      { name: 'B', value: 18 },
+      { name: 'C', value: 32 },
+      { name: 'D', value: 28 },
+    ],
+  };
+
+  const lines = entries.map(({ varName, type, data }) => {
+    const payload = data != null ? data : (fallbackMap[type] || []);
+    return `export const ${varName} = ${JSON.stringify(payload, null, 2)};`;
   });
 
-  return `// Mock data for dashboard widgets
-  import { generateMockData } from './mockDataGenerator';
-  
-  ${widgets
-    .map((widget, index) => {
-      const dataName = `${widget.type.replace("-", "")}Data${index}`;
-      return `export const ${dataName} = generateMockData('${widget.type}', {
-    // Configure your data generation here
-    baseValue: 3000,
-    trend: 'random'
-  });`;
-    })
-    .join("\n\n")}
-  
-  // Export all data
-  export const mockData = {
-    ${dataExports.join(",\n  ")}
-  };
-  `;
+  return `// Mock data for exported dashboard widgets\n${lines.join('\n')}\n`;
 };
 
 /**

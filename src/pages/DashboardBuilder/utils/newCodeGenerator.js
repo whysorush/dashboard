@@ -1,776 +1,620 @@
-// Enhanced Code Generator - Clean, optimized, and error-free
-import { getChartDataTemplate } from './mockDataTemplates';
+// src/pages/DashboardBuilder/utils/newCodeGenerator.js
 
-export const generateDashboardCode = (widgets, componentName = 'Dashboard', options = {}) => {
-  const { 
-    includeData = 'inline', 
-    includeStyles = true, 
-    styleMode = 'tailwind', 
-    includeRowLayout = true, 
-    fileType = 'jsx' 
-  } = options;
-  
-  // Clean component name
-  const cleanComponentName = cleanVariableName(componentName);
-  
-  // Generate imports
-  const imports = generateCleanImports(widgets, styleMode, fileType);
-  
-  // Generate mock data
-  const mockData = includeData === 'inline' ? generateCleanMockData(widgets) : '';
-  
-  // Generate CSS if needed
-  const cssStyles = styleMode === 'inline' ? generateInlineStyles() : '';
-  
-  // Generate component layout
-  const layoutCode = generateComponentLayout(widgets, includeData, styleMode, includeStyles, includeRowLayout);
-  
-  // Generate complete component
-  const componentCode = `${imports}
-${includeData === 'separate' ? "import { mockData } from './mockData';" : ''}
-${styleMode === 'css' ? "import './dashboard.css';" : ''}
+/**
+ * Dashboard exporter supporting inline data or separate data file.
+ *
+ * API:
+ *   generateDashboardCode(widgets, componentName, {
+ *     includeData: 'inline' | 'separate' | 'none',
+ *     includeStyles: true,
+ *     styleMode: 'inline',              // current generator emits inline styles only
+ *     includeRowLayout: true,
+ *     fileType: 'jsx' | 'js'
+ *   })
+ */
 
-${mockData}
+const WIDGET_FALLBACK_DATA = {
+  "line-chart": [
+    { name: "Jan", value: 40 },
+    { name: "Feb", value: 32 },
+    { name: "Mar", value: 50 },
+    { name: "Apr", value: 45 },
+    { name: "May", value: 62 },
+    { name: "Jun", value: 55 },
+  ],
+  "bar-chart": [
+    { name: "A", value: 24 },
+    { name: "B", value: 18 },
+    { name: "C", value: 32 },
+    { name: "D", value: 28 },
+  ],
+  "area-chart": [
+    { name: "Mon", value: 12 },
+    { name: "Tue", value: 20 },
+    { name: "Wed", value: 18 },
+    { name: "Thu", value: 26 },
+    { name: "Fri", value: 22 },
+  ],
+  "pie-chart": [
+    { name: "Group A", value: 400 },
+    { name: "Group B", value: 300 },
+    { name: "Group C", value: 300 },
+    { name: "Group D", value: 200 },
+  ],
+  "funnel-chart": [
+    { name: "Leads", value: 1000 },
+    { name: "Qualified", value: 650 },
+    { name: "Proposal", value: 420 },
+    { name: "Closed", value: 250 },
+  ],
+  // additional advanced/professional variants fall back to basic shapes
+  "gradient-bar-chart": [
+    { name: "A", value: 24 },
+    { name: "B", value: 18 },
+    { name: "C", value: 32 },
+    { name: "D", value: 28 },
+  ],
+  "smooth-funnel-chart": [
+    { name: "Leads", value: 1000 },
+    { name: "Qualified", value: 650 },
+    { name: "Proposal", value: 420 },
+    { name: "Closed", value: 250 },
+  ],
+  "professional-bar-chart": [
+    { name: "A", value: 24 },
+    { name: "B", value: 18 },
+    { name: "C", value: 32 },
+    { name: "D", value: 28 },
+  ],
+  "data-table": [
+    { id: 1, col1: "Alpha", col2: "Foo", col3: 12 },
+    { id: 2, col1: "Beta", col2: "Bar", col3: 22 },
+    { id: 3, col1: "Gamma", col2: "Baz", col3: 18 },
+  ],
+  "professional-table": [
+    { id: 1, order: "#1001", customer: "Acme Inc", status: "Delivered", amount: 1299.99 },
+    { id: 2, order: "#1002", customer: "Globex", status: "Pending", amount: 549.50 },
+    { id: 3, order: "#1003", customer: "Initech", status: "In-Transit", amount: 239.00 },
+  ],
+  "kpi-card": {
+    title: "Total Revenue",
+    value: 847293,
+    prefix: "$",
+    delta: +4.1,
+    note: "vs last week",
+  },
+  "revenue-kpi": {
+    title: "Revenue",
+    value: 847293,
+    prefix: "$",
+    delta: +4.1,
+    note: "vs last week",
+  },
+  "orders-kpi": {
+    title: "Orders",
+    value: 2847,
+    delta: +2.6,
+    note: "vs last week",
+  },
+  "customers-kpi": {
+    title: "Customers",
+    value: 12483,
+    delta: +2.8,
+    note: "vs last week",
+  },
+  "advanced-filter-bar": {
+    dateRange: { from: "", to: "" },
+    product: "All",
+    status: "All",
+    amount: "$0-10K",
+    qty: "1-100",
+  },
+};
 
-${cssStyles}
+// ---------- helpers ----------
+const safeComponentName = (name) => {
+  const clean = String(name || "MyDashboard").replace(/[^a-zA-Z0-9]/g, "");
+  return clean.charAt(0).toUpperCase() + clean.slice(1);
+};
 
-const ${cleanComponentName} = () => {
-  const [timeRange, setTimeRange] = useState('monthly');
-  const [selectedFilter, setSelectedFilter] = useState('all');
-  
-  return (
-    ${generateContainerWrapper(styleMode, includeStyles)}
-      ${generateHeaderSection(cleanComponentName, styleMode, includeStyles)}
-      
-      ${layoutCode}
-    ${generateContainerClose(styleMode)}
+const needRecharts = (widgets = []) =>
+  widgets.some((w) =>
+    [
+      "line-chart",
+      "bar-chart",
+      "area-chart",
+      "pie-chart",
+      "funnel-chart",
+      "gradient-bar-chart",
+      "smooth-funnel-chart",
+      "professional-bar-chart",
+    ].includes(w.type)
   );
-};
 
-export default ${cleanComponentName};
-`;
+const inlineStylesObjectLiteral = () =>
+  JSON.stringify(
+    {
+      page: {
+        fontFamily:
+          "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial",
+        background: "#f5f5f5",
+        color: "#525252",
+        padding: 16,
+      },
+      container: {
+        maxWidth: 1200,
+        margin: "0 auto",
+      },
+      row: {
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 16,
+        margin: "16px 0",
+      },
+      card: {
+        background: "#ffffff",
+        border: "1px solid rgba(0,0,0,0.08)",
+        borderRadius: 12,
+        padding: 16,
+        flex: "1 1 calc(33.333% - 16px)",
+      },
+      full: { flex: "1 1 100%" },
+      half: { flex: "1 1 calc(50% - 16px)" },
+      third: { flex: "1 1 calc(33.333% - 16px)" },
+      title: { fontSize: 16, fontWeight: 700, marginBottom: 8 },
+      subtitle: { fontSize: 12, color: "#6b7280", marginBottom: 12 },
+      kpiRow: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+      },
+      kpiValue: { fontSize: 28, fontWeight: 800 },
+      kpiDeltaPos: { fontSize: 12, fontWeight: 700, color: "#22c55e" },
+      kpiDeltaNeg: { fontSize: 12, fontWeight: 700, color: "#ef4444" },
+      table: { width: "100%", borderCollapse: "collapse" },
+      th: {
+        textAlign: "left",
+        fontWeight: 600,
+        padding: "10px 12px",
+        borderBottom: "1px solid rgba(0,0,0,0.08)",
+        background: "#00c9ff",
+        color: "#fff",
+      },
+      td: { padding: "10px 12px", borderBottom: "1px solid rgba(0,0,0,0.08)" },
+    },
+    null,
+    2
+  );
 
-  return formatCode(componentCode);
-};
+const serializeWidgetData = (w) => {
+  // If widget already carries data/config we try to use it; otherwise fallback
+  const t = w.type;
+  const cfg = w.config || {};
+  // prefer explicit data on widget/config
+  if (Array.isArray(w.data)) return w.data;
+  if (Array.isArray(cfg.data)) return cfg.data;
 
-// Generate clean, deduplicated imports
-const generateCleanImports = (widgets, styleMode, fileType) => {
-  const imports = {
-    react: new Set(['React', 'useState']),
-    recharts: new Set(),
-    icons: new Set(),
-  };
-  
-  const chartTypes = new Set(widgets.map(w => w.type));
-  
-  // Chart import mapping
-  const chartImports = {
-    'line-chart': ['LineChart', 'Line', 'XAxis', 'YAxis', 'CartesianGrid', 'Legend'],
-    'bar-chart': ['BarChart', 'Bar', 'XAxis', 'YAxis', 'CartesianGrid', 'Legend'],
-    'gradient-bar-chart': ['BarChart', 'Bar', 'XAxis', 'YAxis', 'CartesianGrid'],
-    'area-chart': ['AreaChart', 'Area', 'XAxis', 'YAxis', 'CartesianGrid', 'Legend'],
-    'pie-chart': ['PieChart', 'Pie', 'Cell'],
-    'funnel-chart': ['FunnelChart', 'Funnel', 'LabelList'],
-    'smooth-funnel-chart': []
-  };
-  
-  // Base chart components
-  const hasCharts = Array.from(chartTypes).some(type => type.includes('chart'));
-  if (hasCharts) {
-    imports.recharts.add('ResponsiveContainer');
-    imports.recharts.add('Tooltip');
+  // per-type special cases
+  if (
+    t === "kpi-card" ||
+    t === "revenue-kpi" ||
+    t === "orders-kpi" ||
+    t === "customers-kpi"
+  ) {
+    return {
+      title: cfg.title || (WIDGET_FALLBACK_DATA[t]?.title ?? "KPI"),
+      value: cfg.value ?? WIDGET_FALLBACK_DATA[t]?.value ?? 0,
+      prefix: cfg.prefix ?? WIDGET_FALLBACK_DATA[t]?.prefix ?? "",
+      delta: cfg.growth ?? WIDGET_FALLBACK_DATA[t]?.delta ?? 0,
+      note: cfg.subtitle ?? WIDGET_FALLBACK_DATA[t]?.note ?? "",
+    };
   }
-  
-  // Add chart-specific imports
-  chartTypes.forEach(type => {
-    if (chartImports[type]) {
-      chartImports[type].forEach(imp => imports.recharts.add(imp));
-    }
-  });
-  
-  // Add icon imports for KPI widgets
-  const hasKPIWidgets = Array.from(chartTypes).some(type => type.includes('kpi'));
-  if (hasKPIWidgets) {
-    imports.icons.add('FiTrendingUp');
-    imports.icons.add('FiTrendingDown');
-    imports.icons.add('FiDollarSign');
-    imports.icons.add('FiShoppingCart');
-    imports.icons.add('FiUsers');
+
+  if (t === "data-table") {
+    // allow columns/rows in cfg; else fallback
+    if (Array.isArray(cfg.rows)) return cfg.rows;
+    return WIDGET_FALLBACK_DATA[t];
   }
-  
-  // Build import statements
-  let importString = `import ${Array.from(imports.react).join(', ')} from 'react';\n`;
-  
-  if (imports.recharts.size > 0) {
-    const sortedRecharts = Array.from(imports.recharts).sort();
-    importString += `import {\n  ${sortedRecharts.join(',\n  ')}\n} from 'recharts';\n`;
-  }
-  
-  if (imports.icons.size > 0) {
-    const sortedIcons = Array.from(imports.icons).sort();
-    importString += `import { ${sortedIcons.join(', ')} } from 'react-icons/fi';\n`;
-  }
-  
-  return importString;
+
+  // charts expect array of {name, value}
+  return WIDGET_FALLBACK_DATA[t] || [];
 };
 
-// Generate clean mock data with proper variable names
-const generateCleanMockData = (widgets) => {
-  const dataSets = [];
-  const usedNames = new Set();
-  const hasColors = widgets.some(w => w.type === 'pie-chart');
-  
-  widgets.forEach((widget, index) => {
-    const baseName = cleanVariableName(widget.type);
-    let dataName = `${baseName}Data${index}`;
-    
-    // Ensure unique names
-    let counter = 0;
-    while (usedNames.has(dataName)) {
-      counter++;
-      dataName = `${baseName}Data${index}_${counter}`;
-    }
-    usedNames.add(dataName);
-    
-    const data = getChartDataTemplate(widget.type);
-    dataSets.push(`const ${dataName} = ${JSON.stringify(data, null, 2)};`);
-  });
-  
-  const colorConstants = hasColors ? `
-const CHART_COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];` : '';
-  
-  return `// Mock Data
-${dataSets.join('\n\n')}
-${colorConstants}
-`;
+const rowSizeStyleKey = (countInRow) => {
+  if (countInRow <= 1) return "full";
+  if (countInRow === 2) return "half";
+  return "third";
 };
 
-// Generate component layout based on row structure
-const generateComponentLayout = (widgets, includeData, styleMode, includeStyles, includeRowLayout) => {
-  if (!widgets.length) return '<div>No widgets to display</div>';
-  
-  // Group widgets by row
-  const widgetsByRow = groupWidgetsByRow(widgets);
-  const sortedRows = Object.keys(widgetsByRow).sort();
-  
-  return sortedRows.map(rowId => {
-    const rowWidgets = widgetsByRow[rowId];
-    return generateRowLayout(rowWidgets, includeData, styleMode, includeStyles);
-  }).join('\n\n      ');
-};
+// ---------- per-widget JSX builders ----------
+const buildWidgetJSX = (w, rowCountVar) => {
+  const t = w.type;
+  const title = (w.config && w.config.title) || t;
+  const dataVar = `data_${w.id.replace(/-/g, "_")}`;
+  const sizeKey = `styles[${rowCountVar} <= 1 ? 'full' : (${rowCountVar} === 2 ? 'half' : 'third')]`;
 
-// Group widgets by their row position
-const groupWidgetsByRow = (widgets) => {
-  const grouped = {};
-  
-  widgets.forEach(widget => {
-    const rowId = widget.position?.rowId || 'default-row';
-    if (!grouped[rowId]) grouped[rowId] = [];
-    grouped[rowId].push(widget);
-  });
-  
-  // Sort widgets within each row by their index
-  Object.keys(grouped).forEach(rowId => {
-    grouped[rowId].sort((a, b) => (a.position?.index || 0) - (b.position?.index || 0));
-  });
-  
-  return grouped;
-};
+  switch (t) {
+    case "kpi-card":
+    case "revenue-kpi":
+    case "orders-kpi":
+    case "customers-kpi":
+      return `
+        <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
+          <div style={styles.title}>${title}</div>
+          <div style={styles.kpiRow}>
+            <div style={styles.kpiValue}>
+              {${dataVar}.prefix || ''}{${dataVar}.value?.toLocaleString?.() ?? ${dataVar}.value}
+            </div>
+            <div style={${dataVar}.delta >= 0 ? styles.kpiDeltaPos : styles.kpiDeltaNeg}>
+              {${dataVar}.delta >= 0 ? '▲' : '▼'} {Math.abs(${dataVar}.delta)}%
+            </div>
+          </div>
+          {${dataVar}.note && <div style={styles.subtitle}>{${dataVar}.note}</div>}
+        </div>
+      `;
 
-// Generate a single row layout
-const generateRowLayout = (rowWidgets, includeData, styleMode, includeStyles) => {
-  const widgetComponents = rowWidgets.map((widget, index) => {
-    return generateWidgetComponent(widget, index, includeData, styleMode, includeStyles);
-  });
-  
-  const rowClasses = getRowClasses(styleMode, includeStyles);
-  const widgetClasses = getWidgetClasses(rowWidgets.length, styleMode, includeStyles);
-  
-  return `<div ${rowClasses}>
-        ${widgetComponents.map((comp, i) => 
-          `<div ${widgetClasses}>\n          ${comp}\n        </div>`
-        ).join('\n        ')}
-      </div>`;
-};
+    case "data-table":
+      return `
+        <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
+          <div style={styles.title}>${title}</div>
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                {Object.keys(${dataVar}[0] || { id:1,col1:'Col 1',col2:'Col 2',col3:'Col 3' }).map((h) => (
+                  <th key={h} style={styles.th}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {(${dataVar} || []).map((row, i) => (
+                <tr key={row.id || i}>
+                  {Object.keys(row).map((k) => (
+                    <td key={k} style={styles.td}>{row[k]}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      `;
 
-// Generate individual widget component
-const generateWidgetComponent = (widget, index, includeData, styleMode, includeStyles) => {
-  const dataVariable = includeData === 'inline' ? `${cleanVariableName(widget.type)}Data${index}` : 'mockData';
-  
-  switch (widget.type) {
-    case 'revenue-kpi':
-      return generateRevenueKPI(widget, styleMode, includeStyles);
-    case 'orders-kpi':
-      return generateOrdersKPI(widget, styleMode, includeStyles);
-    case 'customers-kpi':
-      return generateCustomersKPI(widget, styleMode, includeStyles);
-    case 'gradient-bar-chart':
-      return generateGradientBarChart(widget, dataVariable, styleMode, includeStyles);
-    case 'smooth-funnel-chart':
-      return generateSmoothFunnelChart(widget, styleMode, includeStyles);
-    case 'professional-table':
-      return generateProfessionalTable(widget, dataVariable, styleMode, includeStyles);
-    case 'advanced-filter-bar':
-      return generateAdvancedFilterBar(widget, styleMode, includeStyles);
+    case "professional-table":
+      return `
+        <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
+          <div style={styles.title}>${title}</div>
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                {Object.keys(${dataVar}[0] || { id:1,order:'#1001',customer:'Customer',status:'Pending',amount:0 }).map((h) => (
+                  <th key={h} style={styles.th}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {(${dataVar} || []).map((row, i) => (
+                <tr key={row.id || i}>
+                  {Object.keys(row).map((k) => (
+                    <td key={k} style={styles.td}>{k === 'amount' ? (row[k] ?? 0).toLocaleString() : row[k]}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+    // recharts-based
+    case "line-chart":
+      return `
+        <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
+          <div style={styles.title}>${title}</div>
+          <ResponsiveContainer width="100%" height={260}>
+            <LineChart data={${dataVar}}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} dot={false} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      `;
+
+    case "bar-chart":
+      return `
+        <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
+          <div style={styles.title}>${title}</div>
+          <ResponsiveContainer width="100%" height={260}>
+            <BarChart data={${dataVar}}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="value" fill="#00c9ff" radius={[6,6,0,0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      `;
+
+    case "gradient-bar-chart":
+      return `
+        <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
+          <div style={styles.title}>${title}</div>
+          <ResponsiveContainer width="100%" height={260}>
+            <BarChart data={${dataVar}}>
+              <defs>
+                <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#00c9ff" stopOpacity={0.9} />
+                  <stop offset="100%" stopColor="#00c9ff" stopOpacity={0.2} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="value" fill="url(#barGradient)" radius={[8,8,0,0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      `;
+
+    case "area-chart":
+      return `
+        <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
+          <div style={styles.title}>${title}</div>
+          <ResponsiveContainer width="100%" height={260}>
+            <AreaChart data={${dataVar}}>
+              <defs>
+                <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.35} />
+                  <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.05} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Area type="monotone" dataKey="value" stroke="#3b82f6" fill="url(#areaFill)" strokeWidth={2} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      `;
+
+    case "pie-chart":
+      return `
+        <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
+          <div style={styles.title}>${title}</div>
+          <ResponsiveContainer width="100%" height={260}>
+            <PieChart>
+              <Tooltip />
+              <Legend />
+              <Pie data={${dataVar}} dataKey="value" nameKey="name" outerRadius={90}>
+                {${dataVar}.map((entry, index) => (
+                  <Cell key={index} fill={['#00c9ff','#38bdf8','#60a5fa','#8b5cf6'][index % 4]} />
+                ))}
+              </Pie>
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      `;
+
+    case "funnel-chart":
+      // Simulate funnel with BarChart (Recharts Funnel is not core)
+      return `
+        <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
+          <div style={styles.title}>${title}</div>
+          <ResponsiveContainer width="100%" height={260}>
+            <BarChart data={${dataVar}} layout="vertical">
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis type="number" />
+              <YAxis dataKey="name" type="category" />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="value" fill="#00c9ff" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      `;
+
+    case "smooth-funnel-chart":
+      return `
+        <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
+          <div style={styles.title}>${title}</div>
+          <ResponsiveContainer width="100%" height={260}>
+            <BarChart data={${dataVar}} layout="vertical">
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis type="number" />
+              <YAxis dataKey="name" type="category" />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="value" fill="#38bdf8" radius={[8,8,8,8]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      `;
+
+    case "professional-bar-chart":
+      return `
+        <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
+          <div style={styles.title}>${title}</div>
+          <ResponsiveContainer width="100%" height={260}>
+            <BarChart data={${dataVar}}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="value" fill="#3b82f6" radius={[10,10,0,0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      `;
+
+    case "advanced-filter-bar":
+      return `
+        <div key="${w.id}" style={{...styles.card, ...styles.full}}>
+          <div style={{ ...styles.title, marginBottom: 12 }}>${title}</div>
+          <div style={{ display:'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 12 }}>
+            <div>
+              <div style={styles.subtitle}>Date From</div>
+              <input type="date" defaultValue="${
+                w.config?.dateRange?.from || ""
+              }" style={{width:'100%', padding:'8px 10px', border:'1px solid rgba(0,0,0,0.08)', borderRadius:8}} />
+            </div>
+            <div>
+              <div style={styles.subtitle}>Date To</div>
+              <input type="date" defaultValue="${
+                w.config?.dateRange?.to || ""
+              }" style={{width:'100%', padding:'8px 10px', border:'1px solid rgba(0,0,0,0.08)', borderRadius:8}} />
+            </div>
+            <div>
+              <div style={styles.subtitle}>Transaction Amount</div>
+              <select defaultValue="${
+                w.config?.amount || "0-10K"
+              }" style={{width:'100%', padding:'8px 10px', border:'1px solid rgba(0,0,0,0.08)', borderRadius:8}}>
+                <option>0-10K</option><option>10K-50K</option><option>50K-100K</option><option>100K+</option>
+              </select>
+            </div>
+            <div>
+              <div style={styles.subtitle}>Product</div>
+              <select defaultValue="${
+                w.config?.product || "All"
+              }" style={{width:'100%', padding:'8px 10px', border:'1px solid rgba(0,0,0,0.08)', borderRadius:8}}>
+                <option>All</option><option>Manufacturing</option><option>Marketing</option><option>Branding</option>
+              </select>
+            </div>
+            <div>
+              <div style={styles.subtitle}>Status</div>
+              <select defaultValue="${
+                w.config?.status || "All"
+              }" style={{width:'100%', padding:'8px 10px', border:'1px solid rgba(0,0,0,0.08)', borderRadius:8}}>
+                <option>All</option><option>Pending</option><option>Delivered</option><option>In-Transit</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      `;
+
     default:
-      return generateStandardChart(widget, dataVariable, styleMode, includeStyles);
+      return `
+        <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
+          <div style={styles.title}>${title}</div>
+          <div style={styles.subtitle}>Unsupported widget type: ${t}</div>
+        </div>
+      `;
   }
 };
 
-// Professional KPI Components
-const generateRevenueKPI = (widget, styleMode, includeStyles) => {
-  const config = widget.config || {};
-  const value = config.value || 847293;
-  const growth = config.growth || 4.1;
-  const title = config.title || 'Total Revenue';
-  
-  const containerProps = getKPIContainerProps(styleMode, includeStyles);
-  
-  return `<div ${containerProps}>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-teal-100 dark:bg-teal-900 rounded-lg flex items-center justify-center">
-                <FiDollarSign className="w-5 h-5 text-teal-600 dark:text-teal-400" />
-              </div>
-              <span className="text-sm text-gray-500 dark:text-gray-400">${title}</span>
-            </div>
-            <div className="mb-2">
-              <span className="text-3xl font-bold text-gray-900 dark:text-white">
-                $${value.toLocaleString()}
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              <FiTrendingUp className="w-4 h-4 text-green-500" />
-              <span className="text-sm text-green-600 font-medium">+${growth}%</span>
-              <span className="text-xs text-gray-500">from last week</span>
-            </div>
-          </div>`;
-};
+// ---------- main generator ----------
+export function generateDashboardCode(
+  widgets = [],
+  name = "MyDashboard",
+  opts = {}
+) {
+  const componentName = safeComponentName(name);
+  const includeDataMode = opts.includeData || "inline"; // 'inline' | 'separate' | 'none'
+  const includeData = includeDataMode !== "none";
+  const includeRowLayout = opts.includeRowLayout !== false;
 
-const generateOrdersKPI = (widget, styleMode, includeStyles) => {
-  const config = widget.config || {};
-  const value = config.value || 2847;
-  const growth = config.growth || 2.6;
-  const title = config.title || 'Orders';
-  
-  const containerProps = getKPIContainerProps(styleMode, includeStyles);
-  
-  return `<div ${containerProps}>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                <FiShoppingCart className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <span className="text-sm text-gray-500 dark:text-gray-400">${title}</span>
-            </div>
-            <div className="mb-2">
-              <span className="text-3xl font-bold text-gray-900 dark:text-white">
-                ${value.toLocaleString()}
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              <FiTrendingUp className="w-4 h-4 text-green-500" />
-              <span className="text-sm text-green-600 font-medium">+${growth}%</span>
-              <span className="text-xs text-gray-500">from last week</span>
-            </div>
-          </div>`;
-};
+  // group widgets by rowId to size them like your builder (1->full, 2->half, 3+->third)
+  const rowsMap = {};
+  widgets.forEach((w) => {
+    const rowId = w?.position?.rowId || "row-default";
+    if (!rowsMap[rowId]) rowsMap[rowId] = [];
+    rowsMap[rowId].push(w);
+  });
 
-const generateCustomersKPI = (widget, styleMode, includeStyles) => {
-  const config = widget.config || {};
-  const value = config.value || 12483;
-  const growth = config.growth || 2.8;
-  const title = config.title || 'Customers';
-  
-  const containerProps = getKPIContainerProps(styleMode, includeStyles);
-  
-  return `<div ${containerProps}>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-                <FiUsers className="w-5 h-5 text-green-600 dark:text-green-400" />
-              </div>
-              <span className="text-sm text-gray-500 dark:text-gray-400">${title}</span>
-            </div>
-            <div className="mb-2">
-              <span className="text-3xl font-bold text-gray-900 dark:text-white">
-                ${value.toLocaleString()}
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              <FiTrendingUp className="w-4 h-4 text-green-500" />
-              <span className="text-sm text-green-600 font-medium">+${growth}%</span>
-              <span className="text-xs text-gray-500">from last week</span>
-            </div>
-          </div>`;
-};
+  // Build data variables per widget (inline mode) or import map (separate mode)
+  const allWidgetsFlat = Object.values(rowsMap).flat();
+  const dataVariablePairs = allWidgetsFlat.map((w) => ({
+    id: w.id,
+    varName: `data_${w.id.replace(/-/g, "_")}`,
+    data: serializeWidgetData(w),
+  }));
 
-// Chart Components
-const generateGradientBarChart = (widget, dataVariable, styleMode, includeStyles) => {
-  const config = widget.config || {};
-  const title = config.title || 'Bar Chart';
-  const totalValue = config.mainValue || 242673;
-  
-  const containerProps = getChartContainerProps(styleMode, includeStyles);
-  
-  return `<div ${containerProps}>
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">${title}</h3>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
-                  $${totalValue.toLocaleString()}
-                </p>
-              </div>
-              <select className="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-md text-sm">
-                <option>Week</option>
-                <option>Month</option>
-                <option>Year</option>
-              </select>
-            </div>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={${dataVariable}}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e0e7ff" />
-                <XAxis dataKey="name" stroke="#6b7280" fontSize={12} />
-                <YAxis stroke="#6b7280" fontSize={12} />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                  }}
-                />
-                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                  <defs>
-                    <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#00E5FF" stopOpacity={0.85} />
-                      <stop offset="100%" stopColor="#92FE9D" stopOpacity={0.85} />
-                    </linearGradient>
-                  </defs>
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>`;
-};
+  const dataBlocksInline = includeData && includeDataMode === "inline"
+    ? dataVariablePairs
+        .map(({ varName, data }) => `const ${varName} = ${JSON.stringify(data, null, 2)};`)
+        .join("\n")
+    : "";
 
-const generateSmoothFunnelChart = (widget, styleMode, includeStyles) => {
-  const config = widget.config || {};
-  const title = config.title || 'Funnel Chart';
-  
-  const containerProps = getChartContainerProps(styleMode, includeStyles);
-  
-  return `<div ${containerProps}>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-white">${title}</h3>
-              <select className="px-3 py-1 bg-gray-700 rounded-md text-sm text-white">
-                <option>Week</option>
-                <option>Month</option>
-                <option>Year</option>
-              </select>
-            </div>
-            <div className="space-y-4 mb-6">
-              <div className="h-6 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-full"></div>
-              <div className="h-6 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full w-4/5 ml-auto mr-auto"></div>
-              <div className="h-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full w-3/5 ml-auto mr-auto"></div>
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-4 h-4 bg-cyan-400 rounded-full"></div>
-                  <span className="text-sm text-gray-300">Manufacturing</span>
-                </div>
-                <p className="text-xl font-bold text-white">$30,000</p>
-              </div>
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-4 h-4 bg-cyan-500 rounded-full"></div>
-                  <span className="text-sm text-gray-300">Marketing</span>
-                </div>
-                <p className="text-xl font-bold text-white">$35,000</p>
-              </div>
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
-                  <span className="text-sm text-gray-300">Branding</span>
-                </div>
-                <p className="text-xl font-bold text-white">$35,000</p>
-              </div>
-            </div>
-          </div>`;
-};
+  const separateDataImports = includeDataMode === "separate" && dataVariablePairs.length
+    ? `import {\n${dataVariablePairs
+        .map(({ varName }) => `  ${varName}`)
+        .join(",\n")}\n} from './mockData';`
+    : "";
 
-const generateProfessionalTable = (widget, dataVariable, styleMode, includeStyles) => {
-  const config = widget.config || {};
-  const title = config.title || 'Data Table';
-  
-  const containerProps = getChartContainerProps(styleMode, includeStyles);
-  
-  return `<div ${containerProps}>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">${title}</h3>
-              <div className="flex items-center gap-2">
-                <input 
-                  type="text" 
-                  placeholder="Search..." 
-                  className="px-3 py-1 border border-gray-300 rounded-md text-sm"
-                />
-              </div>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-full">
-                <thead className="bg-gray-50 dark:bg-gray-700">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Customer</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Order ID</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Amount</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                  <tr>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">John Doe</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">#12345</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">$1,234</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                        Approved
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>`;
-};
+  const stylesLiteral = inlineStylesObjectLiteral();
 
-const generateAdvancedFilterBar = (widget, styleMode, includeStyles) => {
-  const containerProps = getFilterBarProps(styleMode, includeStyles);
-  
-  return `<div ${containerProps}>
-            <div className="flex flex-wrap gap-4 items-center">
-              <div className="flex items-center gap-2">
-                <input type="date" className="px-3 py-2 border border-gray-300 rounded-md text-sm" />
-                <span className="text-sm text-gray-500">to</span>
-                <input type="date" className="px-3 py-2 border border-gray-300 rounded-md text-sm" />
-              </div>
-              <div>
-                <input type="number" placeholder="Transaction Amount" className="px-3 py-2 border border-gray-300 rounded-md text-sm w-40" />
-              </div>
-              <div>
-                <select className="px-3 py-2 border border-gray-300 rounded-md text-sm w-32">
-                  <option>All Products</option>
-                  <option>Product A</option>
-                  <option>Product B</option>
-                </select>
-              </div>
-              <div>
-                <select className="px-3 py-2 border border-gray-300 rounded-md text-sm w-32">
-                  <option>All Status</option>
-                  <option>Pending</option>
-                  <option>Approved</option>
-                </select>
-              </div>
-            </div>
-          </div>`;
-};
+  // Build per-row JSX
+  const rowsJSX = Object.entries(rowsMap)
+    .map(([rowId, list]) => {
+      const rowCountVar = `rowCount_${rowId.replace(/-/g, "_")}`;
+      const rowCountDecl = `const ${rowCountVar} = ${list.length};`;
+      const widgetsJSX = list
+        .map((w) => buildWidgetJSX(w, rowCountVar))
+        .join("\n");
+      return `
+      ${rowCountDecl}
+      <div key="${rowId}" style={styles.row}>
+        ${widgetsJSX}
+      </div>
+    `;
+    })
+    .join("\n");
 
-const generateStandardChart = (widget, dataVariable, styleMode, includeStyles) => {
-  const config = widget.config || {};
-  const title = config.title || 'Chart';
-  
-  const containerProps = getChartContainerProps(styleMode, includeStyles);
-  
-  return `<div ${containerProps}>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">${title}</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={${dataVariable}}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="value" fill="#3b82f6" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>`;
-};
+  const imports = needRecharts(widgets)
+    ? `import React from "react";
+import {
+  ResponsiveContainer,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  LineChart, Line,
+  BarChart, Bar, Cell,
+  AreaChart, Area,
+  PieChart, Pie
+} from "recharts";`
+    : `import React from "react";`;
 
-// Utility functions
-const cleanVariableName = (name) => {
-  return name
-    .replace(/[^a-zA-Z0-9]/g, '') // Remove special characters
-    .replace(/^[0-9]/, '') // Remove leading numbers
-    .toLowerCase()
-    .replace(/^./, char => char.toUpperCase()); // Capitalize first letter
-};
+  return `// Auto-generated dashboard
+${imports}
+${separateDataImports}
 
-const getRowClasses = (styleMode, includeStyles) => {
-  if (styleMode === 'tailwind') {
-    return 'className="flex gap-6 mb-6"';
-  }
-  return 'style={{display: "flex", gap: "24px", marginBottom: "24px"}}';
-};
+export default function ${componentName}() {
+  const styles = ${stylesLiteral};
 
-const getWidgetClasses = (widgetCount, styleMode, includeStyles) => {
-  const flexBasis = widgetCount === 1 ? '100%' : 
-                   widgetCount === 2 ? '50%' : 
-                   '33.333%';
-  
-  if (styleMode === 'tailwind') {
-    const flexClass = widgetCount === 1 ? 'flex-1' :
-                      widgetCount === 2 ? 'flex-1' :
-                      'flex-1';
-    return `className="${flexClass}"`;
-  }
-  
-  return `style={{flex: 1, flexBasis: "${flexBasis}"}}`;
-};
+  // ----- inline data -----
+${dataBlocksInline}
 
-const getKPIContainerProps = (styleMode, includeStyles) => {
-  if (styleMode === 'tailwind') {
-    return 'className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"';
-  }
-  return 'style={{backgroundColor: "white", padding: "24px", borderRadius: "8px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", border: "1px solid #e5e7eb"}}';
-};
-
-const getChartContainerProps = (styleMode, includeStyles) => {
-  if (styleMode === 'tailwind') {
-    return 'className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"';
-  }
-  return 'style={{backgroundColor: "white", padding: "24px", borderRadius: "8px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", border: "1px solid #e5e7eb"}}';
-};
-
-const getFilterBarProps = (styleMode, includeStyles) => {
-  if (styleMode === 'tailwind') {
-    return 'className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"';
-  }
-  return 'style={{backgroundColor: "white", padding: "16px", borderRadius: "8px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", border: "1px solid #e5e7eb"}}';
-};
-
-const generateContainerWrapper = (styleMode, includeStyles) => {
-  if (styleMode === 'tailwind') {
-    return '<div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">\n      <div className="max-w-7xl mx-auto">';
-  }
-  return '<div style={{padding: "24px", backgroundColor: "#f9fafb", minHeight: "100vh"}}>\n      <div style={{maxWidth: "1280px", margin: "0 auto"}}>';
-};
-
-const generateHeaderSection = (componentName, styleMode, includeStyles) => {
-  if (styleMode === 'tailwind') {
-    return `<header className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">${componentName}</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">Real-time dashboard analytics</p>
-        </header>`;
-  }
-  return `<header style={{marginBottom: "32px"}}>
-          <h1 style={{fontSize: "30px", fontWeight: "bold", color: "#111827", margin: 0}}>${componentName}</h1>
-          <p style={{color: "#6b7280", marginTop: "8px", margin: 0}}>Real-time dashboard analytics</p>
-        </header>`;
-};
-
-const generateContainerClose = (styleMode) => {
-  return '</div>\n    </div>';
-};
-
-const generateInlineStyles = () => {
-  return `const styles = {
-  container: {
-    padding: '24px',
-    backgroundColor: '#f9fafb',
-    minHeight: '100vh'
-  },
-  wrapper: {
-    maxWidth: '1280px',
-    margin: '0 auto'
-  },
-  row: {
-    display: 'flex',
-    gap: '24px',
-    marginBottom: '24px'
-  },
-  widget: {
-    flex: 1,
-    backgroundColor: 'white',
-    padding: '24px',
-    borderRadius: '8px',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-    border: '1px solid #e5e7eb'
-  }
-};
-`;
-};
-
-const formatCode = (code) => {
-  return code
-    .replace(/\n\s*\n\s*\n/g, '\n\n') // Remove excessive line breaks
-    .replace(/^\s+/gm, (match) => match) // Preserve indentation
-    .trim();
-};
-
-// Generate separate CSS file
-export const generateCSSFile = () => {
-  return `/* Dashboard Styles */
-.dashboard-container {
-  padding: 24px;
-  background-color: #f9fafb;
-  min-height: 100vh;
-}
-
-.dashboard-wrapper {
-  max-width: 1280px;
-  margin: 0 auto;
-}
-
-.dashboard-header {
-  margin-bottom: 32px;
-}
-
-.dashboard-title {
-  font-size: 30px;
-  font-weight: bold;
-  color: #111827;
-  margin: 0;
-}
-
-.dashboard-subtitle {
-  color: #6b7280;
-  margin-top: 8px;
-  margin: 0;
-}
-
-.dashboard-row {
-  display: flex;
-  gap: 24px;
-  margin-bottom: 24px;
-}
-
-.dashboard-widget {
-  flex: 1;
-  background-color: white;
-  padding: 24px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  border: 1px solid #e5e7eb;
-}
-
-.kpi-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.kpi-value {
-  font-size: 24px;
-  font-weight: bold;
-  color: #111827;
-  margin: 8px 0;
-}
-
-.kpi-growth {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 14px;
-  color: #16a34a;
-}
-
-.filter-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  align-items: center;
-}
-
-.filter-input {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 14px;
-}
-
-.table-container {
-  overflow-x: auto;
-}
-
-.table {
-  min-width: 100%;
-  border-collapse: collapse;
-}
-
-.table-header {
-  background-color: #f9fafb;
-  padding: 12px 24px;
-  text-align: left;
-  font-size: 12px;
-  font-weight: 500;
-  color: #6b7280;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.table-cell {
-  padding: 16px 24px;
-  white-space: nowrap;
-  font-size: 14px;
-  color: #111827;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.status-badge {
-  display: inline-flex;
-  padding: 4px 8px;
-  font-size: 12px;
-  font-weight: 600;
-  border-radius: 9999px;
-}
-
-.status-approved {
-  background-color: #dcfce7;
-  color: #166534;
-}
-
-.status-pending {
-  background-color: #fef3c7;
-  color: #92400e;
-}
-
-.status-review {
-  background-color: #dbeafe;
-  color: #1e40af;
-}
-
-/* Dark mode styles */
-@media (prefers-color-scheme: dark) {
-  .dashboard-container {
-    background-color: #111827;
-  }
-  
-  .dashboard-widget {
-    background-color: #1f2937;
-    border-color: #374151;
-  }
-  
-  .dashboard-title {
-    color: #f9fafb;
-  }
-  
-  .dashboard-subtitle {
-    color: #9ca3af;
-  }
-  
-  .kpi-value {
-    color: #f9fafb;
-  }
-  
-  .table-header {
-    background-color: #374151;
-    color: #d1d5db;
-  }
-  
-  .table-cell {
-    color: #f9fafb;
-    border-color: #374151;
-  }
+  return (
+    <div style={styles.page}>
+      <div style={styles.container}>
+        ${
+          includeRowLayout
+            ? rowsJSX
+            : `
+        <div style={styles.row}>
+          ${Object.values(rowsMap)
+            .flat()
+            .map((w) => buildWidgetJSX(w, "3"))
+            .join("\n")}
+        </div>`
+        }
+      </div>
+    </div>
+  );
 }
 `;
-};
+}
 
-export default { generateDashboardCode, generateCSSFile };
+// Optional: for ExportDialog’s “CSS” mode in case you still need it
+export function generateCSSFile() {
+  // Not used in inline mode, but kept for compatibility
+  return `/* Generated CSS placeholder (inline mode does not emit CSS files) */`;
+}

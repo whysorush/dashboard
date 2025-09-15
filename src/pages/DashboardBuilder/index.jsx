@@ -16,8 +16,75 @@ import {
   FiZap,
 } from "react-icons/fi";
 import createReferenceDashboard from "./templates/referenceTemplate";
-import "./styles/builder.css";
+// import "./styles/builder.css";
 import PopupModal from "./components/PreviewModal";
+
+const styles = {
+  container: {
+    minHeight: "100vh",
+    background: "#f3f4f6",
+    display: "flex",
+    flexDirection: "column",
+  },
+  header: {
+    position: "sticky",
+    top: 0,
+    zIndex: 50,
+    background: "white",
+    borderBottom: "1px solid #e5e7eb",
+    padding: "12px 16px",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+  },
+  headerContent: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    flexWrap: "wrap",
+  },
+  title: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#111827",
+    marginBottom: 8,
+  },
+  actions: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 8,
+    width: "100%",
+    justifyContent: "end",
+  },
+  main: {
+    display: "flex",
+  },
+  sidebarLeft: {
+    width: 250,
+    background: "white",
+    borderRight: "1px solid #e5e7eb",
+    overflowY: "auto",
+  },
+  canvas: {
+    flex: 1,
+    background: "#f9fafb",
+    overflow: "auto",
+  },
+  button: (bg, hoverBg) => ({
+    padding: "6px 12px",
+    background: bg,
+    color: "white",
+    borderRadius: 6,
+    display: "flex",
+    alignItems: "center",
+    fontSize: 14,
+    transition: "background-color 0.2s",
+    border: "none",
+    cursor: "pointer",
+  }),
+  icon: { marginRight: 8 },
+};
 
 const DashboardBuilderContent = () => {
   const { widgets, rows, clearCanvas, loadTemplate, addRow, addWidget } =
@@ -33,45 +100,44 @@ const DashboardBuilderContent = () => {
   };
 
   return (
-    <div className="dashboard-builder-container">
+    <div style={styles.container}>
       {/* Header */}
-      <div className="db-header sticky top-0 z-50">
-        <div className="db-header-content flex-wrap md:flex-nowrap">
-          <div className="db-title mb-2 md:mb-0">
+      <div style={styles.header}>
+        <div style={styles.headerContent}>
+          <div style={styles.title}>
             <FiGrid style={{ color: "var(--primary)" }} />
-            <span className="hidden sm:inline">
+            <span style={{ display: "inline" }}>
               Row-Based Dashboard Builder
             </span>
-            <span className="sm:hidden">Dashboard Builder</span>
           </div>
 
           {/* Header Actions */}
-          <div className="flex flex-wrap gap-2 w-full md:w-auto justify-end">
+          <div style={styles.actions}>
             <button
               onClick={() => setShowPreview(true)}
-              className="px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 flex items-center text-sm transition-colors"
+              style={styles.button("#3b82f6")}
               title="Preview Dashboard"
             >
-              <FiEye className="mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Preview</span>
+              <FiEye style={styles.icon} />
+              <span style={{ display: "inline" }}>Preview</span>
             </button>
 
             <button
               onClick={() => setShowExport(true)}
-              className="px-3 py-1.5 sm:px-4 sm:py-2 bg-green-500 text-white rounded-md hover:bg-green-600 flex items-center text-sm transition-colors"
+              style={styles.button("#10b981")}
               title="Export Dashboard Code"
             >
-              <FiCode className="mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Export</span>
+              <FiCode style={styles.icon} />
+              <span style={{ display: "inline" }}>Export</span>
             </button>
 
             <button
               onClick={loadReferenceTemplate}
-              className="px-3 py-1.5 sm:px-4 sm:py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 flex items-center text-sm transition-colors"
+              style={styles.button("#8b5cf6")}
               title="Load Reference Template"
             >
-              <FiImage className="mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Template</span>
+              <FiImage style={styles.icon} />
+              <span style={{ display: "inline" }}>Template</span>
             </button>
 
             <button
@@ -87,34 +153,34 @@ const DashboardBuilderContent = () => {
                 addWidget(WIDGET_TYPES.GRADIENT_BAR_CHART, null, row3);
                 addWidget(WIDGET_TYPES.SMOOTH_FUNNEL_CHART, null, row3);
               }}
-              className="px-3 py-1.5 sm:px-4 sm:py-2 bg-amber-500 text-white rounded-md hover:bg-amber-600 flex items-center text-sm transition-colors"
+              style={styles.button("#f59e0b")}
               title="Quick Start with Sample Dashboard"
             >
-              <FiZap className="mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Quick Start</span>
+              <FiZap style={styles.icon} />
+              <span style={{ display: "inline" }}>Quick Start</span>
             </button>
 
             <button
               onClick={clearCanvas}
-              className="px-3 py-1.5 sm:px-4 sm:py-2 bg-red-500 text-white rounded-md hover:bg-red-600 flex items-center text-sm transition-colors"
+              style={styles.button("#ef4444")}
               title="Clear Dashboard"
             >
-              <FiTrash2 className="mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Clear</span>
+              <FiTrash2 style={styles.icon} />
+              <span style={{ display: "inline" }}>Clear</span>
             </button>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="db-main flex flex-col md:flex-row h-[calc(100vh-60px)]">
+      <div style={styles.main}>
         {/* Left Sidebar - Component Palette */}
-        <div className="db-sidebar-left">
+        <div style={styles.sidebarLeft}>
           <ComponentPalette />
         </div>
 
         {/* Canvas */}
-        <div className="db-canvas flex-1 overflow-auto bg-gray-50 dark:bg-gray-900">
+        <div style={styles.canvas}>
           <Canvas />
         </div>
       </div>

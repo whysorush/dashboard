@@ -16,6 +16,30 @@ import FilterBar from "./FilterBar";
 import { generateMockData, calculateKPIs } from "../../utils/mockDataGenerator";
 import { GRADIENT_CHART_COLORS } from "../../constants";
 
+const styles = {
+  container: {
+    background: "var(--stat-card-bg)",
+    border: "1px solid var(--border)",
+    borderRadius: 14,
+    padding: 16,
+  },
+  header: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  title: { margin: 0, fontSize: 16, color: "var(--text)" },
+  total: { fontSize: 22, fontWeight: 700, margin: "6px 0 10px", color: "var(--text)" },
+  select: {
+    background: "var(--bg)",
+    color: "var(--text)",
+    border: "1px solid var(--border)",
+    borderRadius: 8,
+    padding: "6px 8px",
+  },
+};
+
 const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
   const config = widget?.config || {};
 
@@ -59,44 +83,30 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
   }, [config.startColor, config.endColor]);
 
   return (
-    // <BaseWidget widget={widget} isSelected={isSelected} onClick={onClick}>
-    <div className="chart-container">
+    <div style={styles.container}>
       {console.log("dddddddddddddddddddddddddddddddddd", data)}
-      <div className="chart-header bar-chart-header">
-        <div className="figma-heading">
-          <h3>Bar Chart</h3>
-          <div>{total}</div>
+      <div style={styles.header}>
+        <div>
+          <h3 style={styles.title}>Bar Chart</h3>
+          <div style={styles.total}>{total}</div>
         </div>
 
-        <select
-          className="time-filter"
-          // value={range}
-          // onChange={(e) => setRange(e.target.value)}
-        >
+        <select style={styles.select}>
           <option>Week</option>
           <option>Month</option>
           <option>Year</option>
         </select>
       </div>
 
-      <div className="bar-chart" style={{ height: 260 }}>
+      <div style={{ width: "100%", height: 260 }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
             barCategoryGap="18%"
             barGap={6}
             margin={{ top: 4, right: 8, bottom: 0, left: 0 }}
-            // barCategoryGap={16}
           >
             <CartesianGrid stroke={"rgba(0,0,0,0.06)"} vertical={false} />
-
-            {/* {config.showGrid !== false && (
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  vertical={false}
-                  stroke="#E5E7EB"
-                />
-              )} */}
 
             <XAxis
               dataKey="name"
@@ -161,7 +171,6 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
         Lorem ipsum simply dummy text of the printing and typesetting industry.
       </div>
     </div>
-    // </BaseWidget>
   );
 };
 

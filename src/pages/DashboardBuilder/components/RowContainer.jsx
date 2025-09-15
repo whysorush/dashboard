@@ -57,7 +57,7 @@ const RowContainer = ({ row, children, isSelected, onAddWidget, canAddMore = tru
       // className="row-content flex flex-row flex-nowrap gap-4 justify-center items-stretch"
       > */}
 
-<div class="row-content">
+<div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: 16, width: '100%', minHeight: 100, overflowX: 'auto', alignItems: 'stretch', padding: '8px 0' }}>
 {children}
 
 </div>

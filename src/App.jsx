@@ -21,20 +21,44 @@ import GradientBarChartWidget from "./pages/DashboardBuilder/components/widgets/
 import AdvancedFilterBarWidget from "./pages/DashboardBuilder/components/widgets/AdvancedFilterBarWidget";
 import ProfessionalTableWidget from "./pages/DashboardBuilder/components/widgets/ProfessionalTableWidget";
 
+const styles = {
+  dashboardContainer: {
+    display: "grid",
+    gridTemplateColumns: "260px 1fr",
+    minHeight: "100vh",
+    overflowX: "hidden",
+  },
+  sidebar: {
+    background: "var(--panel)",
+    borderRight: "1px solid var(--border)",
+    padding: "20px 16px",
+    position: "relative",
+    zIndex: 20,
+    transition: "transform 0.25s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease",
+  },
+  mainContent: {},
+  chartsSection: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: 16,
+    marginTop: 18,
+  },
+};
+
 function DashboardLayout() {
   return (
-    <div className="dashboard-container">
-      <aside className="sidebar">
+    <div style={styles.dashboardContainer}>
+      <aside style={styles.sidebar}>
         <Sidebar />
       </aside>
 
-      <main className="main-content">
+      <main style={styles.mainContent}>
         <Header />
         {/* <Filters /> */}
         <AdvancedFilterBarWidget />
         <StatCards />
 
-        <section className="charts-section">
+        <section style={styles.chartsSection}>
           {/* <BarChartBox /> */}
           <GradientBarChartWidget />
           <SmoothFunnelChartWidget />
@@ -57,7 +81,7 @@ function App() {
           <Route
             path="/dashboard"
             element={
-              <main className="flex-1 overflow-auto">
+              <main style={{ flex: 1, overflow: "auto" }}>
                 <DashboardLayout />
               </main>
             }

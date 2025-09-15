@@ -6,16 +6,47 @@ import {
   FaArrowUp,
 } from "react-icons/fa";
 
+const styles = {
+  list: {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+    gap: 16,
+    marginTop: 18,
+  },
+  card: {
+    display: "grid",
+    gridTemplateColumns: "54px 1fr",
+    gap: 14,
+    background: "linear-gradient(180deg, color-mix(in oklab, var(--panel) 92%, transparent), color-mix(in oklab, var(--panel) 100%, transparent))",
+    border: "1px solid var(--border)",
+    borderRadius: 14,
+    padding: 16,
+  },
+  icon: {
+    width: 54,
+    height: 54,
+    display: "grid",
+    placeItems: "center",
+    borderRadius: 12,
+    background: "var(--icon-stat-bg)",
+    color: "var(--icon-stat-font)",
+    marginBottom: 8,
+  },
+  title: { margin: 0, fontSize: 14, color: "var(--text)" },
+  value: { fontSize: 28, fontWeight: 800, color: "var(--text)", width: "50%" },
+  change: { display: "flex", alignItems: "center", gap: 6, color: "#22c55e", fontSize: 12, marginTop: 24 },
+};
+
 function StatCard({ icon: Icon, title, value, changeText }) {
   return (
-    <div className="stat-card">
-      <div className={`stat-icon ${title.toLowerCase().split(" ")[0]}`}>
+    <div style={styles.card}>
+      <div style={styles.icon}>
         <Icon />
       </div>
-      <div className="stat-content">
-        <h3>{title}</h3>
-        <div className="stat-value">{value}</div>
-        <div className="stat-change positive">
+      <div>
+        <h3 style={styles.title}>{title}</h3>
+        <div style={styles.value}>{value}</div>
+        <div style={styles.change}>
           <FaArrowUp />
           <span>{changeText}</span>
         </div>
@@ -26,7 +57,7 @@ function StatCard({ icon: Icon, title, value, changeText }) {
 
 export default function StatCards() {
   return (
-    <section className="stats-cards">
+    <section style={styles.list}>
       <StatCard
         icon={FaDollarSign}
         title="Total Revenue"

@@ -11,12 +11,31 @@ import {
 import BaseWidget from "./BaseWidget";
 import { GRADIENT_CHART_COLORS } from "../../constants";
 
+const styles = {
+  container: {
+    background: "var(--stat-card-bg)",
+    border: "1px solid var(--border)",
+    borderRadius: 14,
+    padding: 16,
+  },
+  header: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  title: { margin: 0, fontSize: 16, color: "var(--text)" },
+  select: {
+    background: "var(--bg)",
+    color: "var(--text)",
+    border: "1px solid var(--border)",
+    borderRadius: 8,
+    padding: "6px 8px",
+  },
+};
+
 /**
  * Funnel Chart Widget (Recharts FunnelChart)
- *
- * - Uses Recharts <FunnelChart> with <Funnel>, <Cell>, and <LabelList>
- * - Clean, minimal styling with responsive container
- * - Legend below the chart (matches your previous layout)
  */
 const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
   console.log("widgettttttttttttttt", widget);
@@ -64,11 +83,9 @@ const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
 
   // Build a small palette from start->end for cells
   const cellColors = useMemo(() => {
-    // simple interpolation between start and end in HSL-ish space via CSS opacity steps
-    // (You can replace with a proper color interpolator if you have one.)
     return [
       gradientColors.startColor,
-      gradientColors.endColor + "CC", // ~80% opacity
+      gradientColors.endColor + "CC",
       gradientColors.endColor,
     ];
   }, [gradientColors]);
@@ -80,39 +97,16 @@ const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
   }, [widget?.position?.size]);
 
   return (
-    <div className="chart-container">
-      {/*     
-    <BaseWidget
-      widget={widget}
-      isSelected={isSelected}
-      onClick={onClick}
-      className="p-0 overflow-hidden"
-    >
-      <div className="p-6 bg-white dark:bg-gray-800 rounded-lg">
-        <div className="mb-6">
-          <h3 className="text-base font-medium text-gray-700 dark:text-gray-300">
-            Funnel Chart
-          </h3>
-        </div> */}
-
-      {/* Chart */}
-
-      <div className="chart-header">
-        <h3>Funnel Chart</h3>
-        <select
-          className="time-filter"
-          // value={range}
-          // onChange={(e) => setRange(e.target.value)}
-        >
+    <div style={styles.container}>
+      <div style={styles.header}>
+        <h3 style={styles.title}>Funnel Chart</h3>
+        <select style={styles.select}>
           <option>Week</option>
           <option>Month</option>
           <option>Year</option>
         </select>
       </div>
-      <div
-        className="funnel-chart"
-        style={{ width: "100%", height: chartHeight }}
-      >
+      <div style={{ width: "100%", height: chartHeight }}>
         <ResponsiveContainer>
           <FunnelChart>
             <Tooltip
@@ -124,68 +118,16 @@ const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
                 }).format(val)
               }
             />
-            <Funnel
-              dataKey="value"
-              data={stageData}
-              // isAnimationActive={true}
-              // Optional: adjust shape / width
-              width={600}
-              // "trapezoid" is default; could use custom shape if needed
-            >
-              {/* Value labels inside each segment */}
-              <LabelList
-                position="inside"
-                fill="#fff"
-                stroke="none"
-                dataKey="display"
-              />
-              {/* Stage labels to the right */}
-              <LabelList
-                dataKey="name"
-                position="right"
-                fill="#525252"
-                className="text-xs"
-              />
+            <Funnel dataKey="value" data={stageData} width={600}>
+              <LabelList position="inside" fill="#fff" stroke="none" dataKey="display" />
+              <LabelList dataKey="name" position="right" fill="#525252" />
               {stageData.map((entry, idx) => (
-                <Cell
-                  key={`cell-${idx}`}
-                  fill={cellColors[idx % cellColors.length]}
-                />
+                <Cell key={`cell-${idx}`} fill={cellColors[idx % cellColors.length]} />
               ))}
             </Funnel>
           </FunnelChart>
         </ResponsiveContainer>
       </div>
-
-      {/* Legend */}
-      {/* <div className="mt-6 grid grid-cols-3 gap-4">
-          {stageData.map((stage, index) => (
-            <div key={index} className="text-center">
-              <div className="flex items-center justify-center mb-1">
-                <span
-                  className="w-3 h-3 rounded-full mr-1"
-                  style={{
-                    backgroundColor: cellColors[index % cellColors.length],
-                  }}
-                ></span>
-                <span className="text-xs text-gray-600 dark:text-gray-400">
-                  {stage.name}
-                </span>
-              </div>
-              <div className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                {stage.display}
-              </div>
-            </div>
-          ))}
-        </div> */}
-
-      {/* Footer text */}
-      {/* <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
-           Lorem ipsum simply dummy text of the printing and typesetting
-           industry.
-         </div>
-       </div>
-     </BaseWidget> */}
     </div>
   );
 };
