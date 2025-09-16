@@ -402,36 +402,39 @@ const buildWidgetJSX = (w, rowCountVar) => {
       `;
 
     case "funnel-chart":
-      // Simulate funnel with BarChart (Recharts Funnel is not core)
+      // Use Recharts Funnel components when available
       return `
         <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
           <div style={styles.title}>${title}</div>
           <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={${dataVar}} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" />
-              <YAxis dataKey="name" type="category" />
+            <FunnelChart>
               <Tooltip />
-              <Legend />
-              <Bar dataKey="value" fill="#00c9ff" />
-            </BarChart>
+              <Funnel dataKey="value" data={${dataVar}} isAnimationActive>
+                <LabelList position="right" fill="#000" stroke="none" dataKey="name" />
+              </Funnel>
+            </FunnelChart>
           </ResponsiveContainer>
         </div>
       `;
 
     case "smooth-funnel-chart":
+      // Smooth look by using gradient fill and label list
       return `
         <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
           <div style={styles.title}>${title}</div>
           <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={${dataVar}} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" />
-              <YAxis dataKey="name" type="category" />
+            <FunnelChart>
+              <defs>
+                <linearGradient id="funnelGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#38bdf8" stopOpacity={0.9} />
+                  <stop offset="100%" stopColor="#38bdf8" stopOpacity={0.2} />
+                </linearGradient>
+              </defs>
               <Tooltip />
-              <Legend />
-              <Bar dataKey="value" fill="#38bdf8" radius={[8,8,8,8]} />
-            </BarChart>
+              <Funnel dataKey="value" data={${dataVar}} isAnimationActive>
+                <LabelList position="right" fill="#000" stroke="none" dataKey="name" />
+              </Funnel>
+            </FunnelChart>
           </ResponsiveContainer>
         </div>
       `;
@@ -578,7 +581,8 @@ import {
   LineChart, Line,
   BarChart, Bar, Cell,
   AreaChart, Area,
-  PieChart, Pie
+  PieChart, Pie,
+  FunnelChart, Funnel, LabelList
 } from "recharts";`
     : `import React from "react";`;
 

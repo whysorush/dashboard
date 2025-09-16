@@ -25,6 +25,16 @@ export const WIDGET_TYPES = {
     PROFESSIONAL_KPI_CARD: 'professional-kpi-card'
   };
   
+// Add a grouping to identify KPI widget types easily
+export const KPI_WIDGET_TYPES = [
+  WIDGET_TYPES.KPI_CARD,
+  WIDGET_TYPES.PROFESSIONAL_KPI_CARD,
+  WIDGET_TYPES.PROFESSIONAL_KPI,
+  WIDGET_TYPES.REVENUE_KPI,
+  WIDGET_TYPES.ORDERS_KPI,
+  WIDGET_TYPES.CUSTOMERS_KPI,
+];
+  
   export const WIDGET_CATEGORIES = {
     // Professional widgets first
     EXACT_DESIGN_WIDGETS: {

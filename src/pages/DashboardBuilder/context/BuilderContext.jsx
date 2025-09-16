@@ -7,6 +7,7 @@ import React, {
   useEffect,
 } from "react";
 import { generateUniqueId } from "../utils/gridHelpers";
+import { KPI_WIDGET_TYPES } from "../constants";
 
 const BuilderContext = createContext();
 
@@ -77,7 +78,9 @@ export const BuilderProvider = ({ children }) => {
       const targetRowId =
         rowId || (rows.length ? rows[0].id : `row-${Date.now()}`);
 
-      if (!rows.find((r) => r.id === targetRowId)) {
+      // Only auto-create a row when no explicit rowId is provided.
+      // This avoids duplicating rows when callers already created the row.
+      if (!rowId && !rows.find((r) => r.id === targetRowId)) {
         setRows((prev) => [
           ...prev,
           { id: targetRowId, title: `Row ${prev.length + 1}` },
@@ -87,6 +90,24 @@ export const BuilderProvider = ({ children }) => {
       const rowWidgets = widgets.filter(
         (w) => w.position.rowId === targetRowId
       );
+
+      const isKpi = KPI_WIDGET_TYPES.includes(type);
+      const hasAnyKpi = rowWidgets.some(w => KPI_WIDGET_TYPES.includes(w.type));
+      const hasAnyNonKpi = rowWidgets.some(w => !KPI_WIDGET_TYPES.includes(w.type));
+
+      // Enforce KPI limit: Max 4 KPI widgets per row
+      if (isKpi) {
+        const existingKpis = rowWidgets.filter(w => KPI_WIDGET_TYPES.includes(w.type)).length;
+        if (existingKpis >= 4) {
+          return null;
+        }
+      }
+
+      // Enforce exclusivity: KPI rows contain only KPIs; non-KPI rows contain no KPIs
+      if ((isKpi && hasAnyNonKpi) || (!isKpi && hasAnyKpi)) {
+        return null;
+      }
+
       const nextIndex =
         position?.index ?? Math.max(0, Math.min(rowWidgets.length, 2));
       const nextRowSize =
@@ -164,6 +185,27 @@ export const BuilderProvider = ({ children }) => {
 
   const updateWidgetRowPosition = useCallback(
     (widgetId, newRowId, newIndex) => {
+      const moving = widgets.find(w => w.id === widgetId);
+      if (!moving) return;
+
+      const isKpi = KPI_WIDGET_TYPES.includes(moving.type);
+      const destinationWidgets = widgets.filter(w => w.position.rowId === newRowId && w.id !== widgetId);
+      const hasAnyKpi = destinationWidgets.some(w => KPI_WIDGET_TYPES.includes(w.type));
+      const hasAnyNonKpi = destinationWidgets.some(w => !KPI_WIDGET_TYPES.includes(w.type));
+
+      // Enforce KPI limit when moving into a row
+      if (isKpi) {
+        const kpiCount = destinationWidgets.filter(w => KPI_WIDGET_TYPES.includes(w.type)).length;
+        if (kpiCount >= 4) {
+          return; // disallow move
+        }
+      }
+
+      // Enforce exclusivity for moves
+      if ((isKpi && hasAnyNonKpi) || (!isKpi && hasAnyKpi)) {
+        return; // disallow move
+      }
+
       const rowIndex = getRowIndex(newRowId);
       let next = widgets.map((w) =>
         w.id === widgetId
@@ -199,6 +241,24 @@ export const BuilderProvider = ({ children }) => {
 
       const rowId = base.position.rowId;
       const rowWidgets = widgets.filter((w) => w.position.rowId === rowId);
+
+      const isKpi = KPI_WIDGET_TYPES.includes(base.type);
+      const hasAnyKpi = rowWidgets.some(w => KPI_WIDGET_TYPES.includes(w.type));
+      const hasAnyNonKpi = rowWidgets.some(w => !KPI_WIDGET_TYPES.includes(w.type));
+
+      // Enforce KPI limit on duplicate
+      if (isKpi) {
+        const existingKpis = rowWidgets.filter(w => KPI_WIDGET_TYPES.includes(w.type)).length;
+        if (existingKpis >= 4) {
+          return null;
+        }
+      }
+
+      // Enforce exclusivity on duplicate
+      if ((isKpi && hasAnyNonKpi) || (!isKpi && hasAnyKpi)) {
+        return null;
+      }
+
       const nextIndex = rowWidgets.length;
 
       const clone = {

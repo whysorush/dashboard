@@ -14,10 +14,12 @@ import { useBuilder } from "../context/BuilderContext";
 const DraggableWidgetItem = ({ widget }) => {
   const [{ isDragging }, drag] = useDrag({
     type: "widget",
-    item: {
+    // Generate a fresh token for every drag start
+    item: () => ({
       type: widget.type,
       defaultSize: widget.defaultSize || { w: 4, h: 3 },
-    },
+      dragId: `${Date.now()}-${Math.random()}`,
+    }),
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -159,7 +161,7 @@ const ComponentPalette = () => {
       </div>
 
       {/* Help Section - Always Visible at Bottom */}
-      <div className="mt-auto mx-3 p-3 mb-3 bg-blue-50 dark:bg-blue-900/20 rounded-md flex-shrink-0 sticky bottom-0">
+      {/* <div className="mt-auto mx-3 p-3 mb-3 bg-blue-50 dark:bg-blue-900/20 rounded-md flex-shrink-0 sticky bottom-0">
         <h4 className="text-sm font-medium text-blue-700 dark:text-blue-300 flex items-center">
           <FiGrid className="mr-2" /> Row-Based Layout
         </h4>
@@ -169,7 +171,7 @@ const ComponentPalette = () => {
           <li>3 charts = 33.33% each</li>
           <li>Max 3 charts per row</li>
         </ul>
-      </div>
+      </div> */}
     </div>
   );
 };

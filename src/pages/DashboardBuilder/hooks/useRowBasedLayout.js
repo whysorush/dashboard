@@ -1,6 +1,7 @@
 // src/pages/DashboardBuilder/hooks/useRowBasedLayout.js
 import { useMemo, useCallback } from 'react';
 import { useBuilder } from '../context/BuilderContext';
+import { KPI_WIDGET_TYPES } from '../constants';
 
 export const useRowBasedLayout = () => {
   const { widgets, rows, updateWidgetProperty } = useBuilder();
@@ -79,7 +80,7 @@ export const useRowBasedLayout = () => {
     }
   }, []);
 
-  // Get number of widgets allowed in a row
+  // Existing: number of chart widgets allowed in a row (max 3)
   const getMaxWidgetsPerRow = useCallback((rowId) => {
     const rowWidgets = widgetsByRow[rowId] || [];
     const chartWidgets = rowWidgets.filter(w => w.type.includes('chart'));
@@ -90,12 +91,21 @@ export const useRowBasedLayout = () => {
     return 3 - chartWidgets.length;
   }, [widgetsByRow]);
 
+  // New: number of KPI widgets allowed in a row (max 4)
+  const getMaxKPIWidgetsPerRow = useCallback((rowId) => {
+    const rowWidgets = widgetsByRow[rowId] || [];
+    const kpiWidgets = rowWidgets.filter(w => KPI_WIDGET_TYPES.includes(w.type));
+    if (kpiWidgets.length >= 4) return 0;
+    return 4 - kpiWidgets.length;
+  }, [widgetsByRow]);
+
   return {
     widgetsByRow,
     calculateWidgetSizes,
     getWidgetSizeClass,
     getWidgetWidthPercent,
-    getMaxWidgetsPerRow
+    getMaxWidgetsPerRow,
+    getMaxKPIWidgetsPerRow,
   };
 };
 

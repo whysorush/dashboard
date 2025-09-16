@@ -1,12 +1,11 @@
 // src/pages/DashboardBuilder/components/Canvas.jsx
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { useDrop } from "react-dnd";
 import { useBuilder } from "../context/BuilderContext";
 import useRowBasedLayout from "../hooks/useRowBasedLayout";
-import WidgetControls from "./WidgetControls";
 import RowContainer from "./RowContainer";
 import RowManager from "./RowManager";
-import { WIDGET_TYPES } from "../constants";
+import { WIDGET_TYPES, KPI_WIDGET_TYPES } from "../constants";
 
 // Basic widgets
 import LineChartWidget from "./widgets/LineChartWidget";
@@ -39,22 +38,35 @@ const Canvas = () => {
     setSelectedWidget,
   } = useBuilder();
 
-  const { widgetsByRow, calculateWidgetSizes, getMaxWidgetsPerRow } =
+  const { widgetsByRow, calculateWidgetSizes, getMaxWidgetsPerRow, getMaxKPIWidgetsPerRow } =
     useRowBasedLayout();
 
+  // Add a widget into a specific row with auto size by occupancy
   const handleAddWidgetToRow = useCallback(
     (rowId, widgetType = WIDGET_TYPES.BAR_CHART) => {
       const rowWidgets = widgets.filter((w) => w.position.rowId === rowId);
-      const widgetsCount = rowWidgets.length;
+      const count = rowWidgets.length;
+
+      const isKpi = KPI_WIDGET_TYPES.includes(widgetType);
+      const hasAnyKpi = rowWidgets.some(w => KPI_WIDGET_TYPES.includes(w.type));
+      const hasAnyNonKpi = rowWidgets.some(w => !KPI_WIDGET_TYPES.includes(w.type));
+
+      // KPI capacity check
+      if (isKpi) {
+        const kpiCount = rowWidgets.filter(w => KPI_WIDGET_TYPES.includes(w.type)).length;
+        if (kpiCount >= 4) return;
+      }
+
+      // Exclusivity check
+      if ((isKpi && hasAnyNonKpi) || (!isKpi && hasAnyKpi)) return;
 
       addWidget(
         widgetType,
         {
           rowId,
           row: rows.findIndex((r) => r.id === rowId),
-          index: widgetsCount,
-          size:
-            widgetsCount >= 2 ? "small" : widgetsCount === 1 ? "medium" : "large",
+          index: count,
+          size: count >= 2 ? "small" : count === 1 ? "medium" : "large",
         },
         rowId
       );
@@ -62,71 +74,85 @@ const Canvas = () => {
     [widgets, rows, addWidget]
   );
 
+  // Keep sizes consistent when widgets change
   useEffect(() => {
     calculateWidgetSizes();
   }, [widgets.length, calculateWidgetSizes]);
+
+  // ---- Duplicate-drop guards (fix double creation) ----
+  const isProcessingDropRef = useRef(false);
+  const processedDragIdsRef = useRef(new Set());
 
   const [{ isOver, canDrop }, drop] = useDrop({
     accept: "widget",
     canDrop: () => true,
     drop: (item, monitor) => {
+      if (!monitor.isOver({ shallow: true })) return;
+
       const clientOffset = monitor.getClientOffset();
+      const dragId = item?.dragId;
+      if (dragId && processedDragIdsRef.current.has(dragId)) return;
+      if (isProcessingDropRef.current) return;
+      isProcessingDropRef.current = true;
 
-      if (rows.length === 0) {
-        const newRowId = addRow();
-        handleAddWidgetToRow(newRowId, item.type);
-        return;
-      }
+      try {
+        let targetRowId = null;
+        const isKpi = KPI_WIDGET_TYPES.includes(item.type);
 
-      if (clientOffset) {
-        const rowElements = document.querySelectorAll(".row-container");
-        let targetRow = null;
+        if (rows.length === 0) {
+          const createdRowId = addRow();
+          targetRowId =
+            createdRowId || (rows[rows.length - 1] && rows[rows.length - 1].id);
+        } else if (clientOffset) {
+          const rowEls = document.querySelectorAll(".row-container");
+          for (let i = 0; i < rowEls.length; i++) {
+            const rect = rowEls[i].getBoundingClientRect();
+            if (clientOffset.y >= rect.top && clientOffset.y <= rect.bottom) {
+              const candidate = rows[i];
+              if (candidate) {
+                // Exclusivity and capacity checks
+                const rowWidgets = widgets.filter(w => w.position.rowId === candidate.id);
+                const hasAnyKpi = rowWidgets.some(w => KPI_WIDGET_TYPES.includes(w.type));
+                const hasAnyNonKpi = rowWidgets.some(w => !KPI_WIDGET_TYPES.includes(w.type));
+                const capacity = isKpi ? getMaxKPIWidgetsPerRow(candidate.id) : getMaxWidgetsPerRow(candidate.id);
 
-        for (let i = 0; i < rowElements.length; i++) {
-          const rowRect = rowElements[i].getBoundingClientRect();
-          if (clientOffset.y >= rowRect.top && clientOffset.y <= rowRect.bottom) {
-            targetRow = rows[i];
-            break;
-          }
-        }
-
-        if (targetRow) {
-          if (getMaxWidgetsPerRow(targetRow.id) > 0) {
-            handleAddWidgetToRow(targetRow.id, item.type);
-            return;
-          } else {
-            if (
-              item.type === WIDGET_TYPES.PROFESSIONAL_TABLE ||
-              item.type === WIDGET_TYPES.DATA_TABLE
-            ) {
-              const newRowId = addRow();
-              handleAddWidgetToRow(newRowId, item.type);
-              return;
-            }
-
-            for (let i = 0; i < rows.length; i++) {
-              if (getMaxWidgetsPerRow(rows[i].id) > 0) {
-                handleAddWidgetToRow(rows[i].id, item.type);
-                return;
+                if (capacity > 0 && !((isKpi && hasAnyNonKpi) || (!isKpi && hasAnyKpi))) {
+                  targetRowId = candidate.id;
+                }
               }
+              break;
             }
-
-            const newRowId = addRow();
-            handleAddWidgetToRow(newRowId, item.type);
-            return;
           }
         }
-      }
 
-      for (let i = 0; i < rows.length; i++) {
-        if (getMaxWidgetsPerRow(rows[i].id) > 0) {
-          handleAddWidgetToRow(rows[i].id, item.type);
-          return;
+        if (!targetRowId) {
+          const withSpace = rows.find((r) => {
+            const rowWidgets = widgets.filter(w => w.position.rowId === r.id);
+            const hasAnyKpi = rowWidgets.some(w => KPI_WIDGET_TYPES.includes(w.type));
+            const hasAnyNonKpi = rowWidgets.some(w => !KPI_WIDGET_TYPES.includes(w.type));
+            const cap = isKpi ? getMaxKPIWidgetsPerRow(r.id) : getMaxWidgetsPerRow(r.id);
+            if (cap <= 0) return false;
+            return !((isKpi && hasAnyNonKpi) || (!isKpi && hasAnyKpi));
+          });
+          if (withSpace) {
+            targetRowId = withSpace.id;
+          } else {
+            const createdRowId = addRow();
+            targetRowId =
+              createdRowId || (rows[rows.length - 1] && rows[rows.length - 1].id);
+          }
         }
-      }
 
-      const newRowId = addRow();
-      handleAddWidgetToRow(newRowId, item.type);
+        if (!targetRowId) return;
+
+        handleAddWidgetToRow(targetRowId, item.type);
+
+        if (dragId) processedDragIdsRef.current.add(dragId);
+      } finally {
+        setTimeout(() => {
+          isProcessingDropRef.current = false;
+        }, 0);
+      }
     },
     collect: (monitor) => ({
       isOver: monitor.isOver(),
@@ -134,6 +160,7 @@ const Canvas = () => {
     }),
   });
 
+  // Render a widget by type
   const renderWidget = useCallback(
     (widget) => {
       const props = {
@@ -262,9 +289,6 @@ const Canvas = () => {
                     }}
                   >
                     {renderWidget(widget)}
-                    {selectedWidget === widget.id && (
-                      <WidgetControls widgetId={widget.id} />
-                    )}
                   </div>
                 ))}
               </RowContainer>
