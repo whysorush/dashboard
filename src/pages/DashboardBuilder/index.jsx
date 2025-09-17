@@ -54,7 +54,7 @@ const styles = {
     display: "flex",
     flexWrap: "wrap",
     gap: 8,
-    width: "100%",
+    // width: "100%",
     justifyContent: "end",
   },
   main: {
@@ -73,7 +73,7 @@ const styles = {
     height: "100vh",
   },
   button: (bg, hoverBg) => ({
-    padding: "6px 12px",
+    padding: "5px 10px",
     background: bg,
     color: "white",
     borderRadius: 6,

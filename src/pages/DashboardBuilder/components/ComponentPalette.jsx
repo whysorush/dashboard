@@ -1,4 +1,3 @@
-// src/pages/DashboardBuilder/components/ComponentPalette.jsx
 import React, {
   useCallback,
   useLayoutEffect,
@@ -41,19 +40,16 @@ const S = {
     color: t.text,
     border: `1px solid ${t.border}`,
     borderRadius: t.radius,
-    padding: 14,
+    padding: 10,
     display: "flex",
     flexDirection: "column",
-    gap: 14,
-    height: "100vh",
-    overflow: "scroll",
+    gap: 10,
   }),
   header: (t) => ({
     background: t.panel,
     border: `1px solid ${t.border}`,
     borderRadius: t.radius,
     padding: 14,
-    display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
     boxShadow: t.shadow,
@@ -75,11 +71,13 @@ const S = {
     border: "none",
     borderRadius: 12,
     fontWeight: 600,
-    padding: "10px 14px",
+    padding: "5px 10px",
     cursor: "pointer",
+    justifyContent: "center",
     transition: "transform 120ms ease, background 120ms ease",
     transform: hovered ? "translateY(-1px)" : "none",
     boxShadow: "0 6px 16px rgba(37,99,235,0.25)",
+    width: "100%",
   }),
   quickGrid: (t) => ({
     display: "grid",
@@ -92,16 +90,12 @@ const S = {
     boxShadow: t.shadow,
   }),
   quickPill: (t, hovered) => ({
-    display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
     background: hovered ? t.muted : t.pill,
     border: `1px solid ${t.border}`,
     borderRadius: 12,
-    padding: "10px 12px",
     cursor: "pointer",
-    fontWeight: 600,
     transition: "background 120ms ease, transform 120ms ease",
     transform: hovered ? "translateY(-1px)" : "none",
     userSelect: "none",
@@ -109,12 +103,11 @@ const S = {
   sectionWrap: (t, active) => ({
     display: "flex",
     flexDirection: "column",
-    gap: 10,
-    background: t.panel,
-    border: `1px solid ${t.border}`,
+    gap: active ? 10 : 0,
+    background: active ? t.panel : "none",
     borderRadius: t.radius,
-    padding: 10,
-    boxShadow: active ? `${t.shadow}, ${t.activeRing}` : t.shadow,
+    padding: active ? 10 : 0,
+    boxShadow: active ? `${t.shadow}, ${t.activeRing}` : "none",
     transition: "box-shadow 160ms ease, border-color 160ms ease",
   }),
   categoryHeader: (t, hovered, active) => ({
@@ -137,15 +130,12 @@ const S = {
         : t.border
     }`,
     borderRadius: 12,
-    padding: "12px 14px",
+    padding: active ? "5px" : "10px",
     cursor: "pointer",
     transition: "background 140ms ease, border-color 140ms ease",
   }),
   categoryTitleWrap: (t) => ({
-    display: "flex",
     alignItems: "center",
-    gap: 10,
-    fontWeight: 800,
     color: t.text,
   }),
   chevron: (expanded) => ({
@@ -166,7 +156,7 @@ const S = {
   }),
   widgetCard: (t, isDragging, hovered, active) => ({
     display: "flex",
-    gap: 12,
+    gap: 5,
     alignItems: "center",
     background: hovered || active ? (t.isDark ? "#0e1a36" : "#f2f6ff") : t.card,
     border: `1px solid ${
@@ -177,7 +167,7 @@ const S = {
         : t.border
     }`,
     borderRadius: 12,
-    padding: "10px 12px",
+    padding: "10px",
     cursor: "grab",
     transition:
       "background 120ms ease, transform 120ms ease, border 120ms ease, opacity 120ms ease",
@@ -314,8 +304,8 @@ const ComponentPalette = ({ styleMode = "light", accordionMode = false }) => {
 
   const quickAddWidgets = useMemo(
     () => [
-      { type: WIDGET_TYPES.REVENUE_KPI, icon: "💰", label: "Revenue" },
-      { type: WIDGET_TYPES.GRADIENT_BAR_CHART, icon: "📊", label: "Bar Chart" },
+      { type: WIDGET_TYPES.REVENUE_KPI, icon: "💰", label: "KPI" },
+      { type: WIDGET_TYPES.GRADIENT_BAR_CHART, icon: "📊", label: "Chart" },
       { type: WIDGET_TYPES.PROFESSIONAL_TABLE, icon: "📋", label: "Table" },
     ],
     []
@@ -368,21 +358,23 @@ const ComponentPalette = ({ styleMode = "light", accordionMode = false }) => {
   const categories = useMemo(() => Object.entries(WIDGET_CATEGORIES), []);
 
   return (
-    <div style={S.root(t)}>
+    <div style={(S.root(t), S.sectionWrap(t, true))}>
       <div style={S.header(t)}>
         <div style={S.headerLeft}>
           <FiLayout size={18} />
           <span>Dashboard Builder</span>
         </div>
-        <button
-          aria-label="Add Row"
-          style={S.addRowBtn(t, addHover)}
-          onMouseEnter={() => setAddHover(true)}
-          onMouseLeave={() => setAddHover(false)}
-          onClick={addRow}
-        >
-          <FiPlus size={16} /> Add Row
-        </button>
+        <div>
+          <button
+            aria-label="Add Row"
+            style={S.addRowBtn(t, addHover)}
+            onMouseEnter={() => setAddHover(true)}
+            onMouseLeave={() => setAddHover(false)}
+            onClick={addRow}
+          >
+            <FiPlus size={16} /> Add Row
+          </button>
+        </div>
       </div>
 
       <div style={S.quickGrid(t)} aria-label="Quick Add Widgets">
@@ -395,8 +387,8 @@ const ComponentPalette = ({ styleMode = "light", accordionMode = false }) => {
             onClick={() => handleQuickAdd(w.type)}
             aria-label={`Quick add ${w.label}`}
           >
-            <span style={{ fontSize: 18 }}>{w.icon}</span>
-            <span>{w.label}</span>
+            <div style={{ fontSize: 18 }}>{w.icon}</div>
+            <div>{w.label}</div>
           </button>
         ))}
       </div>
