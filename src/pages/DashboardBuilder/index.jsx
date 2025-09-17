@@ -70,6 +70,7 @@ const styles = {
     flex: 1,
     background: "#f9fafb",
     overflow: "auto",
+    height: "100vh",
   },
   button: (bg, hoverBg) => ({
     padding: "6px 12px",

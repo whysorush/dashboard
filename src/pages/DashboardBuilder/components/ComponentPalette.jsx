@@ -1,177 +1,418 @@
 // src/pages/DashboardBuilder/components/ComponentPalette.jsx
-import React, { useState } from "react";
+import React, {
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useDrag } from "react-dnd";
-import {
-  FiGrid,
-  FiPlus,
-  FiChevronDown,
-  FiChevronUp,
-  FiLayout,
-} from "react-icons/fi";
+import { FiPlus, FiChevronDown, FiChevronUp, FiLayout } from "react-icons/fi";
 import { WIDGET_CATEGORIES, WIDGET_TYPES } from "../constants";
 import { useBuilder } from "../context/BuilderContext";
 
-const DraggableWidgetItem = ({ widget }) => {
+/* ---------- THEME ---------- */
+const makeTheme = (mode = "light") => {
+  const isDark = mode === "dark";
+  return {
+    isDark,
+    bg: isDark ? "#0f172a" : "#ffffff",
+    panel: isDark ? "#0d1326" : "#f8fafc",
+    card: isDark ? "#0b1020" : "#ffffff",
+    border: isDark ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.08)",
+    text: isDark ? "#e5e7eb" : "#0f172a",
+    subtext: isDark ? "#94a3b8" : "#475569",
+    accent: "#2563eb",
+    accentHover: "#1d4ed8",
+    muted: isDark ? "#0f172a" : "#eef2f7",
+    pill: isDark ? "#0f172a" : "#f1f5f9",
+    shadow: "0 1px 2px rgba(0,0,0,0.05), 0 8px 24px rgba(0,0,0,0.08)",
+    radius: 14,
+    activeRing: isDark
+      ? "0 0 0 2px rgba(37,99,235,0.35) inset"
+      : "0 0 0 2px rgba(37,99,235,0.18) inset",
+  };
+};
+
+/* ---------- STYLES ---------- */
+const S = {
+  root: (t) => ({
+    background: t.bg,
+    color: t.text,
+    border: `1px solid ${t.border}`,
+    borderRadius: t.radius,
+    padding: 14,
+    display: "flex",
+    flexDirection: "column",
+    gap: 14,
+    height: "100vh",
+    overflow: "scroll",
+  }),
+  header: (t) => ({
+    background: t.panel,
+    border: `1px solid ${t.border}`,
+    borderRadius: t.radius,
+    padding: 14,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    boxShadow: t.shadow,
+  }),
+  headerLeft: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    fontWeight: 700,
+    fontSize: 18,
+    height: 28,
+  },
+  addRowBtn: (t, hovered) => ({
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 8,
+    background: hovered ? t.accentHover : t.accent,
+    color: "#fff",
+    border: "none",
+    borderRadius: 12,
+    fontWeight: 600,
+    padding: "10px 14px",
+    cursor: "pointer",
+    transition: "transform 120ms ease, background 120ms ease",
+    transform: hovered ? "translateY(-1px)" : "none",
+    boxShadow: "0 6px 16px rgba(37,99,235,0.25)",
+  }),
+  quickGrid: (t) => ({
+    display: "grid",
+    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+    gap: 10,
+    background: t.panel,
+    border: `1px solid ${t.border}`,
+    borderRadius: t.radius,
+    padding: 10,
+    boxShadow: t.shadow,
+  }),
+  quickPill: (t, hovered) => ({
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    background: hovered ? t.muted : t.pill,
+    border: `1px solid ${t.border}`,
+    borderRadius: 12,
+    padding: "10px 12px",
+    cursor: "pointer",
+    fontWeight: 600,
+    transition: "background 120ms ease, transform 120ms ease",
+    transform: hovered ? "translateY(-1px)" : "none",
+    userSelect: "none",
+  }),
+  sectionWrap: (t, active) => ({
+    display: "flex",
+    flexDirection: "column",
+    gap: 10,
+    background: t.panel,
+    border: `1px solid ${t.border}`,
+    borderRadius: t.radius,
+    padding: 10,
+    boxShadow: active ? `${t.shadow}, ${t.activeRing}` : t.shadow,
+    transition: "box-shadow 160ms ease, border-color 160ms ease",
+  }),
+  categoryHeader: (t, hovered, active) => ({
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+    background: active
+      ? t.isDark
+        ? "#0c1731"
+        : "#eef4ff"
+      : hovered
+      ? t.muted
+      : t.card,
+    border: `1px solid ${
+      active
+        ? t.isDark
+          ? "rgba(37,99,235,0.45)"
+          : "rgba(37,99,235,0.35)"
+        : t.border
+    }`,
+    borderRadius: 12,
+    padding: "12px 14px",
+    cursor: "pointer",
+    transition: "background 140ms ease, border-color 140ms ease",
+  }),
+  categoryTitleWrap: (t) => ({
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    fontWeight: 800,
+    color: t.text,
+  }),
+  chevron: (expanded) => ({
+    transition: "transform 180ms ease",
+    transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+  }),
+  collapseOuter: {
+    overflow: "hidden",
+    transition:
+      "max-height 220ms ease, opacity 180ms ease, transform 200ms ease",
+  },
+  widgetList: (expanded) => ({
+    display: "grid",
+    gridTemplateColumns: "1fr",
+    gap: 10,
+    opacity: expanded ? 1 : 0,
+    transform: expanded ? "translateY(0px)" : "translateY(-4px)",
+  }),
+  widgetCard: (t, isDragging, hovered, active) => ({
+    display: "flex",
+    gap: 12,
+    alignItems: "center",
+    background: hovered || active ? (t.isDark ? "#0e1a36" : "#f2f6ff") : t.card,
+    border: `1px solid ${
+      hovered || active
+        ? t.isDark
+          ? "rgba(37,99,235,0.45)"
+          : "rgba(37,99,235,0.35)"
+        : t.border
+    }`,
+    borderRadius: 12,
+    padding: "10px 12px",
+    cursor: "grab",
+    transition:
+      "background 120ms ease, transform 120ms ease, border 120ms ease, opacity 120ms ease",
+    transform: hovered ? "translateY(-1px)" : "none",
+    opacity: isDragging ? 0.5 : 1,
+  }),
+  widgetIcon: (t) => ({
+    fontSize: 20,
+    width: 28,
+    textAlign: "center",
+    color: t.subtext,
+  }),
+  widgetText: { display: "flex", flexDirection: "column", gap: 2 },
+  widgetTitle: { fontWeight: 700, fontSize: 14, lineHeight: "18px" },
+  widgetDesc: (t) => ({ fontSize: 12, color: t.subtext, lineHeight: "16px" }),
+};
+
+/* ---------- DRAGGABLE ITEM ---------- */
+const DraggableWidgetItem = React.memo(({ widget, theme, active }) => {
   const [{ isDragging }, drag] = useDrag({
     type: "widget",
-    // Generate a fresh token for every drag start
     item: () => ({
       type: widget.type,
       defaultSize: widget.defaultSize || { w: 4, h: 3 },
       dragId: `${Date.now()}-${Math.random()}`,
     }),
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
+    collect: (monitor) => ({ isDragging: monitor.isDragging() }),
   });
+
+  const [hover, setHover] = useState(false);
 
   return (
     <div
       ref={drag}
-      className={`widget-card cursor-move flex items-center p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md hover:border-blue-500 dark:hover:border-blue-400 ${
-        isDragging ? "opacity-50 border-blue-500" : ""
-      }`}
-      style={{ opacity: isDragging ? 0.5 : 1 }}
+      style={S.widgetCard(theme, isDragging, hover, active)}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      role="button"
+      aria-label={`Drag ${widget.label}`}
+      tabIndex={0}
     >
-      <div className="widget-icon text-xl mr-3">{widget.icon}</div>
-      <div className="widget-info flex-1">
-        <h4 className="text-sm font-medium text-gray-800 dark:text-gray-200">
-          {widget.label}
-        </h4>
-        <p className="text-xs text-gray-500 dark:text-gray-400">
-          {widget.description}
-        </p>
+      <div style={S.widgetIcon(theme)}>{widget.icon}</div>
+      <div style={S.widgetText}>
+        <div style={S.widgetTitle}>{widget.label}</div>
+        {widget.description ? (
+          <div style={S.widgetDesc(theme)}>{widget.description}</div>
+        ) : null}
+      </div>
+    </div>
+  );
+});
+
+/* ---------- CATEGORY SECTION (animates children) ---------- */
+const CategorySection = ({
+  theme,
+  id,
+  label,
+  icon,
+  widgets,
+  expanded,
+  onToggle,
+}) => {
+  const [hover, setHover] = useState(false);
+  const contentRef = useRef(null);
+  const [maxH, setMaxH] = useState(0);
+
+  useLayoutEffect(() => {
+    if (!contentRef.current) return;
+    const h = contentRef.current.scrollHeight;
+    setMaxH(expanded ? h + 8 : 0); // +8 for inner gap padding
+  }, [expanded, widgets]);
+
+  return (
+    <div style={S.sectionWrap(theme, expanded)}>
+      <button
+        onClick={onToggle}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+        style={S.categoryHeader(theme, hover, expanded)}
+        aria-expanded={!!expanded}
+        aria-controls={`cat-${id}`}
+      >
+        <div style={S.categoryTitleWrap(theme)}>
+          <span style={{ fontSize: 18 }}>{icon}</span>
+          <span>{label}</span>
+        </div>
+        <div style={S.chevron(expanded)}>
+          {expanded ? <FiChevronUp /> : <FiChevronDown />}
+        </div>
+      </button>
+
+      <div
+        id={`cat-${id}`}
+        style={{
+          ...S.collapseOuter,
+          maxHeight: maxH,
+          opacity: expanded ? 1 : 0,
+        }}
+        aria-hidden={!expanded}
+      >
+        <div ref={contentRef} style={S.widgetList(expanded)}>
+          {widgets.map((w) => (
+            <DraggableWidgetItem
+              key={w.type}
+              widget={w}
+              theme={theme}
+              active={expanded}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
 };
 
-const ComponentPalette = () => {
+/* ---------- MAIN ---------- */
+const ComponentPalette = ({ styleMode = "light", accordionMode = false }) => {
+  const t = useMemo(() => makeTheme(styleMode), [styleMode]);
   const { addRow } = useBuilder();
-  const [expandedCategories, setExpandedCategories] = useState({
-    PROFESSIONAL_KPIS: true,
-    PROFESSIONAL_CHARTS: true,
-    PROFESSIONAL_TABLES: true,
-    PROFESSIONAL_FILTERS: true,
-  });
 
-  const toggleCategory = (categoryKey) => {
-    setExpandedCategories((prev) => ({
-      ...prev,
-      [categoryKey]: !prev[categoryKey],
-    }));
-  };
+  const initialExpanded = useMemo(
+    () => ({
+      PROFESSIONAL_KPIS: false,
+      PROFESSIONAL_CHARTS: false,
+      PROFESSIONAL_TABLES: false,
+      PROFESSIONAL_FILTERS: false,
+    }),
+    []
+  );
+  const [expanded, setExpanded] = useState(initialExpanded);
 
-  // Quick add buttons for common widgets
-  const quickAddWidgets = [
-    { type: WIDGET_TYPES.REVENUE_KPI, icon: "💰", label: "Revenue" },
-    { type: WIDGET_TYPES.GRADIENT_BAR_CHART, icon: "📊", label: "Bar Chart" },
-    { type: WIDGET_TYPES.PROFESSIONAL_TABLE, icon: "📋", label: "Table" },
-  ];
+  const [addHover, setAddHover] = useState(false);
+  const [pillHover, setPillHover] = useState(null);
+
+  const quickAddWidgets = useMemo(
+    () => [
+      { type: WIDGET_TYPES.REVENUE_KPI, icon: "💰", label: "Revenue" },
+      { type: WIDGET_TYPES.GRADIENT_BAR_CHART, icon: "📊", label: "Bar Chart" },
+      { type: WIDGET_TYPES.PROFESSIONAL_TABLE, icon: "📋", label: "Table" },
+    ],
+    []
+  );
+
+  const toggleCategory = useCallback(
+    (key) =>
+      setExpanded((prev) => {
+        if (accordionMode) {
+          const next = !prev[key];
+          const out = Object.keys(prev).reduce(
+            (acc, k) => ((acc[k] = false), acc),
+            {}
+          );
+          out[key] = next;
+          return out;
+        }
+        return { ...prev, [key]: !prev[key] };
+      }),
+    [accordionMode]
+  );
+
+  const dispatchQuickAdd = useCallback((detail) => {
+    const canvas = document.querySelector(".canvas-container");
+    if (canvas) canvas.dispatchEvent(new CustomEvent("quickadd", { detail }));
+  }, []);
+
+  const handleQuickAdd = useCallback(
+    (type) => {
+      const firstRow = document.querySelector(".row-container");
+      if (!firstRow) {
+        const rowId = addRow();
+        setTimeout(() => dispatchQuickAdd({ type, rowId }), 100);
+        return;
+      }
+      const rows = document.querySelectorAll(".row-container");
+      let targetRowId = null;
+      for (const row of rows) {
+        const rowId = row.getAttribute("data-row-id");
+        if (rowId) {
+          targetRowId = rowId;
+          break;
+        }
+      }
+      if (targetRowId) dispatchQuickAdd({ type, rowId: targetRowId });
+    },
+    [addRow, dispatchQuickAdd]
+  );
+
+  const categories = useMemo(() => Object.entries(WIDGET_CATEGORIES), []);
 
   return (
-    <div className="component-palette overflow-y-auto h-full flex flex-col">
-      {/* Quick Actions - Always Visible */}
-      <div className="sticky top-0 z-10 bg-white dark:bg-gray-800 p-3 border-b border-gray-200 dark:border-gray-700 mb-4 flex-shrink-0">
-        <h2 className="font-bold text-lg mb-3 flex items-center">
-          <FiLayout className="mr-2" /> Dashboard Builder
-        </h2>
-
-        <button
-          onClick={addRow}
-          className="w-full flex items-center justify-center px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 mb-2 transition-colors"
-        >
-          <FiPlus className="mr-2" /> Add Row
-        </button>
-
-        <div className="grid grid-cols-3 gap-2 mt-3">
-          {quickAddWidgets.map((widget) => (
-            <button
-              key={widget.type}
-              className="flex flex-col items-center justify-center p-2 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              onClick={() => {
-                // If no rows, add one first
-                if (!document.querySelector(".row-container")) {
-                  const rowId = addRow();
-                  // Need to wait for the row to be rendered
-                  setTimeout(() => {
-                    const event = new CustomEvent("quickadd", {
-                      detail: { type: widget.type, rowId },
-                    });
-                    document
-                      .querySelector(".canvas-container")
-                      .dispatchEvent(event);
-                  }, 100);
-                } else {
-                  // Find a row with space
-                  const rows = document.querySelectorAll(".row-container");
-                  let targetRowId = null;
-
-                  // Find first row that's not full
-                  for (const row of rows) {
-                    const rowId = row.getAttribute("data-row-id");
-                    if (rowId) {
-                      targetRowId = rowId;
-                      break;
-                    }
-                  }
-
-                  if (targetRowId) {
-                    const event = new CustomEvent("quickadd", {
-                      detail: { type: widget.type, rowId: targetRowId },
-                    });
-                    document
-                      .querySelector(".canvas-container")
-                      .dispatchEvent(event);
-                  }
-                }
-              }}
-            >
-              <span className="text-xl mb-1">{widget.icon}</span>
-              <span className="text-xs">{widget.label}</span>
-            </button>
-          ))}
+    <div style={S.root(t)}>
+      <div style={S.header(t)}>
+        <div style={S.headerLeft}>
+          <FiLayout size={18} />
+          <span>Dashboard Builder</span>
         </div>
+        <button
+          aria-label="Add Row"
+          style={S.addRowBtn(t, addHover)}
+          onMouseEnter={() => setAddHover(true)}
+          onMouseLeave={() => setAddHover(false)}
+          onClick={addRow}
+        >
+          <FiPlus size={16} /> Add Row
+        </button>
       </div>
 
-      {/* Widget Categories - Scrollable Area */}
-      <div className="px-3 flex-grow overflow-y-auto">
-        {Object.entries(WIDGET_CATEGORIES).map(([key, category]) => (
-          <div key={key} className="mb-4">
-            <button
-              onClick={() => toggleCategory(key)}
-              className="w-full flex items-center justify-between p-2 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 mb-2 transition-colors"
-            >
-              <div className="flex items-center">
-                <span className="text-xl mr-2">{category.icon}</span>
-                <span className="font-medium">{category.label}</span>
-              </div>
-              {expandedCategories[key] ? <FiChevronUp /> : <FiChevronDown />}
-            </button>
-
-            {expandedCategories[key] && (
-              <div className="space-y-2 mb-2">
-                {category.widgets.map((widget) => (
-                  <DraggableWidgetItem key={widget.type} widget={widget} />
-                ))}
-              </div>
-            )}
-          </div>
+      <div style={S.quickGrid(t)} aria-label="Quick Add Widgets">
+        {quickAddWidgets.map((w) => (
+          <button
+            key={w.type}
+            style={S.quickPill(t, pillHover === w.type)}
+            onMouseEnter={() => setPillHover(w.type)}
+            onMouseLeave={() => setPillHover(null)}
+            onClick={() => handleQuickAdd(w.type)}
+            aria-label={`Quick add ${w.label}`}
+          >
+            <span style={{ fontSize: 18 }}>{w.icon}</span>
+            <span>{w.label}</span>
+          </button>
         ))}
       </div>
 
-      {/* Help Section - Always Visible at Bottom */}
-      {/* <div className="mt-auto mx-3 p-3 mb-3 bg-blue-50 dark:bg-blue-900/20 rounded-md flex-shrink-0 sticky bottom-0">
-        <h4 className="text-sm font-medium text-blue-700 dark:text-blue-300 flex items-center">
-          <FiGrid className="mr-2" /> Row-Based Layout
-        </h4>
-        <ul className="text-xs text-blue-600 dark:text-blue-400 mt-2 space-y-1 list-disc pl-4">
-          <li>1 chart = 100% width</li>
-          <li>2 charts = 50% each</li>
-          <li>3 charts = 33.33% each</li>
-          <li>Max 3 charts per row</li>
-        </ul>
-      </div> */}
+      {categories.map(([key, cat]) => (
+        <CategorySection
+          key={key}
+          id={key}
+          theme={t}
+          label={cat.label}
+          icon={cat.icon}
+          widgets={cat.widgets}
+          expanded={!!expanded[key]}
+          onToggle={() => toggleCategory(key)}
+        />
+      ))}
     </div>
   );
 };
