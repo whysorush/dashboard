@@ -2,6 +2,85 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { FiChevronUp, FiChevronDown, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
+const styles = {
+  section: {
+    background: "var(--panel)",
+    border: "1px solid var(--border)",
+    borderRadius: 14,
+    marginTop: 18,
+    overflowX: "auto",
+  },
+  toolbar: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    padding: "10px 12px",
+    borderBottom: "1px solid var(--border)",
+    background: "color-mix(in oklab, var(--panel) 98%, transparent)",
+    flexWrap: "wrap",
+  },
+  search: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    background: "var(--search-bar-bg)",
+    border: "1px solid var(--border)",
+    padding: "8px 10px",
+    borderRadius: 10,
+    minWidth: 220,
+    flex: "1 1 260px",
+  },
+  searchInput: {
+    background: "transparent",
+    border: "none",
+    outline: "none",
+    color: "var(--text)",
+    width: "100%",
+    font: "inherit",
+  },
+  table: { width: "100%", borderCollapse: "collapse" },
+  thead: { background: "var(--primary)" },
+  th: {
+    textAlign: "left",
+    fontWeight: 600,
+    color: "var(--table-th-font)",
+    padding: "10px 12px",
+    borderBottom: "1px solid var(--border)",
+    whiteSpace: "nowrap",
+    cursor: "pointer",
+  },
+  td: {
+    padding: 12,
+    borderBottom: "1px solid var(--border)",
+    color: "var(--table-td-font)",
+  },
+  pagination: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "10px 12px",
+    borderTop: "1px solid var(--border)",
+    background: "color-mix(in oklab, var(--panel) 98%, transparent)",
+    gap: 12,
+  },
+  pageSize: { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" },
+  muted: { color: "var(--muted)", fontSize: 12, fontWeight: 600 },
+  rangeText: { color: "var(--muted)", fontSize: 12 },
+  nav: { display: "flex", alignItems: "center", gap: 6 },
+  btn: {
+    minWidth: 34,
+    height: 34,
+    padding: "0 8px",
+    background: "var(--panel)",
+    color: "var(--text)",
+    border: "1px solid var(--border)",
+    borderRadius: 8,
+    cursor: "pointer",
+    transition: "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
+  },
+};
+
 const ProfessionalTableWidget = () => {
   const [sortField, setSortField] = useState("");
   const [sortDirection, setSortDirection] = useState("asc");
@@ -89,11 +168,10 @@ const ProfessionalTableWidget = () => {
   };
 
   return (
-    <section className="data-table" aria-label="Orders table">
-      {/* Toolbar */}
-      <div className="table-toolbar">
-        <div className="table-search" role="search">
-          <svg className="icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+    <section style={styles.section} aria-label="Orders table">
+      <div style={styles.toolbar}>
+        <div style={styles.search} role="search">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" style={{ color: "var(--muted)" }}>
             <path
               fill="currentColor"
               d="M15.5 14h-.79l-.28-.27a6.471 6.471 0 0 0 1.57-4.23 6.5 6.5 0 1 0-6.5 6.5c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5Zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14Z"
@@ -105,40 +183,40 @@ const ProfessionalTableWidget = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search..."
             aria-label="Search by customer, order id, product or status"
+            style={styles.searchInput}
           />
         </div>
-        <div className="table-actions" />
+        <div />
       </div>
 
-      {/* Table */}
-      <table>
-        <thead className="table-header">
+      <table style={styles.table}>
+        <thead style={styles.thead}>
           <tr>
-            <th onClick={() => handleSort("id")}>
+            <th style={styles.th} onClick={() => handleSort("id")}>
               Sr No.
               {sortField === "id" && (sortDirection === "asc" ? <FiChevronUp /> : <FiChevronDown />)}
             </th>
-            <th onClick={() => handleSort("customer")}>
+            <th style={styles.th} onClick={() => handleSort("customer")}>
               Customer
               {sortField === "customer" && (sortDirection === "asc" ? <FiChevronUp /> : <FiChevronDown />)}
             </th>
-            <th onClick={() => handleSort("orderId")}>
+            <th style={styles.th} onClick={() => handleSort("orderId")}>
               Order ID
               {sortField === "orderId" && (sortDirection === "asc" ? <FiChevronUp /> : <FiChevronDown />)}
             </th>
-            <th onClick={() => handleSort("productName")}>
+            <th style={styles.th} onClick={() => handleSort("productName")}>
               Product Name
               {sortField === "productName" && (sortDirection === "asc" ? <FiChevronUp /> : <FiChevronDown />)}
             </th>
-            <th onClick={() => handleSort("quantity")}>
+            <th style={styles.th} onClick={() => handleSort("quantity")}>
               Order Qty
               {sortField === "quantity" && (sortDirection === "asc" ? <FiChevronUp /> : <FiChevronDown />)}
             </th>
-            <th onClick={() => handleSort("orderAmount")}>
+            <th style={styles.th} onClick={() => handleSort("orderAmount")}>
               Order Amount
               {sortField === "orderAmount" && (sortDirection === "asc" ? <FiChevronUp /> : <FiChevronDown />)}
             </th>
-            <th onClick={() => handleSort("status")}>
+            <th style={styles.th} onClick={() => handleSort("status")}>
               Status
               {sortField === "status" && (sortDirection === "asc" ? <FiChevronUp /> : <FiChevronDown />)}
             </th>
@@ -149,46 +227,45 @@ const ProfessionalTableWidget = () => {
           {pagedData.length ? (
             pagedData.map((item) => (
               <tr key={item.id}>
-                <td>{item.id}</td>
-                <td>{item.customer}</td>
-                <td>{item.orderId}</td>
-                <td>{item.productName}</td>
-                <td>{item.quantity}</td>
-                <td>{item.orderAmount}</td>
-                <td><span>{item.status}</span></td>
+                <td style={styles.td}>{item.id}</td>
+                <td style={styles.td}>{item.customer}</td>
+                <td style={styles.td}>{item.orderId}</td>
+                <td style={styles.td}>{item.productName}</td>
+                <td style={styles.td}>{item.quantity}</td>
+                <td style={styles.td}>{item.orderAmount}</td>
+                <td style={styles.td}><span>{item.status}</span></td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan="7">No matching records found</td>
+              <td style={styles.td} colSpan="7">No matching records found</td>
             </tr>
           )}
         </tbody>
       </table>
 
-      {/* Pagination */}
-      <div className="table-pagination" role="navigation" aria-label="Pagination">
-        <div className="page-size">
-          <span className="muted">Rows:</span>
+      <div style={styles.pagination} role="navigation" aria-label="Pagination">
+        <div style={styles.pageSize}>
+          <span style={styles.muted}>Rows:</span>
           <strong>10</strong>
-          <span className="range">
+          <span style={styles.rangeText}>
             • Showing {totalItems === 0 ? 0 : start + 1}–{end} of {totalItems}
           </span>
         </div>
 
-        <div className="nav">
+        <div style={styles.nav}>
           <button
             type="button"
             onClick={goToPreviousPage}
             disabled={currentPage === 0}
-            className="btn"
+            style={styles.btn}
             aria-label="Previous page"
             title="Previous page"
           >
             <FiChevronLeft />
           </button>
 
-          <span className="range" aria-live="polite" style={{ padding: "0 8px" }}>
+          <span style={{ ...styles.rangeText, padding: "0 8px" }} aria-live="polite">
             Page {currentPage + 1} of {totalPages}
           </span>
 
@@ -196,7 +273,7 @@ const ProfessionalTableWidget = () => {
             type="button"
             onClick={goToNextPage}
             disabled={currentPage >= totalPages - 1}
-            className="btn"
+            style={styles.btn}
             aria-label="Next page"
             title="Next page"
           >

@@ -25,7 +25,7 @@
 }
 
 /* Dark mode variables (activated when <html> has class .dark) */
-.dark:root {
+.dark {
   --bg: #0f121a;
   --panel: #1f2937;
   --stat-card-bg: #1f2937;

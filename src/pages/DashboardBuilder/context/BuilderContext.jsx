@@ -7,7 +7,7 @@ import React, {
   useEffect,
 } from "react";
 import { generateUniqueId } from "../utils/gridHelpers";
-import { KPI_WIDGET_TYPES } from "../constants";
+import { KPI_WIDGET_TYPES, WIDGET_TYPES } from "../constants";
 
 const BuilderContext = createContext();
 
@@ -91,21 +91,54 @@ export const BuilderProvider = ({ children }) => {
         (w) => w.position.rowId === targetRowId
       );
 
+      // Enforce max widgets per row: 2
+      if (rowWidgets.length >= 2) {
+        if (typeof window !== "undefined") window.alert("This row already has the maximum of 2 widgets.");
+        return null;
+      }
+
       const isKpi = KPI_WIDGET_TYPES.includes(type);
+      const isFilter = type === WIDGET_TYPES.ADVANCED_FILTER_BAR;
       const hasAnyKpi = rowWidgets.some(w => KPI_WIDGET_TYPES.includes(w.type));
-      const hasAnyNonKpi = rowWidgets.some(w => !KPI_WIDGET_TYPES.includes(w.type));
+      const hasAnyFilter = rowWidgets.some(w => w.type === WIDGET_TYPES.ADVANCED_FILTER_BAR);
+      const hasAnyNonKpiNonFilter = rowWidgets.some(
+        w => !KPI_WIDGET_TYPES.includes(w.type) && w.type !== WIDGET_TYPES.ADVANCED_FILTER_BAR
+      );
 
       // Enforce KPI limit: Max 4 KPI widgets per row
       if (isKpi) {
         const existingKpis = rowWidgets.filter(w => KPI_WIDGET_TYPES.includes(w.type)).length;
         if (existingKpis >= 4) {
+          if (typeof window !== "undefined") window.alert("You can add up to 4 KPI widgets in a KPI row.");
           return null;
         }
       }
 
-      // Enforce exclusivity: KPI rows contain only KPIs; non-KPI rows contain no KPIs
-      if ((isKpi && hasAnyNonKpi) || (!isKpi && hasAnyKpi)) {
-        return null;
+      // Row constraints when filters are present or being added
+      // If the row already has a filter, only allow adding filters or KPIs
+      if (hasAnyFilter) {
+        if (!(isKpi || isFilter)) {
+          if (typeof window !== "undefined") window.alert("Rows with filters only allow KPI or filter widgets.");
+          return null;
+        }
+      } else if (isFilter) {
+        // If adding a filter into a row, ensure the row doesn't contain non-KPI/non-filter widgets
+        if (hasAnyNonKpiNonFilter) {
+          if (typeof window !== "undefined") window.alert("You cannot place a filter in a row that contains non-KPI/non-filter widgets.");
+          return null;
+        }
+        // KPI + Filter mix is allowed, so skip generic KPI/non-KPI exclusivity in this branch
+      } else {
+        // Generic exclusivity when no filters are involved: KPI rows contain only KPIs; non-KPI rows contain no KPIs
+        const hasAnyNonKpi = rowWidgets.some(w => !KPI_WIDGET_TYPES.includes(w.type));
+        if ((isKpi && hasAnyNonKpi) || (!isKpi && hasAnyKpi)) {
+          if (typeof window !== "undefined") window.alert(
+            isKpi
+              ? "KPI widgets cannot be mixed with non-KPI widgets in the same row."
+              : "Non-KPI widgets cannot be mixed with KPI widgets in the same row."
+          );
+          return null;
+        }
       }
 
       const nextIndex =
@@ -189,21 +222,54 @@ export const BuilderProvider = ({ children }) => {
       if (!moving) return;
 
       const isKpi = KPI_WIDGET_TYPES.includes(moving.type);
+      const isFilter = moving.type === WIDGET_TYPES.ADVANCED_FILTER_BAR;
       const destinationWidgets = widgets.filter(w => w.position.rowId === newRowId && w.id !== widgetId);
       const hasAnyKpi = destinationWidgets.some(w => KPI_WIDGET_TYPES.includes(w.type));
-      const hasAnyNonKpi = destinationWidgets.some(w => !KPI_WIDGET_TYPES.includes(w.type));
+      const hasAnyFilter = destinationWidgets.some(w => w.type === WIDGET_TYPES.ADVANCED_FILTER_BAR);
+      const hasAnyNonKpiNonFilter = destinationWidgets.some(
+        w => !KPI_WIDGET_TYPES.includes(w.type) && w.type !== WIDGET_TYPES.ADVANCED_FILTER_BAR
+      );
+
+      // Enforce max widgets per row on destination: 2
+      if (destinationWidgets.length >= 2) {
+        if (typeof window !== "undefined") window.alert("This row already has the maximum of 2 widgets.");
+        return; // disallow move
+      }
 
       // Enforce KPI limit when moving into a row
       if (isKpi) {
         const kpiCount = destinationWidgets.filter(w => KPI_WIDGET_TYPES.includes(w.type)).length;
         if (kpiCount >= 4) {
+          if (typeof window !== "undefined") window.alert("You can add up to 4 KPI widgets in a KPI row.");
           return; // disallow move
         }
       }
 
-      // Enforce exclusivity for moves
-      if ((isKpi && hasAnyNonKpi) || (!isKpi && hasAnyKpi)) {
-        return; // disallow move
+      // Row constraints with filters
+      if (hasAnyFilter) {
+        // Row already has a filter: only filters or KPIs may enter
+        if (!(isKpi || isFilter)) {
+          if (typeof window !== "undefined") window.alert("Rows with filters only allow KPI or filter widgets.");
+          return;
+        }
+      } else if (isFilter) {
+        // Moving a filter into a row that has non-KPI/non-filter widgets is disallowed
+        if (hasAnyNonKpiNonFilter) {
+          if (typeof window !== "undefined") window.alert("You cannot place a filter in a row that contains non-KPI/non-filter widgets.");
+          return;
+        }
+        // KPI + Filter mix is allowed
+      } else {
+        // Generic exclusivity when no filters are involved
+        const hasAnyNonKpi = destinationWidgets.some(w => !KPI_WIDGET_TYPES.includes(w.type));
+        if ((isKpi && hasAnyNonKpi) || (!isKpi && hasAnyKpi)) {
+          if (typeof window !== "undefined") window.alert(
+            isKpi
+              ? "KPI widgets cannot be mixed with non-KPI widgets in the same row."
+              : "Non-KPI widgets cannot be mixed with KPI widgets in the same row."
+          );
+          return; // disallow move
+        }
       }
 
       const rowIndex = getRowIndex(newRowId);
@@ -242,21 +308,51 @@ export const BuilderProvider = ({ children }) => {
       const rowId = base.position.rowId;
       const rowWidgets = widgets.filter((w) => w.position.rowId === rowId);
 
+      // Enforce max widgets per row on duplicate: 2
+      if (rowWidgets.length >= 2) {
+        if (typeof window !== "undefined") window.alert("This row already has the maximum of 2 widgets.");
+        return null;
+      }
+
       const isKpi = KPI_WIDGET_TYPES.includes(base.type);
+      const isFilter = base.type === WIDGET_TYPES.ADVANCED_FILTER_BAR;
       const hasAnyKpi = rowWidgets.some(w => KPI_WIDGET_TYPES.includes(w.type));
-      const hasAnyNonKpi = rowWidgets.some(w => !KPI_WIDGET_TYPES.includes(w.type));
+      const hasAnyFilter = rowWidgets.some(w => w.type === WIDGET_TYPES.ADVANCED_FILTER_BAR);
+      const hasAnyNonKpiNonFilter = rowWidgets.some(
+        w => !KPI_WIDGET_TYPES.includes(w.type) && w.type !== WIDGET_TYPES.ADVANCED_FILTER_BAR
+      );
 
       // Enforce KPI limit on duplicate
       if (isKpi) {
         const existingKpis = rowWidgets.filter(w => KPI_WIDGET_TYPES.includes(w.type)).length;
         if (existingKpis >= 4) {
+          if (typeof window !== "undefined") window.alert("You can add up to 4 KPI widgets in a KPI row.");
           return null;
         }
       }
 
-      // Enforce exclusivity on duplicate
-      if ((isKpi && hasAnyNonKpi) || (!isKpi && hasAnyKpi)) {
-        return null;
+      // Row constraints with filters
+      if (hasAnyFilter) {
+        if (!(isKpi || isFilter)) {
+          if (typeof window !== "undefined") window.alert("Rows with filters only allow KPI or filter widgets.");
+          return null;
+        }
+      } else if (isFilter) {
+        if (hasAnyNonKpiNonFilter) {
+          if (typeof window !== "undefined") window.alert("You cannot place a filter in a row that contains non-KPI/non-filter widgets.");
+          return null;
+        }
+      } else {
+        // Generic exclusivity when no filters are involved
+        const hasAnyNonKpi = rowWidgets.some(w => !KPI_WIDGET_TYPES.includes(w.type));
+        if ((isKpi && hasAnyNonKpi) || (!isKpi && hasAnyKpi)) {
+          if (typeof window !== "undefined") window.alert(
+            isKpi
+              ? "KPI widgets cannot be mixed with non-KPI widgets in the same row."
+              : "Non-KPI widgets cannot be mixed with KPI widgets in the same row."
+          );
+          return null;
+        }
       }
 
       const nextIndex = rowWidgets.length;

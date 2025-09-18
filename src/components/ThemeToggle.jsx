@@ -1,12 +1,26 @@
 import { useTheme } from "../context/ThemeContext";
 
+const buttonStyle = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: 38,
+  height: 38,
+  borderRadius: 10,
+  background: "var(--panel)",
+  color: "var(--text)",
+  border: "1px solid var(--border)",
+  cursor: "pointer",
+  transition: "transform 0.08s ease",
+};
+
 export default function ThemeToggle() {
   const { theme, isDark, toggleTheme } = useTheme();
 
   return (
     <button
       onClick={toggleTheme}
-      className="theme-toggle"
+      style={buttonStyle}
       title={`Switch to ${isDark ? 'light' : 'dark'} theme`}
       aria-pressed={isDark}
       aria-label={`Toggle ${theme} mode`}

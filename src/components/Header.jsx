@@ -39,8 +39,8 @@ const styles = {
   notificationIcon: {
     color: "var(--primary)",
     borderRadius: 8,
-    border: "1px solid #e7e7e7",
-    background: "#fff",
+    border: "1px solid var(--border)",
+    background: "var(--panel)",
     padding: 6,
   },
   userAvatar: {

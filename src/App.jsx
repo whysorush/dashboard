@@ -34,7 +34,8 @@ const styles = {
     padding: "20px 16px",
     position: "relative",
     zIndex: 20,
-    transition: "transform 0.25s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease",
+    transition:
+      "transform 0.25s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease",
   },
   mainContent: {},
   chartsSection: {
@@ -54,17 +55,13 @@ function DashboardLayout() {
 
       <main style={styles.mainContent}>
         <Header />
-        {/* <Filters /> */}
         <AdvancedFilterBarWidget />
         <StatCards />
 
         <section style={styles.chartsSection}>
-          {/* <BarChartBox /> */}
           <GradientBarChartWidget />
           <SmoothFunnelChartWidget />
         </section>
-
-        {/* <DataTable /> */}
 
         <ProfessionalTableWidget />
       </main>

@@ -46,11 +46,11 @@ export default function Sidebar() {
 
   return (
     <>
-      <div className="logo">
+      <div>
         <h2 style={styles.logoH2}>Stack Logix</h2>
       </div>
 
-      <nav className="nav-menu">
+      <nav>
         <div style={styles.navSection}>
           <p style={styles.navTitle}>Home</p>
           <ul style={styles.ul}>

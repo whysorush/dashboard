@@ -22,7 +22,7 @@ import PopupModal from "./components/PreviewModal";
 const styles = {
   container: {
     minHeight: "100vh",
-    background: "#f3f4f6",
+    background: "var(--bg)",
     display: "flex",
     flexDirection: "column",
   },
@@ -30,8 +30,8 @@ const styles = {
     position: "sticky",
     top: 0,
     zIndex: 50,
-    background: "white",
-    borderBottom: "1px solid #e5e7eb",
+    background: "var(--panel)",
+    borderBottom: "1px solid var(--border)",
     padding: "12px 16px",
     boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
   },
@@ -47,7 +47,7 @@ const styles = {
     gap: 8,
     fontSize: 20,
     fontWeight: "bold",
-    color: "#111827",
+    color: "var(--text)",
     marginBottom: 8,
   },
   actions: {
@@ -62,13 +62,13 @@ const styles = {
   },
   sidebarLeft: {
     width: 250,
-    background: "white",
-    borderRight: "1px solid #e5e7eb",
+    background: "var(--panel)",
+    borderRight: "1px solid var(--border)",
     overflowY: "auto",
   },
   canvas: {
     flex: 1,
-    background: "#f9fafb",
+    background: "var(--bg)",
     overflow: "auto",
     height: "100vh",
   },
