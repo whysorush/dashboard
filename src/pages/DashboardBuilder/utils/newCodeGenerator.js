@@ -142,25 +142,22 @@ const inlineStylesObjectLiteral = () =>
         padding: 16,
       },
       container: {
-        maxWidth: 1200,
-        margin: "0 auto",
+        width: "100%",
+        margin: "0",
       },
       row: {
         display: "flex",
-        flexWrap: "wrap",
-        gap: 16,
-        margin: "16px 0",
+        alignItems: "stretch",
+        gap: 8,
+        margin: "24px 0px",
       },
       card: {
         background: "#ffffff",
         border: "1px solid rgba(0,0,0,0.08)",
         borderRadius: 12,
         padding: 16,
-        flex: "1 1 calc(33.333% - 16px)",
+        height: "100%",
       },
-      full: { flex: "1 1 100%" },
-      half: { flex: "1 1 calc(50% - 16px)" },
-      third: { flex: "1 1 calc(33.333% - 16px)" },
       title: { fontSize: 16, fontWeight: 700, marginBottom: 8 },
       subtitle: { fontSize: 12, color: "#6b7280", marginBottom: 12 },
       kpiRow: {
@@ -231,7 +228,8 @@ const buildWidgetJSX = (w, rowCountVar) => {
   const t = w.type;
   const title = (w.config && w.config.title) || t;
   const dataVar = `data_${w.id.replace(/-/g, "_")}`;
-  const sizeKey = `styles[${rowCountVar} <= 1 ? 'full' : (${rowCountVar} === 2 ? 'half' : 'third')]`;
+  // Calculate flexible width like the preview does
+  const widgetStyle = `{{...styles.card, flexBasis: \`calc((100% - \${Math.min(3, ${rowCountVar}) - 1}*8px) / \${Math.min(3, ${rowCountVar})})\`}}`;
 
   switch (t) {
     case "kpi-card":
@@ -239,7 +237,7 @@ const buildWidgetJSX = (w, rowCountVar) => {
     case "orders-kpi":
     case "customers-kpi":
       return `
-        <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
+        <div key="${w.id}" style=${widgetStyle}>
           <div style={styles.title}>${title}</div>
           <div style={styles.kpiRow}>
             <div style={styles.kpiValue}>
@@ -255,7 +253,7 @@ const buildWidgetJSX = (w, rowCountVar) => {
 
     case "data-table":
       return `
-        <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
+        <div key="${w.id}" style=${widgetStyle}>
           <div style={styles.title}>${title}</div>
           <table style={styles.table}>
             <thead>
@@ -280,7 +278,7 @@ const buildWidgetJSX = (w, rowCountVar) => {
 
     case "professional-table":
       return `
-        <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
+        <div key="${w.id}" style=${widgetStyle}>
           <div style={styles.title}>${title}</div>
           <table style={styles.table}>
             <thead>
@@ -306,7 +304,7 @@ const buildWidgetJSX = (w, rowCountVar) => {
     // recharts-based
     case "line-chart":
       return `
-        <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
+        <div key="${w.id}" style=${widgetStyle}>
           <div style={styles.title}>${title}</div>
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={${dataVar}}>
@@ -323,7 +321,7 @@ const buildWidgetJSX = (w, rowCountVar) => {
 
     case "bar-chart":
       return `
-        <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
+        <div key="${w.id}" style=${widgetStyle}>
           <div style={styles.title}>${title}</div>
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={${dataVar}}>
@@ -340,7 +338,7 @@ const buildWidgetJSX = (w, rowCountVar) => {
 
     case "gradient-bar-chart":
       return `
-        <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
+        <div key="${w.id}" style=${widgetStyle}>
           <div style={styles.title}>${title}</div>
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={${dataVar}}>
@@ -363,7 +361,7 @@ const buildWidgetJSX = (w, rowCountVar) => {
 
     case "area-chart":
       return `
-        <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
+        <div key="${w.id}" style=${widgetStyle}>
           <div style={styles.title}>${title}</div>
           <ResponsiveContainer width="100%" height={260}>
             <AreaChart data={${dataVar}}>
@@ -385,7 +383,7 @@ const buildWidgetJSX = (w, rowCountVar) => {
 
     case "pie-chart":
       return `
-        <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
+        <div key="${w.id}" style=${widgetStyle}>
           <div style={styles.title}>${title}</div>
           <ResponsiveContainer width="100%" height={260}>
             <PieChart>
@@ -404,7 +402,7 @@ const buildWidgetJSX = (w, rowCountVar) => {
     case "funnel-chart":
       // Use Recharts Funnel components when available
       return `
-        <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
+        <div key="${w.id}" style=${widgetStyle}>
           <div style={styles.title}>${title}</div>
           <ResponsiveContainer width="100%" height={260}>
             <FunnelChart>
@@ -420,7 +418,7 @@ const buildWidgetJSX = (w, rowCountVar) => {
     case "smooth-funnel-chart":
       // Smooth look by using gradient fill and label list
       return `
-        <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
+        <div key="${w.id}" style=${widgetStyle}>
           <div style={styles.title}>${title}</div>
           <ResponsiveContainer width="100%" height={260}>
             <FunnelChart>
@@ -441,7 +439,7 @@ const buildWidgetJSX = (w, rowCountVar) => {
 
     case "professional-bar-chart":
       return `
-        <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
+        <div key="${w.id}" style=${widgetStyle}>
           <div style={styles.title}>${title}</div>
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={${dataVar}}>
@@ -458,7 +456,7 @@ const buildWidgetJSX = (w, rowCountVar) => {
 
     case "advanced-filter-bar":
       return `
-        <div key="${w.id}" style={{...styles.card, ...styles.full}}>
+        <div key="${w.id}" style={{...styles.card, flexBasis: '100%'}}>
           <div style={{ ...styles.title, marginBottom: 12 }}>${title}</div>
           <div style={{ display:'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 12 }}>
             <div>
@@ -503,7 +501,7 @@ const buildWidgetJSX = (w, rowCountVar) => {
 
     default:
       return `
-        <div key="${w.id}" style={{...styles.card, ...${sizeKey}}}>
+        <div key="${w.id}" style=${widgetStyle}>
           <div style={styles.title}>${title}</div>
           <div style={styles.subtitle}>Unsupported widget type: ${t}</div>
         </div>
@@ -552,16 +550,22 @@ export function generateDashboardCode(
 
   const stylesLiteral = inlineStylesObjectLiteral();
 
+  // Build row count declarations
+  const rowCountDeclarations = Object.entries(rowsMap)
+    .map(([rowId, list]) => {
+      const rowCountVar = `rowCount_${rowId.replace(/-/g, "_")}`;
+      return `const ${rowCountVar} = ${list.length};`;
+    })
+    .join("\n  ");
+
   // Build per-row JSX
   const rowsJSX = Object.entries(rowsMap)
     .map(([rowId, list]) => {
       const rowCountVar = `rowCount_${rowId.replace(/-/g, "_")}`;
-      const rowCountDecl = `const ${rowCountVar} = ${list.length};`;
       const widgetsJSX = list
         .map((w) => buildWidgetJSX(w, rowCountVar))
         .join("\n");
       return `
-      ${rowCountDecl}
       <div key="${rowId}" style={styles.row}>
         ${widgetsJSX}
       </div>
@@ -596,6 +600,9 @@ export default function ${componentName}() {
   // ----- inline data -----
 ${dataBlocksInline}
 
+  // ----- row count variables -----
+  ${rowCountDeclarations}
+
   return (
     <div style={styles.page}>
       <div style={styles.container}>
@@ -606,7 +613,7 @@ ${dataBlocksInline}
         <div style={styles.row}>
           ${Object.values(rowsMap)
             .flat()
-            .map((w) => buildWidgetJSX(w, "3"))
+            .map((w) => buildWidgetJSX(w, `${Object.values(rowsMap).flat().length}`))
             .join("\n")}
         </div>`
         }
