@@ -65,6 +65,7 @@ const styles = {
     background: "var(--panel)",
     borderRight: "1px solid var(--border)",
     overflowY: "auto",
+    height: "100vh",
   },
   canvas: {
     flex: 1,

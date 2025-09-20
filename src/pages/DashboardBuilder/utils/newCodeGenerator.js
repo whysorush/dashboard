@@ -229,7 +229,7 @@ const buildWidgetJSX = (w, rowCountVar) => {
   const title = (w.config && w.config.title) || t;
   const dataVar = `data_${w.id.replace(/-/g, "_")}`;
   // Calculate flexible width like the preview does
-  const widgetStyle = `{{...styles.card, flexBasis: \`calc((100% - \${Math.min(3, ${rowCountVar}) - 1}*8px) / \${Math.min(3, ${rowCountVar})})\`}}`;
+  const widgetStyle = `{{...styles.card, flexBasis: \`calc((100% - \${Math.min(4, ${rowCountVar}) - 1}*8px) / \${Math.min(4, ${rowCountVar})})\`}}`;
 
   switch (t) {
     case "kpi-card":

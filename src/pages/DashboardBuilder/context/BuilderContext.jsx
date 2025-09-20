@@ -56,7 +56,7 @@ export const BuilderProvider = ({ children }) => {
     const rowWidgets = widgetsDraft.filter((w) => w.position.rowId === rowId);
     const count = rowWidgets.length;
     if (count === 0) return widgetsDraft;
-    const size = count === 1 ? "large" : count === 2 ? "medium" : "small";
+    const size = count === 1 ? "large" : count === 2 ? "medium" : count === 3 ? "small" : "extra-small";
     return widgetsDraft.map((w) =>
       w.position.rowId === rowId
         ? { ...w, position: { ...w.position, size } }
@@ -91,15 +91,25 @@ export const BuilderProvider = ({ children }) => {
         (w) => w.position.rowId === targetRowId
       );
 
-      // Enforce max widgets per row: 2
-      if (rowWidgets.length >= 2) {
-        if (typeof window !== "undefined") window.alert("This row already has the maximum of 2 widgets.");
-        return null;
+      // Enforce max widgets per row based on widget type
+      const isKpi = KPI_WIDGET_TYPES.includes(type);
+      const hasAnyKpi = rowWidgets.some(w => KPI_WIDGET_TYPES.includes(w.type));
+      
+      if (isKpi || hasAnyKpi) {
+        // KPI rows can have up to 4 widgets
+        if (rowWidgets.length >= 4) {
+          if (typeof window !== "undefined") window.alert("This row already has the maximum of 4 KPI widgets.");
+          return null;
+        }
+      } else {
+        // Non-KPI rows can have up to 2 widgets
+        if (rowWidgets.length >= 2) {
+          if (typeof window !== "undefined") window.alert("This row already has the maximum of 2 widgets.");
+          return null;
+        }
       }
 
-      const isKpi = KPI_WIDGET_TYPES.includes(type);
       const isFilter = type === WIDGET_TYPES.ADVANCED_FILTER_BAR;
-      const hasAnyKpi = rowWidgets.some(w => KPI_WIDGET_TYPES.includes(w.type));
       const hasAnyFilter = rowWidgets.some(w => w.type === WIDGET_TYPES.ADVANCED_FILTER_BAR);
       const hasAnyNonKpiNonFilter = rowWidgets.some(
         w => !KPI_WIDGET_TYPES.includes(w.type) && w.type !== WIDGET_TYPES.ADVANCED_FILTER_BAR
@@ -142,13 +152,15 @@ export const BuilderProvider = ({ children }) => {
       }
 
       const nextIndex =
-        position?.index ?? Math.max(0, Math.min(rowWidgets.length, 2));
+        position?.index ?? Math.max(0, Math.min(rowWidgets.length, 4));
       const nextRowSize =
         rowWidgets.length === 0
           ? "large"
           : rowWidgets.length === 1
           ? "medium"
-          : "small";
+          : rowWidgets.length === 2
+          ? "small"
+          : "extra-small";
 
       const newWidget = {
         id: generateUniqueId(),
@@ -216,6 +228,34 @@ export const BuilderProvider = ({ children }) => {
     [widgets, saveToHistory]
   );
 
+  const updateWidgetProperty = useCallback(
+    (widgetId, path, value) => {
+      const next = widgets.map((w) => {
+        if (w.id !== widgetId) return w;
+        
+        const updated = { ...w };
+        const pathParts = path.split('.');
+        let current = updated;
+        
+        // Navigate to the parent of the target property
+        for (let i = 0; i < pathParts.length - 1; i++) {
+          const part = pathParts[i];
+          if (!current[part]) current[part] = {};
+          current[part] = { ...current[part] };
+          current = current[part];
+        }
+        
+        // Set the final property
+        current[pathParts[pathParts.length - 1]] = value;
+        return updated;
+      });
+      
+      setWidgets(next);
+      saveToHistory(next);
+    },
+    [widgets, saveToHistory]
+  );
+
   const updateWidgetRowPosition = useCallback(
     (widgetId, newRowId, newIndex) => {
       const moving = widgets.find(w => w.id === widgetId);
@@ -230,10 +270,19 @@ export const BuilderProvider = ({ children }) => {
         w => !KPI_WIDGET_TYPES.includes(w.type) && w.type !== WIDGET_TYPES.ADVANCED_FILTER_BAR
       );
 
-      // Enforce max widgets per row on destination: 2
-      if (destinationWidgets.length >= 2) {
-        if (typeof window !== "undefined") window.alert("This row already has the maximum of 2 widgets.");
-        return; // disallow move
+      // Enforce max widgets per row on destination based on widget type
+      if (isKpi || hasAnyKpi) {
+        // KPI rows can have up to 4 widgets
+        if (destinationWidgets.length >= 4) {
+          if (typeof window !== "undefined") window.alert("This row already has the maximum of 4 KPI widgets.");
+          return; // disallow move
+        }
+      } else {
+        // Non-KPI rows can have up to 2 widgets
+        if (destinationWidgets.length >= 2) {
+          if (typeof window !== "undefined") window.alert("This row already has the maximum of 2 widgets.");
+          return; // disallow move
+        }
       }
 
       // Enforce KPI limit when moving into a row
@@ -308,15 +357,25 @@ export const BuilderProvider = ({ children }) => {
       const rowId = base.position.rowId;
       const rowWidgets = widgets.filter((w) => w.position.rowId === rowId);
 
-      // Enforce max widgets per row on duplicate: 2
-      if (rowWidgets.length >= 2) {
-        if (typeof window !== "undefined") window.alert("This row already has the maximum of 2 widgets.");
-        return null;
+      // Enforce max widgets per row on duplicate based on widget type
+      const isKpi = KPI_WIDGET_TYPES.includes(base.type);
+      const hasAnyKpi = rowWidgets.some(w => KPI_WIDGET_TYPES.includes(w.type));
+      
+      if (isKpi || hasAnyKpi) {
+        // KPI rows can have up to 4 widgets
+        if (rowWidgets.length >= 4) {
+          if (typeof window !== "undefined") window.alert("This row already has the maximum of 4 KPI widgets.");
+          return null;
+        }
+      } else {
+        // Non-KPI rows can have up to 2 widgets
+        if (rowWidgets.length >= 2) {
+          if (typeof window !== "undefined") window.alert("This row already has the maximum of 2 widgets.");
+          return null;
+        }
       }
 
-      const isKpi = KPI_WIDGET_TYPES.includes(base.type);
       const isFilter = base.type === WIDGET_TYPES.ADVANCED_FILTER_BAR;
-      const hasAnyKpi = rowWidgets.some(w => KPI_WIDGET_TYPES.includes(w.type));
       const hasAnyFilter = rowWidgets.some(w => w.type === WIDGET_TYPES.ADVANCED_FILTER_BAR);
       const hasAnyNonKpiNonFilter = rowWidgets.some(
         w => !KPI_WIDGET_TYPES.includes(w.type) && w.type !== WIDGET_TYPES.ADVANCED_FILTER_BAR
@@ -531,6 +590,7 @@ export const BuilderProvider = ({ children }) => {
     addWidget,
     removeWidget,
     updateWidget,
+    updateWidgetProperty,
     updateWidgetRowPosition,
     duplicateWidget,
     toggleLockWidget,

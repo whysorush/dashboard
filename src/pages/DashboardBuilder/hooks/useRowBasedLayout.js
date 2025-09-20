@@ -37,7 +37,7 @@ export const useRowBasedLayout = () => {
       if (count === 0) return;
       
       // Determine size class based on count
-      const sizeClass = count === 1 ? 'large' : count === 2 ? 'medium' : 'small';
+      const sizeClass = count === 1 ? 'large' : count === 2 ? 'medium' : count <= 4 ? 'small' : 'extra-small';
       
       // Update all widgets in this row
       rowWidgets.forEach(widget => {
@@ -59,6 +59,8 @@ export const useRowBasedLayout = () => {
         return 'flex-1 w-1/2';
       case 'small':
         return 'flex-1 w-1/3';
+      case 'extra-small':
+        return 'flex-1 w-1/4';
       default:
         return 'flex-1 w-full';
     }
@@ -75,20 +77,29 @@ export const useRowBasedLayout = () => {
         return 50;
       case 'small':
         return 33.33;
+      case 'extra-small':
+        return 25;
       default:
         return 100;
     }
   }, []);
 
-  // Existing: number of chart widgets allowed in a row (max 3)
+  // Updated: number of widgets allowed in a row based on widget type
   const getMaxWidgetsPerRow = useCallback((rowId) => {
     const rowWidgets = widgetsByRow[rowId] || [];
-    const chartWidgets = rowWidgets.filter(w => w.type.includes('chart'));
+    const kpiWidgets = rowWidgets.filter(w => KPI_WIDGET_TYPES.includes(w.type));
+    const hasAnyKpi = kpiWidgets.length > 0;
+    const hasAnyNonKpi = rowWidgets.some(w => !KPI_WIDGET_TYPES.includes(w.type));
     
-    // If there are already 3 chart widgets, no more can be added
-    if (chartWidgets.length >= 3) return 0;
-    
-    return 3 - chartWidgets.length;
+    if (hasAnyKpi) {
+      // KPI rows can have up to 4 widgets total
+      if (rowWidgets.length >= 4) return 0;
+      return 4 - rowWidgets.length;
+    } else {
+      // Non-KPI rows can have up to 2 widgets total
+      if (rowWidgets.length >= 2) return 0;
+      return 2 - rowWidgets.length;
+    }
   }, [widgetsByRow]);
 
   // New: number of KPI widgets allowed in a row (max 4)

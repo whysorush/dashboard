@@ -358,7 +358,12 @@ const ComponentPalette = ({ styleMode = "light", accordionMode = false }) => {
   const categories = useMemo(() => Object.entries(WIDGET_CATEGORIES), []);
 
   return (
-    <div style={(S.root(t), S.sectionWrap(t, true))}>
+    <div 
+    
+    style={(S.root(t), S.sectionWrap(t, true))}
+    
+    
+    >
       <div style={S.header(t)}>
         <div style={S.headerLeft}>
           <FiLayout size={18} />

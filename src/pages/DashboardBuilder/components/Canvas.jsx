@@ -50,10 +50,18 @@ const Canvas = () => {
       const hasAnyKpi = rowWidgets.some(w => KPI_WIDGET_TYPES.includes(w.type));
       const hasAnyNonKpi = rowWidgets.some(w => !KPI_WIDGET_TYPES.includes(w.type));
 
-      // KPI capacity check
-      if (isKpi) {
-        const kpiCount = rowWidgets.filter(w => KPI_WIDGET_TYPES.includes(w.type)).length;
-        if (kpiCount >= 4) return;
+      // Row capacity check based on widget type
+      if (isKpi || hasAnyKpi) {
+        // KPI rows can have up to 4 widgets
+        if (count >= 4) return;
+        // KPI capacity check
+        if (isKpi) {
+          const kpiCount = rowWidgets.filter(w => KPI_WIDGET_TYPES.includes(w.type)).length;
+          if (kpiCount >= 4) return;
+        }
+      } else {
+        // Non-KPI rows can have up to 2 widgets
+        if (count >= 2) return;
       }
 
       // Exclusivity check
@@ -65,7 +73,7 @@ const Canvas = () => {
           rowId,
           row: rows.findIndex((r) => r.id === rowId),
           index: count,
-          size: count >= 2 ? "small" : count === 1 ? "medium" : "large",
+          size: count >= 3 ? "small" : count >= 1 ? "medium" : "large",
         },
         rowId
       );
@@ -238,7 +246,7 @@ const Canvas = () => {
               Add a row first, then add charts to it!
             </p>
             <p className="text-sm text-gray-400 dark:text-gray-600 mb-4">
-              1 chart = full width • 2 charts = half each • 3 charts = third each
+              1 widget = full width • 2 widgets = half each • 3 widgets = third each • 4 KPI widgets = quarter each
             </p>
             <button
               onClick={addRow}
@@ -260,7 +268,9 @@ const Canvas = () => {
                 ? "flex-1 w-full"
                 : rowWidgets.length === 2
                 ? "flex-1 w-1/2"
-                : "flex-1 w-1/3";
+                : rowWidgets.length === 3
+                ? "flex-1 w-1/3"
+                : "flex-1 w-1/4";
 
             return (
               <RowContainer
@@ -282,7 +292,9 @@ const Canvas = () => {
                           ? "calc(100% - 8px)"
                           : rowWidgets.length === 2
                           ? "calc(50% - 16px)"
-                          : "calc(33.333% - 16px)",
+                          : rowWidgets.length === 3
+                          ? "calc(33.333% - 16px)"
+                          : "calc(25% - 16px)",
                       height: "100%",
                     }}
                   >
@@ -308,7 +320,7 @@ const Canvas = () => {
         <div className="absolute inset-0 border-2 border-dashed border-blue-500 bg-blue-500 bg-opacity-10 pointer-events-none rounded-lg">
           <div className="flex items-center justify-center h-full">
             <p className="text-blue-600 dark:text-blue-400 font-semibold text-lg">
-              Drop chart here — charts auto-resize per row
+              Drop widget here — widgets auto-resize per row
             </p>
           </div>
         </div>

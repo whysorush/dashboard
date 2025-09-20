@@ -45,7 +45,7 @@ const RowContainer = ({ row, children, isSelected, onAddWidget, canAddMore = tru
           </button>
         ) : (
           <div className="flex items-center text-xs px-2 py-1 bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded cursor-not-allowed"
-            title="Max 3 charts/row; Max 4 KPI cards/row; KPI rows cannot mix with other types"
+            title="Max 2 widgets/row for charts; Max 4 widgets/row for KPIs; KPI rows cannot mix with other types"
           >
             <FiAlertCircle className="mr-1" size={12} /> Max Reached
           </div>
