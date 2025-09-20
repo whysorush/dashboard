@@ -21,7 +21,6 @@ import ProfessionalTableWidget from "../widgets/ProfessionalTableWidget";
 import AdvancedFilterBarWidget from "../widgets/AdvancedFilterBarWidget";
 
 // Import exact design professional widgets
-import ProfessionalBarChartWidget from "../widgets/ProfessionalBarChartWidget";
 
 import { WIDGET_TYPES } from "../../constants";
 
@@ -101,8 +100,7 @@ const DashboardPreview = ({
         return <DataTableWidget {...props} />;
 
       //optional widgets
-      case WIDGET_TYPES.PROFESSIONAL_BAR_CHART:
-        return <ProfessionalBarChartWidget {...props} />;
+     
       case WIDGET_TYPES.PROFESSIONAL_KPI_CARD:
         return <ProfessionalKPIWidget {...props} />;
 

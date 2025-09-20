@@ -25,7 +25,6 @@ import GradientBarChartWidget from "./widgets/GradientBarChartWidget";
 import SmoothFunnelChartWidget from "./widgets/SmoothFunnelChartWidget";
 import ProfessionalTableWidget from "./widgets/ProfessionalTableWidget";
 import AdvancedFilterBarWidget from "./widgets/AdvancedFilterBarWidget";
-import ProfessionalBarChartWidget from "./widgets/ProfessionalBarChartWidget";
 
 const Canvas = () => {
   const {
@@ -185,8 +184,7 @@ const Canvas = () => {
           return <SmoothFunnelChartWidget {...props} />;
         case WIDGET_TYPES.PROFESSIONAL_TABLE:
           return <ProfessionalTableWidget {...props} />;
-        case WIDGET_TYPES.PROFESSIONAL_BAR_CHART:
-          return <ProfessionalBarChartWidget {...props} />;
+    
         case WIDGET_TYPES.PROFESSIONAL_KPI_CARD:
         case WIDGET_TYPES.PROFESSIONAL_KPI:
           return <ProfessionalKPIWidget {...props} />;

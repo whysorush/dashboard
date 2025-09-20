@@ -1,15 +1,15 @@
 // src/pages/DashboardBuilder/components/PropertiesPanel/index.jsx
-import React, { useState } from 'react';
-import { FiX, FiChevronDown, FiChevronRight } from 'react-icons/fi';
-import { useBuilder } from '../../context/BuilderContext';
-import { WIDGET_TYPES } from '../../constants';
-import GeneralProperties from './GeneralProperties';
-import DataProperties from './DataProperties';
-import StyleProperties from './StyleProperties';
-import KPIProperties from './KPIProperties';
-import GradientChartProperties from './GradientChartProperties';
-import ProfessionalBarChartProperties from './ProfessionalBarChartProperties';
-import ProfessionalKPIProperties from './ProfessionalKPIProperties';
+import React, { useState } from "react";
+import { FiX, FiChevronDown, FiChevronRight } from "react-icons/fi";
+import { useBuilder } from "../../context/BuilderContext";
+import { WIDGET_TYPES } from "../../constants";
+import GeneralProperties from "./GeneralProperties";
+import DataProperties from "./DataProperties";
+import StyleProperties from "./StyleProperties";
+import KPIProperties from "./KPIProperties";
+import GradientChartProperties from "./GradientChartProperties";
+import ProfessionalBarChartProperties from "./ProfessionalBarChartProperties";
+import ProfessionalKPIProperties from "./ProfessionalKPIProperties";
 
 const PropertiesPanel = ({ onClose }) => {
   const { widgets, selectedWidget, updateWidgetProperty } = useBuilder();
@@ -19,17 +19,17 @@ const PropertiesPanel = ({ onClose }) => {
     style: true,
     kpi: true,
     professionalBar: true,
-    professionalKPI: true
+    professionalKPI: true,
   });
 
-  const widget = widgets.find(w => w.id === selectedWidget);
-  
+  const widget = widgets.find((w) => w.id === selectedWidget);
+
   if (!widget) return null;
 
   const toggleSection = (section) => {
-    setExpandedSections(prev => ({
+    setExpandedSections((prev) => ({
       ...prev,
-      [section]: !prev[section]
+      [section]: !prev[section],
     }));
   };
 
@@ -42,82 +42,87 @@ const PropertiesPanel = ({ onClose }) => {
     WIDGET_TYPES.PROFESSIONAL_KPI,
     WIDGET_TYPES.REVENUE_KPI,
     WIDGET_TYPES.ORDERS_KPI,
-    WIDGET_TYPES.CUSTOMERS_KPI
+    WIDGET_TYPES.CUSTOMERS_KPI,
   ].includes(widget.type);
-  
+
   const isGradientChart = [
     WIDGET_TYPES.GRADIENT_BAR_CHART,
-    WIDGET_TYPES.SMOOTH_FUNNEL_CHART
+    WIDGET_TYPES.SMOOTH_FUNNEL_CHART,
   ].includes(widget.type);
-  
+
   const isBasicChart = [
     WIDGET_TYPES.LINE_CHART,
     WIDGET_TYPES.BAR_CHART,
     WIDGET_TYPES.AREA_CHART,
     WIDGET_TYPES.PIE_CHART,
-    WIDGET_TYPES.FUNNEL_CHART
+    WIDGET_TYPES.FUNNEL_CHART,
   ].includes(widget.type);
-  
+
   // New exact design widgets
-  const isProfessionalBarChart = widget.type === WIDGET_TYPES.PROFESSIONAL_BAR_CHART;
-  const isProfessionalKPICard = widget.type === WIDGET_TYPES.PROFESSIONAL_KPI_CARD;
-  
+  const isProfessionalKPICard =
+    widget.type === WIDGET_TYPES.PROFESSIONAL_KPI_CARD;
+
   const sections = [
     {
-      id: 'general',
-      title: 'General',
-      icon: '⚙️',
-      component: GeneralProperties
+      id: "general",
+      title: "General",
+      icon: "⚙️",
+      component: GeneralProperties,
     },
     {
-      id: 'professionalBar',
-      title: 'Professional Bar Chart',
-      icon: '📊',
+      id: "professionalBar",
+      title: "Professional Bar Chart",
+      icon: "📊",
       component: ProfessionalBarChartProperties,
-      show: isProfessionalBarChart
+      show: isProfessionalBarChart,
     },
     {
-      id: 'professionalKPI',
-      title: 'Professional KPI',
-      icon: '💰',
+      id: "professionalKPI",
+      title: "Professional KPI",
+      icon: "💰",
       component: ProfessionalKPIProperties,
-      show: isProfessionalKPICard
+      show: isProfessionalKPICard,
     },
     {
-      id: 'kpi',
-      title: 'KPI Properties',
-      icon: '💰',
+      id: "kpi",
+      title: "KPI Properties",
+      icon: "💰",
       component: KPIProperties,
-      show: isProfessionalKPI
+      show: isProfessionalKPI,
     },
     {
-      id: 'gradient',
-      title: 'Chart Properties',
-      icon: '🎨',
+      id: "gradient",
+      title: "Chart Properties",
+      icon: "🎨",
       component: GradientChartProperties,
-      show: isGradientChart
+      show: isGradientChart,
     },
     {
-      id: 'data',
-      title: 'Data',
-      icon: '📊',
+      id: "data",
+      title: "Data",
+      icon: "📊",
       component: DataProperties,
-      show: !isProfessionalKPI && !isProfessionalBarChart && !isProfessionalKPICard // Hide for professional widgets
+      show:
+        !isProfessionalKPI && !isProfessionalBarChart && !isProfessionalKPICard, // Hide for professional widgets
     },
     {
-      id: 'style',
-      title: 'Style',
-      icon: '🎨',
+      id: "style",
+      title: "Style",
+      icon: "🎨",
       component: StyleProperties,
-      show: !isProfessionalKPI && !isGradientChart && !isProfessionalBarChart && !isProfessionalKPICard // Hide for professional widgets
+      show:
+        !isProfessionalKPI &&
+        !isGradientChart &&
+        !isProfessionalBarChart &&
+        !isProfessionalKPICard, // Hide for professional widgets
     },
     {
-      id: 'basicKpi',
-      title: 'KPIs',
-      icon: '📈',
+      id: "basicKpi",
+      title: "KPIs",
+      icon: "📈",
       component: KPIProperties,
-      show: isBasicChart || widget.type === 'kpi-card'
-    }
+      show: isBasicChart || widget.type === "kpi-card",
+    },
   ];
 
   return (
@@ -129,7 +134,9 @@ const PropertiesPanel = ({ onClose }) => {
             Widget Properties
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            {widget.type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+            {widget.type
+              .replace("-", " ")
+              .replace(/\b\w/g, (l) => l.toUpperCase())}
           </p>
         </div>
         <button
@@ -142,13 +149,16 @@ const PropertiesPanel = ({ onClose }) => {
 
       {/* Properties Sections */}
       <div className="flex-1 overflow-y-auto">
-        {sections.map(section => {
+        {sections.map((section) => {
           if (section.show === false) return null;
-          
+
           const SectionComponent = section.component;
-          
+
           return (
-            <div key={section.id} className="border-b border-gray-200 dark:border-gray-700">
+            <div
+              key={section.id}
+              className="border-b border-gray-200 dark:border-gray-700"
+            >
               {/* Section Header */}
               <button
                 onClick={() => toggleSection(section.id)}
@@ -186,9 +196,9 @@ const PropertiesPanel = ({ onClose }) => {
       <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
         <button
           onClick={() => {
-            if (window.confirm('Reset all properties to default values?')) {
+            if (window.confirm("Reset all properties to default values?")) {
               // Reset logic here
-              console.log('Reset properties');
+              console.log("Reset properties");
             }
           }}
           className="w-full px-4 py-2 text-sm text-gray-600 dark:text-gray-400 
