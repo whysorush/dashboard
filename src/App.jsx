@@ -10,8 +10,8 @@ import "./index.css";
 import "./App.css";
 
 // Lazy load components for better performance with preloading
-const DashboardBuilder = lazy(() => 
-  import("./pages/DashboardBuilder").then(module => {
+const DashboardBuilder = lazy(() =>
+  import("./pages/DashboardBuilder").then((module) => {
     // Preload related components
     import("./pages/DashboardBuilder/components/Canvas");
     import("./pages/DashboardBuilder/components/ComponentPalette");
@@ -28,17 +28,20 @@ const Sidebar = lazy(() => import("./components/Sidebar"));
 const StatCards = lazy(() => import("./components/StatCard"));
 
 // Lazy load dashboard widgets with preloading
-const SmoothFunnelChartWidget = lazy(() => 
+const SmoothFunnelChartWidget = lazy(() =>
   import("./pages/DashboardBuilder/components/widgets/SmoothFunnelChartWidget")
 );
-const GradientBarChartWidget = lazy(() => 
+const GradientBarChartWidget = lazy(() =>
   import("./pages/DashboardBuilder/components/widgets/GradientBarChartWidget")
 );
-const AdvancedFilterBarWidget = lazy(() => 
+const AdvancedFilterBarWidget = lazy(() =>
   import("./pages/DashboardBuilder/components/widgets/AdvancedFilterBarWidget")
 );
-const ProfessionalTableWidget = lazy(() => 
+const ProfessionalTableWidget = lazy(() =>
   import("./pages/DashboardBuilder/components/widgets/ProfessionalTableWidget")
+);
+const PieChartWidget = lazy(() =>
+  import("./pages/DashboardBuilder/components/widgets/PieChartWidget")
 );
 
 const styles = {
@@ -104,11 +107,11 @@ const DashboardLayout = memo(() => {
         <Suspense fallback={<HeaderFallback />}>
           <Header />
         </Suspense>
-        
+
         <Suspense fallback={<FilterFallback />}>
           <AdvancedFilterBarWidget />
         </Suspense>
-        
+
         <Suspense fallback={<StatCardsFallback />}>
           <StatCards />
         </Suspense>
@@ -120,6 +123,9 @@ const DashboardLayout = memo(() => {
           <Suspense fallback={<ChartFallback />}>
             <SmoothFunnelChartWidget />
           </Suspense>
+          <Suspense fallback={<ChartFallback />}>
+            <PieChartWidget />
+          </Suspense>
         </section>
 
         <Suspense fallback={<TableFallback />}>
@@ -130,7 +136,7 @@ const DashboardLayout = memo(() => {
   );
 });
 
-DashboardLayout.displayName = 'DashboardLayout';
+DashboardLayout.displayName = "DashboardLayout";
 
 function App() {
   return (
@@ -146,17 +152,19 @@ function App() {
               </main>
             }
           />
-          <Route 
-            path="/dashboard-builder" 
+          <Route
+            path="/dashboard-builder"
             element={
-              <Suspense fallback={
-                <div className="flex items-center justify-center h-screen">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-                </div>
-              }>
+              <Suspense
+                fallback={
+                  <div className="flex items-center justify-center h-screen">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                  </div>
+                }
+              >
                 <DashboardBuilder />
               </Suspense>
-            } 
+            }
           />
         </Routes>
       </Router>

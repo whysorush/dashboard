@@ -16,10 +16,13 @@ import KPIDisplay from "./KPIDisplay";
 import FilterBar from "./FilterBar";
 import { generateMockData, calculateKPIs } from "../../utils/mockDataGenerator";
 import { useTheme } from "../../../../context/ThemeContext";
+import { useGlobalColors } from "../../../../hooks/useGlobalColors";
 
 const MultiLineChartWidget = ({ widget }) => {
   // Get theme configuration
   const { themeConfig, styleMode } = useTheme();
+  // Get global colors
+  const globalColors = useGlobalColors();
   // Memoize configuration values to prevent unnecessary recalculations
   const config = useMemo(() => ({
     dataPoints: widget.config?.dataPoints || 12,
@@ -91,12 +94,13 @@ const MultiLineChartWidget = ({ widget }) => {
     return size === "large" ? 350 : size === "medium" ? 300 : 250;
   }, [widget.position?.size]);
 
-  // Memoize series configuration with theme-aware colors
+  // Memoize series configuration with global colors support
   const seriesConfig = useMemo(() => {
+    // Use global colors with fallbacks
     const defaultColors = [
-      themeConfig?.primary || "#27D0FC",
-      themeConfig?.secondary || "#10B981",
-      themeConfig?.accent || "#F59E0B",
+      globalColors.primary,
+      globalColors.secondary,
+      globalColors.accent,
     ];
     
     return {
@@ -105,7 +109,7 @@ const MultiLineChartWidget = ({ widget }) => {
       names: config.seriesNames,
       count: config.seriesCount,
     };
-  }, [themeConfig, widget.config?.seriesColors, widget.config?.seriesStyles, config]);
+  }, [globalColors, widget.config?.seriesColors, widget.config?.seriesStyles, config]);
 
   // Calculate average for reference line (using primary series) - memoized
   const average = useMemo(() => {
@@ -202,12 +206,12 @@ const MultiLineChartWidget = ({ widget }) => {
             {average !== null && (
               <ReferenceLine
                 y={average}
-                stroke={themeConfig?.accent || "#F59E0B"}
+                stroke={globalColors.accent}
                 strokeDasharray="3 3"
                 label={{
                   value: "Average",
                   position: "insideTopRight",
-                  fill: themeConfig?.accent || "#F59E0B",
+                  fill: globalColors.accent,
                   fontSize: 12,
                   fontFamily: "var(--font-family)",
                 }}

@@ -1,3 +1,6 @@
+/* Import global colors at the top */
+@import './styles/global-colors.css';
+
 :root {
   /* Legacy variables for backward compatibility */
   --bg: #f5f5f5;
@@ -170,6 +173,8 @@ body {
 .dark ::-webkit-scrollbar-thumb:hover {
   background: #64748b;
 }
+
+/* Import global colors - moved to top */
 
 /* ================= STYLE MODE SUPPORT ================= */
 /* Professional Style Mode */

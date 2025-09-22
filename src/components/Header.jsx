@@ -2,6 +2,7 @@
 import { FaSearch, FaBell } from "react-icons/fa";
 import logo from "../assets/man.png"; // Adjust the path as necessary
 import ThemeToggle from "./ThemeToggle";
+import ColorPalette from "./ColorPalette";
 
 const styles = {
   header: {
@@ -68,6 +69,7 @@ export default function Header() {
       </div>
 
       <div style={styles.userProfile}>
+        <ColorPalette />
         <ThemeToggle />
         <FaBell style={styles.notificationIcon} />
         <div style={styles.userAvatar}>

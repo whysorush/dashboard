@@ -197,6 +197,18 @@ export const ThemeProvider = ({ children }) => {
       : STYLE_MODES.DEFAULT;
   });
 
+  const [globalColors, setGlobalColors] = useState(() => {
+    // Prefer saved global colors; otherwise default
+    const stored = (() => {
+      try {
+        return localStorage.getItem("globalColors");
+      } catch {
+        return null;
+      }
+    })();
+    return stored ? JSON.parse(stored) : null;
+  });
+
   // Update localStorage and document class when theme changes
   useEffect(() => {
     try {
@@ -217,35 +229,61 @@ export const ThemeProvider = ({ children }) => {
     } catch {}
   }, [styleMode]);
 
+  // Update localStorage when global colors change
+  useEffect(() => {
+    try {
+      if (globalColors) {
+        localStorage.setItem("globalColors", JSON.stringify(globalColors));
+      }
+    } catch {}
+  }, [globalColors]);
+
   // Memoized theme application to prevent unnecessary re-renders
   const applyTheme = useCallback(() => {
     const currentThemeConfig = THEME_CONFIGS[styleMode]?.[theme];
     if (currentThemeConfig && typeof window !== "undefined") {
       const root = document.documentElement;
 
+      // Merge global colors with theme config
+      const mergedThemeConfig = {
+        ...currentThemeConfig,
+        ...(globalColors && {
+          primary: globalColors.primary,
+          secondary: globalColors.secondary,
+          accent: globalColors.accent,
+        }),
+      };
+
       // Batch DOM updates for better performance
       requestAnimationFrame(() => {
         // Apply theme variables
-        Object.entries(currentThemeConfig).forEach(([key, value]) => {
+        Object.entries(mergedThemeConfig).forEach(([key, value]) => {
           root.style.setProperty(`--theme-${key}`, value);
         });
 
         // Apply additional CSS variables for comprehensive theming
-        root.style.setProperty("--chart-primary", currentThemeConfig.primary);
-        root.style.setProperty("--chart-secondary", currentThemeConfig.secondary);
-        root.style.setProperty("--chart-accent", currentThemeConfig.accent);
+        root.style.setProperty("--chart-primary", mergedThemeConfig.primary);
+        root.style.setProperty("--chart-secondary", mergedThemeConfig.secondary);
+        root.style.setProperty("--chart-accent", mergedThemeConfig.accent);
         root.style.setProperty(
           "--chart-background",
-          currentThemeConfig.background
+          mergedThemeConfig.background
         );
-        root.style.setProperty("--chart-surface", currentThemeConfig.surface);
-        root.style.setProperty("--chart-text", currentThemeConfig.text);
+        root.style.setProperty("--chart-surface", mergedThemeConfig.surface);
+        root.style.setProperty("--chart-text", mergedThemeConfig.text);
         root.style.setProperty(
           "--chart-text-secondary",
-          currentThemeConfig.textSecondary
+          mergedThemeConfig.textSecondary
         );
-        root.style.setProperty("--chart-border", currentThemeConfig.border);
-        root.style.setProperty("--chart-grid", currentThemeConfig.chartGrid);
+        root.style.setProperty("--chart-border", mergedThemeConfig.border);
+        root.style.setProperty("--chart-grid", mergedThemeConfig.chartGrid);
+
+        // Apply global colors as CSS custom properties
+        if (globalColors) {
+          root.style.setProperty("--global-primary", globalColors.primary);
+          root.style.setProperty("--global-secondary", globalColors.secondary);
+          root.style.setProperty("--global-accent", globalColors.accent);
+        }
 
         // Apply style mode specific variables
         const styleModeConfig = getStyleModeConfig(styleMode);
@@ -259,7 +297,7 @@ export const ThemeProvider = ({ children }) => {
           ` style-mode-${styleMode}`;
       });
     }
-  }, [theme, styleMode]);
+  }, [theme, styleMode, globalColors]);
 
   // Apply CSS custom properties based on current theme and style mode
   useEffect(() => {
@@ -323,6 +361,8 @@ export const ThemeProvider = ({ children }) => {
     setStyleMode,
     toggleTheme,
     themeConfig: currentThemeConfig,
+    globalColors,
+    setGlobalColors,
     availableStyleModes: STYLE_MODES,
     availableThemes: THEMES,
   };

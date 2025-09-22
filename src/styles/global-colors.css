@@ -1,0 +1,178 @@
+/* Global Colors CSS Variables */
+:root {
+  /* Global color variables that can be overridden */
+  --global-primary: #27D0FC;
+  --global-secondary: #10B981;
+  --global-accent: #F59E0B;
+}
+
+/* Apply global colors to all chart elements */
+.chart-container,
+.widget-container,
+.multi-line-chart-widget,
+.bar-chart-widget,
+.pie-chart-widget,
+.kpi-widget,
+.data-table-widget {
+  /* Use global colors for primary elements */
+  --chart-primary: var(--global-primary);
+  --chart-secondary: var(--global-secondary);
+  --chart-accent: var(--global-accent);
+}
+
+/* Apply global colors to buttons and interactive elements */
+button,
+.btn,
+.action-button {
+  --button-primary: var(--global-primary);
+  --button-secondary: var(--global-secondary);
+  --button-accent: var(--global-accent);
+}
+
+/* Apply global colors to form elements */
+input,
+select,
+textarea {
+  --input-primary: var(--global-primary);
+  --input-secondary: var(--global-secondary);
+  --input-accent: var(--global-accent);
+}
+
+/* Apply global colors to status indicators */
+.status-primary {
+  color: var(--global-primary);
+  background-color: color-mix(in oklab, var(--global-primary) 10%, transparent);
+}
+
+.status-secondary {
+  color: var(--global-secondary);
+  background-color: color-mix(in oklab, var(--global-secondary) 10%, transparent);
+}
+
+.status-accent {
+  color: var(--global-accent);
+  background-color: color-mix(in oklab, var(--global-accent) 10%, transparent);
+}
+
+/* Apply global colors to progress bars */
+.progress-bar {
+  background: linear-gradient(
+    90deg,
+    var(--global-primary) 0%,
+    var(--global-secondary) 50%,
+    var(--global-accent) 100%
+  );
+}
+
+/* Apply global colors to borders and highlights */
+.border-primary {
+  border-color: var(--global-primary);
+}
+
+.border-secondary {
+  border-color: var(--global-secondary);
+}
+
+.border-accent {
+  border-color: var(--global-accent);
+}
+
+/* Apply global colors to text */
+.text-primary {
+  color: var(--global-primary);
+}
+
+.text-secondary {
+  color: var(--global-secondary);
+}
+
+.text-accent {
+  color: var(--global-accent);
+}
+
+/* Apply global colors to backgrounds */
+.bg-primary {
+  background-color: var(--global-primary);
+}
+
+.bg-secondary {
+  background-color: var(--global-secondary);
+}
+
+.bg-accent {
+  background-color: var(--global-accent);
+}
+
+/* Apply global colors to hover states */
+.hover-primary:hover {
+  background-color: color-mix(in oklab, var(--global-primary) 10%, transparent);
+  color: var(--global-primary);
+}
+
+.hover-secondary:hover {
+  background-color: color-mix(in oklab, var(--global-secondary) 10%, transparent);
+  color: var(--global-secondary);
+}
+
+.hover-accent:hover {
+  background-color: color-mix(in oklab, var(--global-accent) 10%, transparent);
+  color: var(--global-accent);
+}
+
+/* Apply global colors to focus states */
+.focus-primary:focus {
+  outline-color: var(--global-primary);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--global-primary) 20%, transparent);
+}
+
+.focus-secondary:focus {
+  outline-color: var(--global-secondary);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--global-secondary) 20%, transparent);
+}
+
+.focus-accent:focus {
+  outline-color: var(--global-accent);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--global-accent) 20%, transparent);
+}
+
+/* Apply global colors to selection states */
+.selected-primary {
+  background-color: color-mix(in oklab, var(--global-primary) 20%, transparent);
+  border-color: var(--global-primary);
+}
+
+.selected-secondary {
+  background-color: color-mix(in oklab, var(--global-secondary) 20%, transparent);
+  border-color: var(--global-secondary);
+}
+
+.selected-accent {
+  background-color: color-mix(in oklab, var(--global-accent) 20%, transparent);
+  border-color: var(--global-accent);
+}
+
+/* Apply global colors to gradients */
+.gradient-primary {
+  background: linear-gradient(135deg, var(--global-primary), color-mix(in oklab, var(--global-primary) 80%, white));
+}
+
+.gradient-secondary {
+  background: linear-gradient(135deg, var(--global-secondary), color-mix(in oklab, var(--global-secondary) 80%, white));
+}
+
+.gradient-accent {
+  background: linear-gradient(135deg, var(--global-accent), color-mix(in oklab, var(--global-accent) 80%, white));
+}
+
+/* Apply global colors to shadows */
+.shadow-primary {
+  box-shadow: 0 4px 6px -1px color-mix(in oklab, var(--global-primary) 20%, transparent);
+}
+
+.shadow-secondary {
+  box-shadow: 0 4px 6px -1px color-mix(in oklab, var(--global-secondary) 20%, transparent);
+}
+
+.shadow-accent {
+  box-shadow: 0 4px 6px -1px color-mix(in oklab, var(--global-accent) 20%, transparent);
+}
