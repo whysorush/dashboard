@@ -3,6 +3,7 @@
 export const WIDGET_TYPES = {
   // Basic widgets
   LINE_CHART: "line-chart",
+  MULTI_LINE_CHART: "multi-line-chart",
   BAR_CHART: "bar-chart",
   AREA_CHART: "area-chart",
   PIE_CHART: "pie-chart",
@@ -135,6 +136,13 @@ export const WIDGET_CATEGORIES = {
         defaultSize: { w: 6, h: 4 },
       },
       {
+        type: WIDGET_TYPES.MULTI_LINE_CHART,
+        label: "Multi-Line Chart",
+        icon: "📈",
+        description: "Compare multiple data series over time",
+        defaultSize: { w: 6, h: 4 },
+      },
+      {
         type: WIDGET_TYPES.BAR_CHART,
         label: "Bar Chart",
         icon: "📊",
@@ -193,7 +201,7 @@ export const WIDGET_CATEGORIES = {
 };
 
 export const COLOR_SCHEMES = [
-  { name: "Blue", value: "#3B82F6" },
+  { name: "Blue", value: "#27D0FC" },
   { name: "Green", value: "#10B981" },
   { name: "Purple", value: "#8B5CF6" },
   { name: "Orange", value: "#F97316" },
@@ -270,7 +278,7 @@ export const DEFAULT_WIDGET_CONFIG = {
   showLegend: true,
   showGrid: true,
   animations: true,
-  color: "#3B82F6",
+  color: "#27D0FC",
   dataPoints: 12,
   refreshInterval: 0,
   aggregation: "sum",
@@ -300,7 +308,7 @@ export const PROFESSIONAL_KPI_CONFIGS = {
     growth: 2.6,
     icon: "📦",
     iconBgColor: "rgba(59, 130, 246, 0.1)", // Blue bg with opacity
-    iconColor: "#3B82F6", // Blue
+    iconColor: "#27D0FC", // Blue
     subtitle: "from last week",
     formatType: "number",
   },

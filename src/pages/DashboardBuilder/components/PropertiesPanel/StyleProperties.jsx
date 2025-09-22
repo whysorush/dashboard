@@ -36,7 +36,7 @@ const StyleProperties = ({ widget, onChange }) => {
         <div className="mt-2">
           <input
             type="color"
-            value={widget.config?.color || '#3B82F6'}
+            value={widget.config?.color || '#27D0FC'}
             onChange={(e) => onChange('config.color', e.target.value)}
             className="w-full h-10 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer"
             title="Choose custom color"

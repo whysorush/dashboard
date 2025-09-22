@@ -100,7 +100,7 @@ const KPIDisplay = ({ metrics, config, position = 'top' }) => {
                     <svg className="w-full h-full">
                       <polyline
                         fill="none"
-                        stroke={config?.color || '#3B82F6'}
+                        stroke={config?.color || '#27D0FC'}
                         strokeWidth="2"
                         points="0,20 20,15 40,18 60,10 80,12 100,5"
                         className="opacity-50"

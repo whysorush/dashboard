@@ -1,3 +1,4 @@
+import React, { lazy, Suspense, memo } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -5,21 +6,40 @@ import {
   Navigate,
 } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
-import DashboardBuilder from "./pages/DashboardBuilder";
-import BarChartBox from "./components/BarChart";
-import DataTable from "./components/DataTable";
-import Filters from "./components/Filters";
-import Header from "./components/Header";
-import Sidebar from "./components/Sidebar";
-import StatCards from "./components/StatCard";
 import "./index.css";
 import "./App.css";
 
-import React from "react";
-import SmoothFunnelChartWidget from "./pages/DashboardBuilder/components/widgets/SmoothFunnelChartWidget";
-import GradientBarChartWidget from "./pages/DashboardBuilder/components/widgets/GradientBarChartWidget";
-import AdvancedFilterBarWidget from "./pages/DashboardBuilder/components/widgets/AdvancedFilterBarWidget";
-import ProfessionalTableWidget from "./pages/DashboardBuilder/components/widgets/ProfessionalTableWidget";
+// Lazy load components for better performance with preloading
+const DashboardBuilder = lazy(() => 
+  import("./pages/DashboardBuilder").then(module => {
+    // Preload related components
+    import("./pages/DashboardBuilder/components/Canvas");
+    import("./pages/DashboardBuilder/components/ComponentPalette");
+    return module;
+  })
+);
+
+// Lazy load dashboard components with better chunking
+const BarChartBox = lazy(() => import("./components/BarChart"));
+const DataTable = lazy(() => import("./components/DataTable"));
+const Filters = lazy(() => import("./components/Filters"));
+const Header = lazy(() => import("./components/Header"));
+const Sidebar = lazy(() => import("./components/Sidebar"));
+const StatCards = lazy(() => import("./components/StatCard"));
+
+// Lazy load dashboard widgets with preloading
+const SmoothFunnelChartWidget = lazy(() => 
+  import("./pages/DashboardBuilder/components/widgets/SmoothFunnelChartWidget")
+);
+const GradientBarChartWidget = lazy(() => 
+  import("./pages/DashboardBuilder/components/widgets/GradientBarChartWidget")
+);
+const AdvancedFilterBarWidget = lazy(() => 
+  import("./pages/DashboardBuilder/components/widgets/AdvancedFilterBarWidget")
+);
+const ProfessionalTableWidget = lazy(() => 
+  import("./pages/DashboardBuilder/components/widgets/ProfessionalTableWidget")
+);
 
 const styles = {
   dashboardContainer: {
@@ -46,28 +66,71 @@ const styles = {
   },
 };
 
-function DashboardLayout() {
+// Memoized loading fallback components
+const SidebarFallback = memo(() => (
+  <div className="animate-pulse bg-gray-200 h-full w-full rounded"></div>
+));
+
+const HeaderFallback = memo(() => (
+  <div className="animate-pulse bg-gray-200 h-16 w-full rounded mb-4"></div>
+));
+
+const FilterFallback = memo(() => (
+  <div className="animate-pulse bg-gray-200 h-12 w-full rounded mb-4"></div>
+));
+
+const StatCardsFallback = memo(() => (
+  <div className="animate-pulse bg-gray-200 h-24 w-full rounded mb-4"></div>
+));
+
+const ChartFallback = memo(() => (
+  <div className="animate-pulse bg-gray-200 h-64 w-full rounded"></div>
+));
+
+const TableFallback = memo(() => (
+  <div className="animate-pulse bg-gray-200 h-96 w-full rounded"></div>
+));
+
+const DashboardLayout = memo(() => {
   return (
     <div style={styles.dashboardContainer}>
       <aside style={styles.sidebar}>
-        <Sidebar />
+        <Suspense fallback={<SidebarFallback />}>
+          <Sidebar />
+        </Suspense>
       </aside>
 
       <main style={styles.mainContent}>
-        <Header />
-        <AdvancedFilterBarWidget />
-        <StatCards />
+        <Suspense fallback={<HeaderFallback />}>
+          <Header />
+        </Suspense>
+        
+        <Suspense fallback={<FilterFallback />}>
+          <AdvancedFilterBarWidget />
+        </Suspense>
+        
+        <Suspense fallback={<StatCardsFallback />}>
+          <StatCards />
+        </Suspense>
 
         <section style={styles.chartsSection}>
-          <GradientBarChartWidget />
-          <SmoothFunnelChartWidget />
+          <Suspense fallback={<ChartFallback />}>
+            <GradientBarChartWidget />
+          </Suspense>
+          <Suspense fallback={<ChartFallback />}>
+            <SmoothFunnelChartWidget />
+          </Suspense>
         </section>
 
-        <ProfessionalTableWidget />
+        <Suspense fallback={<TableFallback />}>
+          <ProfessionalTableWidget />
+        </Suspense>
       </main>
     </div>
   );
-}
+});
+
+DashboardLayout.displayName = 'DashboardLayout';
 
 function App() {
   return (
@@ -83,7 +146,18 @@ function App() {
               </main>
             }
           />
-          <Route path="/dashboard-builder" element={<DashboardBuilder />} />
+          <Route 
+            path="/dashboard-builder" 
+            element={
+              <Suspense fallback={
+                <div className="flex items-center justify-center h-screen">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                </div>
+              }>
+                <DashboardBuilder />
+              </Suspense>
+            } 
+          />
         </Routes>
       </Router>
     </ThemeProvider>

@@ -7,8 +7,19 @@ import BaseWidget from './BaseWidget';
 import KPIDisplay from './KPIDisplay';
 import FilterBar from './FilterBar';
 import { generateMockData, calculateKPIs } from '../../utils/mockDataGenerator';
+import { useThemeStyles } from '../../../../utils/themeUtils';
 
 const BarChartWidget = ({ widget, isSelected, onClick }) => {
+  const {
+    getChartColors,
+    getStyleProperties,
+    getCSSVariables,
+    getChartHeight,
+    getColorPalette,
+    getTooltipStyle,
+    getAnimationConfig
+  } = useThemeStyles();
+
   // Generate realistic data based on widget config
   const data = useMemo(() => {
     return generateMockData('categories', {
@@ -27,14 +38,17 @@ const BarChartWidget = ({ widget, isSelected, onClick }) => {
     console.log('Filter changed:', key, value);
   };
 
-  // Calculate height based on widget size
-  const chartHeight = useMemo(() => {
-    const size = widget.position?.size || 'medium';
-    return size === 'large' ? 350 : size === 'medium' ? 300 : 250;
-  }, [widget.position?.size]);
+  // Get theme-aware colors and styles
+  const colors = getChartColors();
+  const styleProps = getStyleProperties();
+  const cssVariables = getCSSVariables();
+  const chartHeight = getChartHeight(widget.position?.size || 'medium');
+  const colorPalette = getColorPalette();
+  const tooltipStyle = getTooltipStyle();
+  const animationConfig = getAnimationConfig(widget.config?.animations !== false);
 
   // Determine bar color and styles
-  const primaryColor = widget.config?.color || '#3B82F6';
+  const primaryColor = widget.config?.color || colors.primary;
   const secondaryColor = `${primaryColor}88`; // 50% opacity version
 
   return (
@@ -47,7 +61,14 @@ const BarChartWidget = ({ widget, isSelected, onClick }) => {
         />
       )}
 
-      <div style={{ width: '100%', height: chartHeight }}>
+      <div 
+        style={{ 
+          width: '100%', 
+          height: chartHeight,
+          ...cssVariables
+        }}
+        className="chart-container"
+      >
         <ResponsiveContainer>
           <BarChart
             data={data}
@@ -58,36 +79,38 @@ const BarChartWidget = ({ widget, isSelected, onClick }) => {
             {widget.config?.showGrid !== false && (
               <CartesianGrid 
                 strokeDasharray="3 3" 
-                className="stroke-gray-200 dark:stroke-gray-700"
+                stroke={colors.grid}
                 vertical={false}
               />
             )}
             <XAxis 
               dataKey="name"
-              tick={{ fontSize: 12 }}
-              className="text-gray-600 dark:text-gray-400"
-              axisLine={{ stroke: '#e5e7eb' }}
+              tick={{ 
+                fontSize: 12,
+                fill: colors.textSecondary
+              }}
+              axisLine={{ stroke: colors.border }}
               tickLine={false}
             />
             <YAxis 
-              tick={{ fontSize: 12 }}
-              className="text-gray-600 dark:text-gray-400"
+              tick={{ 
+                fontSize: 12,
+                fill: colors.textSecondary
+              }}
               axisLine={false}
               tickLine={false}
               width={30}
             />
             <Tooltip
-              contentStyle={{
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                border: '1px solid #e5e7eb',
-                borderRadius: '0.375rem',
-                boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
-              }}
+              contentStyle={tooltipStyle}
               cursor={{ fill: 'rgba(0,0,0,0.05)' }}
             />
             {widget.config?.showLegend !== false && (
               <Legend 
-                wrapperStyle={{ paddingTop: 10 }}
+                wrapperStyle={{ 
+                  paddingTop: 10,
+                  color: colors.text
+                }}
                 iconType="circle"
               />
             )}
@@ -95,8 +118,8 @@ const BarChartWidget = ({ widget, isSelected, onClick }) => {
               name="Current Period"
               dataKey="value"
               fill={primaryColor}
-              radius={[4, 4, 0, 0]}
-              animationDuration={widget.config?.animations !== false ? 1500 : 0}
+              radius={[parseInt(styleProps.borderRadius), parseInt(styleProps.borderRadius), 0, 0]}
+              animationDuration={animationConfig.duration}
               maxBarSize={60}
             />
             {widget.config?.comparisonPeriod && (
@@ -104,8 +127,8 @@ const BarChartWidget = ({ widget, isSelected, onClick }) => {
                 name="Previous Period"
                 dataKey="previousValue"
                 fill={secondaryColor}
-                radius={[4, 4, 0, 0]}
-                animationDuration={widget.config?.animations !== false ? 1500 : 0}
+                radius={[parseInt(styleProps.borderRadius), parseInt(styleProps.borderRadius), 0, 0]}
+                animationDuration={animationConfig.duration}
                 maxBarSize={60}
               />
             )}
@@ -114,7 +137,7 @@ const BarChartWidget = ({ widget, isSelected, onClick }) => {
                 name="Secondary Metric"
                 dataKey="value2"
                 fill={secondaryColor}
-                radius={[4, 4, 0, 0]}
+                radius={[parseInt(styleProps.borderRadius), parseInt(styleProps.borderRadius), 0, 0]}
                 stackId="stack"
               />
             )}

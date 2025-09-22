@@ -38,7 +38,6 @@ const styles = {
  * Funnel Chart Widget (Recharts FunnelChart)
  */
 const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
-  console.log("widgettttttttttttttt", widget);
   const config = widget?.config || {
     id: "widget-1757576664743-8kc63guf7",
     type: "smooth-funnel-chart",

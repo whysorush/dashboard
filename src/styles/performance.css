@@ -1,0 +1,242 @@
+/* Performance-optimized CSS */
+
+/* Reduce layout thrashing */
+* {
+  box-sizing: border-box;
+}
+
+/* Optimize font loading */
+@font-face {
+  font-family: 'Inter';
+  font-display: swap;
+  src: url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+}
+
+/* Optimize animations */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Optimize transforms */
+.transform {
+  will-change: transform;
+}
+
+.hover\:scale-\[1\.02\]:hover {
+  transform: scale(1.02);
+  transition: transform 0.2s ease;
+}
+
+/* Optimize scrolling */
+.overflow-auto {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Optimize images */
+img {
+  max-width: 100%;
+  height: auto;
+  loading: lazy;
+}
+
+/* Optimize canvas rendering */
+.canvas-container {
+  contain: layout style paint;
+  will-change: transform;
+}
+
+/* Optimize widget rendering */
+.widget-wrapper {
+  contain: layout style paint;
+  will-change: transform;
+}
+
+/* Optimize chart rendering */
+.recharts-wrapper {
+  contain: layout style paint;
+}
+
+/* Optimize grid layouts */
+.grid {
+  contain: layout;
+}
+
+/* Optimize flex layouts */
+.flex {
+  contain: layout;
+}
+
+/* Optimize text rendering */
+.text-optimized {
+  text-rendering: optimizeSpeed;
+  font-smooth: antialiased;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Optimize shadows */
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Optimize borders */
+.border {
+  border-width: 1px;
+  border-style: solid;
+}
+
+/* Optimize rounded corners */
+.rounded {
+  border-radius: 0.25rem;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+/* Optimize transitions */
+.transition {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Optimize focus states */
+.focus\:ring-2:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+/* Optimize dark mode */
+@media (prefers-color-scheme: dark) {
+  .dark {
+    color-scheme: dark;
+  }
+}
+
+/* Optimize print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-optimized {
+    color: black !important;
+    background: white !important;
+  }
+}
+
+/* Optimize reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Optimize high contrast mode */
+@media (prefers-contrast: high) {
+  .high-contrast {
+    border: 2px solid;
+    background: white;
+    color: black;
+  }
+}
+
+/* Optimize for mobile */
+@media (max-width: 768px) {
+  .mobile-optimized {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  
+  .mobile-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+/* Optimize for tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .tablet-optimized {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+}
+
+/* Optimize for desktop */
+@media (min-width: 1025px) {
+  .desktop-optimized {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+}
+
+/* Performance monitoring classes */
+.perf-monitor {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 12px;
+  z-index: 9999;
+  display: none;
+}
+
+.perf-monitor.show {
+  display: block;
+}
+
+/* Optimize loading states */
+.loading-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Optimize error states */
+.error-boundary {
+  border: 2px solid #ef4444;
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+/* Optimize success states */
+.success-state {
+  border: 2px solid #10b981;
+  background: #f0fdf4;
+  color: #059669;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}

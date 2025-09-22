@@ -11,7 +11,6 @@ import { PROFESSIONAL_KPI_CONFIGS } from "../../constants";
  */
 
 const RevenueKPIWidget = ({ widget, isSelected, onClick }) => {
-  console.log("revenue widget", widget);
 
   // Merge default Revenue KPI config with any custom config
   const mergedConfig = {

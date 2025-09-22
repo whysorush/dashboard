@@ -7,8 +7,19 @@ import BaseWidget from './BaseWidget';
 import KPIDisplay from './KPIDisplay';
 import FilterBar from './FilterBar';
 import { generateMockData, calculateKPIs } from '../../utils/mockDataGenerator';
+import { useThemeStyles } from '../../../../utils/themeUtils';
 
 const FunnelChartWidget = ({ widget, isSelected, onClick }) => {
+  const {
+    getChartColors,
+    getStyleProperties,
+    getCSSVariables,
+    getChartHeight,
+    getColorPalette,
+    getTooltipStyle,
+    getAnimationConfig
+  } = useThemeStyles();
+
   const data = useMemo(() => {
     return generateMockData('funnel', {
       stages: 5
@@ -40,13 +51,14 @@ const FunnelChartWidget = ({ widget, isSelected, onClick }) => {
     console.log('Filter changed:', key, value);
   };
 
-  const COLORS = [
-    '#3B82F6',
-    '#60A5FA', 
-    '#93C5FD',
-    '#BFDBFE',
-    '#DBEAFE'
-  ];
+  // Get theme-aware colors and styles
+  const colors = getChartColors();
+  const styleProps = getStyleProperties();
+  const cssVariables = getCSSVariables();
+  const chartHeight = getChartHeight(widget.position?.size || 'medium');
+  const colorPalette = getColorPalette(5);
+  const tooltipStyle = getTooltipStyle();
+  const animationConfig = getAnimationConfig(widget.config?.animations !== false);
 
   return (
     <BaseWidget widget={widget} isSelected={isSelected} onClick={onClick}>
@@ -58,15 +70,18 @@ const FunnelChartWidget = ({ widget, isSelected, onClick }) => {
         />
       )}
 
-      <div style={{ width: '100%', height: 250 }}>
+      <div 
+        style={{ 
+          width: '100%', 
+          height: chartHeight,
+          ...cssVariables
+        }}
+        className="chart-container"
+      >
         <ResponsiveContainer>
           <FunnelChart>
             <Tooltip
-              contentStyle={{
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                border: '1px solid #e5e7eb',
-                borderRadius: '0.375rem'
-              }}
+              contentStyle={tooltipStyle}
             />
             <Funnel
               dataKey="value"
@@ -75,7 +90,7 @@ const FunnelChartWidget = ({ widget, isSelected, onClick }) => {
             >
               <LabelList 
                 position="center" 
-                fill="#fff"
+                fill={colors.text}
                 formatter={(value) => `${value.toLocaleString()}`}
               />
               {data.map((entry, index) => (
@@ -83,7 +98,7 @@ const FunnelChartWidget = ({ widget, isSelected, onClick }) => {
                   key={`cell-${index}`}
                   fill={widget.config?.color ? 
                     `${widget.config.color}${Math.floor((1 - index * 0.15) * 255).toString(16).padStart(2, '0')}` : 
-                    COLORS[index % COLORS.length]
+                    colorPalette[index % colorPalette.length]
                   }
                 />
               ))}

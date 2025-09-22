@@ -179,7 +179,7 @@ const generateMockDataCode = (widgets) => {
     dataSets.push(`const ${dataName} = ${JSON.stringify(data, null, 2)};`);
   });
   
-  const pieColors = usePieChart ? "const CHART_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];" : '';
+  const pieColors = usePieChart ? "const CHART_COLORS = ['#27D0FC', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];" : '';
   
   return `// Mock Data
 ${dataSets.join('\n\n')}
@@ -472,7 +472,7 @@ const formatKPIValue = (value, type) => {
 
 // Enhanced chart code generation with style mode support
 const generateChartCode = (type, dataName, config, styleMode) => {
-  const color = config?.color || '#3B82F6';
+  const color = config?.color || '#27D0FC';
   const containerStyle = styleMode === 'inline' ? 
     'style={{width: "100%", height: "250px"}}' : 
     styleMode === 'css' ? 'className="chart-container"' :

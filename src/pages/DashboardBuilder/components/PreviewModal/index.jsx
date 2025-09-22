@@ -24,7 +24,7 @@ const styles = {
     boxShadow: "0 10px 25px rgba(0, 0, 0, 0.3)",
     maxWidth: "100%",
     maxHeight: "90%",
-    width: "auto",
+    width: "90%",
     overflow: "hidden",
     animation: "slideIn 0.3s ease-out",
   },
@@ -117,13 +117,6 @@ const PopupModal = ({
             layout={layout}
           />
           {children}
-
-          {/* <Canvas /> */}
-
-          {console.log("widgetsssssssssssssss", widgets)}
-          {console.log("rowssssssssssssssss", rows)}
-          {console.log("themeeeeeeeeeeeeeeeeeeeeeee", theme)}
-          {console.log("layoutttttttttttttttttttttttttttttttt", layout)}
         </div>
       </div>
     </div>

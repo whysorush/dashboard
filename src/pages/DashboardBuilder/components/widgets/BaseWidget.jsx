@@ -1,8 +1,8 @@
 // src/pages/DashboardBuilder/components/widgets/BaseWidget.jsx
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { FiMoreVertical, FiRefreshCw } from 'react-icons/fi';
 
-const BaseWidget = ({ 
+const BaseWidget = memo(({ 
   widget, 
   isSelected, 
   onClick, 
@@ -10,7 +10,7 @@ const BaseWidget = ({
   loading = false, 
   error = null 
 }) => {
-  const getBorderStyle = () => {
+  const borderStyle = useMemo(() => {
     switch (widget.config?.borderStyle) {
       case 'none':
         return 'border-0';
@@ -23,23 +23,23 @@ const BaseWidget = ({
       default:
         return 'border';
     }
-  };
+  }, [widget.config?.borderStyle]);
 
-  const getOpacity = () => {
+  const opacity = useMemo(() => {
     return widget.config?.opacity || 1;
-  };
+  }, [widget.config?.opacity]);
 
   return (
     <div
       className={`widget-wrapper group relative h-full bg-white dark:bg-gray-800 rounded-lg 
                 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer
-                ${getBorderStyle()} border-gray-200 dark:border-gray-700
+                ${borderStyle} border-gray-200 dark:border-gray-700
                 ${isSelected ? 'ring-2 ring-blue-500 shadow-lg' : ''}
                 ${widget.locked ? 'cursor-not-allowed' : ''}
                 hover:transform hover:scale-[1.02]`}
       onClick={onClick}
       style={{ 
-        opacity: getOpacity(),
+        opacity,
         fontFamily: "'Figtree', sans-serif"
       }}
     >
@@ -108,6 +108,8 @@ const BaseWidget = ({
       )}
     </div>
   );
-};
+});
+
+BaseWidget.displayName = 'BaseWidget';
 
 export default BaseWidget;

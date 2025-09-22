@@ -18,6 +18,8 @@ import {
 import createReferenceDashboard from "./templates/referenceTemplate";
 // import "./styles/builder.css";
 import PopupModal from "./components/PreviewModal";
+import ThemeToggle from "../../components/ThemeToggle";
+import StyleModeSelector from "../../components/StyleModeSelector";
 
 const styles = {
   container: {
@@ -115,6 +117,8 @@ const DashboardBuilderContent = () => {
 
           {/* Header Actions */}
           <div style={styles.actions}>
+            <StyleModeSelector />
+            <ThemeToggle />
             <button
               onClick={() => setShowPreview(true)}
               style={styles.button("#3b82f6")}
@@ -148,12 +152,16 @@ const DashboardBuilderContent = () => {
                 const row1 = addRow();
                 const row2 = addRow();
                 const row3 = addRow();
+                const row4 = addRow();
+                const row5 = addRow();
                 addWidget(WIDGET_TYPES.ADVANCED_FILTER_BAR, null, row1);
                 addWidget(WIDGET_TYPES.REVENUE_KPI, null, row2);
                 addWidget(WIDGET_TYPES.ORDERS_KPI, null, row2);
                 addWidget(WIDGET_TYPES.CUSTOMERS_KPI, null, row2);
-                addWidget(WIDGET_TYPES.GRADIENT_BAR_CHART, null, row3);
-                addWidget(WIDGET_TYPES.SMOOTH_FUNNEL_CHART, null, row3);
+                addWidget(WIDGET_TYPES.LINE_CHART, null, row3);
+                addWidget(WIDGET_TYPES.MULTI_LINE_CHART, null, row3);
+                addWidget(WIDGET_TYPES.GRADIENT_BAR_CHART, null, row4);
+                addWidget(WIDGET_TYPES.SMOOTH_FUNNEL_CHART, null, row4);
               }}
               style={styles.button("#f59e0b")}
               title="Quick Start with Sample Dashboard"

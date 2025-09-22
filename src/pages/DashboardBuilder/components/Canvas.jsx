@@ -1,5 +1,5 @@
 // src/pages/DashboardBuilder/components/Canvas.jsx
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, lazy, Suspense, memo, useMemo } from "react";
 import { useDrop } from "react-dnd";
 import { useBuilder } from "../context/BuilderContext";
 import useRowBasedLayout from "../hooks/useRowBasedLayout";
@@ -7,24 +7,25 @@ import RowContainer from "./RowContainer";
 import RowManager from "./RowManager";
 import { WIDGET_TYPES, KPI_WIDGET_TYPES } from "../constants";
 
-// Basic widgets
-import LineChartWidget from "./widgets/LineChartWidget";
-import BarChartWidget from "./widgets/BarChartWidget";
-import AreaChartWidget from "./widgets/AreaChartWidget";
-import PieChartWidget from "./widgets/PieChartWidget";
-import FunnelChartWidget from "./widgets/FunnelChartWidget";
-import KPICardWidget from "./widgets/KPICardWidget";
-import DataTableWidget from "./widgets/DataTableWidget";
+// Lazy load widgets for better performance
+const LineChartWidget = lazy(() => import("./widgets/LineChartWidget"));
+const MultiLineChartWidget = lazy(() => import("./widgets/MultiLineChartWidget"));
+const BarChartWidget = lazy(() => import("./widgets/BarChartWidget"));
+const AreaChartWidget = lazy(() => import("./widgets/AreaChartWidget"));
+const PieChartWidget = lazy(() => import("./widgets/PieChartWidget"));
+const FunnelChartWidget = lazy(() => import("./widgets/FunnelChartWidget"));
+const KPICardWidget = lazy(() => import("./widgets/KPICardWidget"));
+const DataTableWidget = lazy(() => import("./widgets/DataTableWidget"));
 
 // Professional widgets
-import ProfessionalKPIWidget from "./widgets/ProfessionalKPIWidget";
-import RevenueKPIWidget from "./widgets/RevenueKPIWidget";
-import OrdersKPIWidget from "./widgets/OrdersKPIWidget";
-import CustomersKPIWidget from "./widgets/CustomersKPIWidget";
-import GradientBarChartWidget from "./widgets/GradientBarChartWidget";
-import SmoothFunnelChartWidget from "./widgets/SmoothFunnelChartWidget";
-import ProfessionalTableWidget from "./widgets/ProfessionalTableWidget";
-import AdvancedFilterBarWidget from "./widgets/AdvancedFilterBarWidget";
+const ProfessionalKPIWidget = lazy(() => import("./widgets/ProfessionalKPIWidget"));
+const RevenueKPIWidget = lazy(() => import("./widgets/RevenueKPIWidget"));
+const OrdersKPIWidget = lazy(() => import("./widgets/OrdersKPIWidget"));
+const CustomersKPIWidget = lazy(() => import("./widgets/CustomersKPIWidget"));
+const GradientBarChartWidget = lazy(() => import("./widgets/GradientBarChartWidget"));
+const SmoothFunnelChartWidget = lazy(() => import("./widgets/SmoothFunnelChartWidget"));
+const ProfessionalTableWidget = lazy(() => import("./widgets/ProfessionalTableWidget"));
+const AdvancedFilterBarWidget = lazy(() => import("./widgets/AdvancedFilterBarWidget"));
 
 const Canvas = () => {
   const {
@@ -167,59 +168,66 @@ const Canvas = () => {
     }),
   });
 
-  // Render a widget by type
+  // Memoized widget component map for better performance
+  const widgetComponentMap = useMemo(() => ({
+    [WIDGET_TYPES.ADVANCED_FILTER_BAR]: AdvancedFilterBarWidget,
+    [WIDGET_TYPES.REVENUE_KPI]: RevenueKPIWidget,
+    [WIDGET_TYPES.ORDERS_KPI]: OrdersKPIWidget,
+    [WIDGET_TYPES.CUSTOMERS_KPI]: CustomersKPIWidget,
+    [WIDGET_TYPES.GRADIENT_BAR_CHART]: GradientBarChartWidget,
+    [WIDGET_TYPES.SMOOTH_FUNNEL_CHART]: SmoothFunnelChartWidget,
+    [WIDGET_TYPES.PROFESSIONAL_TABLE]: ProfessionalTableWidget,
+    [WIDGET_TYPES.PROFESSIONAL_KPI_CARD]: ProfessionalKPIWidget,
+    [WIDGET_TYPES.PROFESSIONAL_KPI]: ProfessionalKPIWidget,
+    [WIDGET_TYPES.LINE_CHART]: LineChartWidget,
+    [WIDGET_TYPES.MULTI_LINE_CHART]: MultiLineChartWidget,
+    [WIDGET_TYPES.BAR_CHART]: BarChartWidget,
+    [WIDGET_TYPES.AREA_CHART]: AreaChartWidget,
+    [WIDGET_TYPES.PIE_CHART]: PieChartWidget,
+    [WIDGET_TYPES.FUNNEL_CHART]: FunnelChartWidget,
+    [WIDGET_TYPES.KPI_CARD]: KPICardWidget,
+    [WIDGET_TYPES.DATA_TABLE]: DataTableWidget,
+  }), []);
+
+  // Memoized widget renderer
+  const WidgetRenderer = memo(({ widget, isSelected, onClick }) => {
+    const WidgetComponent = widgetComponentMap[widget.type];
+
+    if (!WidgetComponent) {
+      return (
+        <div className="widget-placeholder p-4 border-2 border-dashed border-gray-300 rounded-lg">
+          <p className="text-gray-500">Unknown widget type: {widget.type}</p>
+        </div>
+      );
+    }
+
+    return (
+      <Suspense fallback={
+        <div className="widget-loading p-4 border-2 border-dashed border-gray-300 rounded-lg">
+          <div className="flex items-center justify-center h-32">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          </div>
+        </div>
+      }>
+        <WidgetComponent 
+          widget={widget}
+          isSelected={isSelected}
+          onClick={onClick}
+        />
+      </Suspense>
+    );
+  });
+
+  // Render a widget by type with Suspense for lazy loading
   const renderWidget = useCallback(
     (widget) => {
-      const props = {
-        widget,
-        isSelected: selectedWidget === widget.id,
-        onClick: () => setSelectedWidget(widget.id),
-      };
-
-      switch (widget.type) {
-        // Professional / advanced
-        case WIDGET_TYPES.ADVANCED_FILTER_BAR:
-          return <AdvancedFilterBarWidget {...props} />;
-        case WIDGET_TYPES.REVENUE_KPI:
-          return <RevenueKPIWidget {...props} />;
-        case WIDGET_TYPES.ORDERS_KPI:
-          return <OrdersKPIWidget {...props} />;
-        case WIDGET_TYPES.CUSTOMERS_KPI:
-          return <CustomersKPIWidget {...props} />;
-        case WIDGET_TYPES.GRADIENT_BAR_CHART:
-          return <GradientBarChartWidget {...props} />;
-        case WIDGET_TYPES.SMOOTH_FUNNEL_CHART:
-          return <SmoothFunnelChartWidget {...props} />;
-        case WIDGET_TYPES.PROFESSIONAL_TABLE:
-          return <ProfessionalTableWidget {...props} />;
-    
-        case WIDGET_TYPES.PROFESSIONAL_KPI_CARD:
-        case WIDGET_TYPES.PROFESSIONAL_KPI:
-          return <ProfessionalKPIWidget {...props} />;
-
-        // Basic
-        case WIDGET_TYPES.LINE_CHART:
-          return <LineChartWidget {...props} />;
-        case WIDGET_TYPES.BAR_CHART:
-          return <BarChartWidget {...props} />;
-        case WIDGET_TYPES.AREA_CHART:
-          return <AreaChartWidget {...props} />;
-        case WIDGET_TYPES.PIE_CHART:
-          return <PieChartWidget {...props} />;
-        case WIDGET_TYPES.FUNNEL_CHART:
-          return <FunnelChartWidget {...props} />;
-        case WIDGET_TYPES.KPI_CARD:
-          return <KPICardWidget {...props} />;
-        case WIDGET_TYPES.DATA_TABLE:
-          return <DataTableWidget {...props} />;
-
-        default:
-          return (
-            <div className="widget-placeholder p-4 border-2 border-dashed border-gray-300 rounded-lg">
-              <p className="text-gray-500">Unknown widget type: {widget.type}</p>
-            </div>
-          );
-      }
+      return (
+        <WidgetRenderer
+          widget={widget}
+          isSelected={selectedWidget === widget.id}
+          onClick={() => setSelectedWidget(widget.id)}
+        />
+      );
     },
     [selectedWidget, setSelectedWidget]
   );

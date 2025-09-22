@@ -7,8 +7,19 @@ import BaseWidget from './BaseWidget';
 import KPIDisplay from './KPIDisplay';
 import FilterBar from './FilterBar';
 import { generateMockData, calculateKPIs } from '../../utils/mockDataGenerator';
+import { useThemeStyles } from '../../../../utils/themeUtils';
 
 const AreaChartWidget = ({ widget, isSelected, onClick }) => {
+  const {
+    getChartColors,
+    getStyleProperties,
+    getCSSVariables,
+    getChartHeight,
+    getGradientColors,
+    getTooltipStyle,
+    getAnimationConfig
+  } = useThemeStyles();
+
   const data = useMemo(() => {
     return generateMockData('time-series', {
       points: widget.config?.dataPoints || 12,
@@ -24,6 +35,15 @@ const AreaChartWidget = ({ widget, isSelected, onClick }) => {
     console.log('Filter changed:', key, value);
   };
 
+  // Get theme-aware colors and styles
+  const colors = getChartColors();
+  const styleProps = getStyleProperties();
+  const cssVariables = getCSSVariables();
+  const chartHeight = getChartHeight(widget.position?.size || 'medium');
+  const gradientColors = getGradientColors(widget.config?.color || colors.primary);
+  const tooltipStyle = getTooltipStyle();
+  const animationConfig = getAnimationConfig(widget.config?.animations !== false);
+
   return (
     <BaseWidget widget={widget} isSelected={isSelected} onClick={onClick}>
       {widget.config?.showKPIs !== false && (
@@ -34,7 +54,14 @@ const AreaChartWidget = ({ widget, isSelected, onClick }) => {
         />
       )}
 
-      <div style={{ width: '100%', height: 250 }}>
+      <div 
+        style={{ 
+          width: '100%', 
+          height: chartHeight,
+          ...cssVariables
+        }}
+        className="chart-container"
+      >
         <ResponsiveContainer>
           <AreaChart
             data={data}
@@ -43,33 +70,39 @@ const AreaChartWidget = ({ widget, isSelected, onClick }) => {
             {widget.config?.showGrid !== false && (
               <CartesianGrid 
                 strokeDasharray="3 3" 
-                className="stroke-gray-200 dark:stroke-gray-700"
+                stroke={colors.grid}
               />
             )}
             <XAxis 
               dataKey="name"
-              tick={{ fontSize: 12 }}
-              className="text-gray-600 dark:text-gray-400"
-            />
-            <YAxis 
-              tick={{ fontSize: 12 }}
-              className="text-gray-600 dark:text-gray-400"
-            />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                border: '1px solid #e5e7eb',
-                borderRadius: '0.375rem'
+              tick={{ 
+                fontSize: 12,
+                fill: colors.textSecondary
               }}
             />
-            {widget.config?.showLegend !== false && <Legend />}
+            <YAxis 
+              tick={{ 
+                fontSize: 12,
+                fill: colors.textSecondary
+              }}
+            />
+            <Tooltip
+              contentStyle={tooltipStyle}
+            />
+            {widget.config?.showLegend !== false && (
+              <Legend 
+                wrapperStyle={{ 
+                  color: colors.text
+                }}
+              />
+            )}
             <Area
               type={widget.config?.smoothCurves ? 'monotone' : 'linear'}
               dataKey="value"
-              stroke={widget.config?.color || '#3B82F6'}
-              fill={widget.config?.color || '#3B82F6'}
+              stroke={widget.config?.color || colors.primary}
+              fill={widget.config?.color || colors.primary}
               fillOpacity={0.6}
-              animationDuration={widget.config?.animations !== false ? 1500 : 0}
+              animationDuration={animationConfig.duration}
             />
           </AreaChart>
         </ResponsiveContainer>

@@ -77,7 +77,7 @@ export const createReferenceDashboard = () => {
         growth: 2.6,
         icon: '📦',
         iconBgColor: 'rgba(59, 130, 246, 0.1)', // Blue bg with opacity
-        iconColor: '#3B82F6', // Blue
+        iconColor: '#27D0FC', // Blue
         subtitle: 'from last week',
         formatType: 'number'
       }

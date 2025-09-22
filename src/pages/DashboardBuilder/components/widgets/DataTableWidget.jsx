@@ -3,8 +3,20 @@ import React, { useState, useMemo } from 'react';
 import { FiChevronUp, FiChevronDown, FiSearch } from 'react-icons/fi';
 import BaseWidget from './BaseWidget';
 import FilterBar from './FilterBar';
+import { useThemeStyles } from '../../../../utils/themeUtils';
 
 const DataTableWidget = ({ widget, isSelected, onClick }) => {
+  const {
+    getChartColors,
+    getStyleProperties,
+    getCSSVariables
+  } = useThemeStyles();
+
+  // Get theme-aware colors and styles
+  const colors = getChartColors();
+  const styleProps = getStyleProperties();
+  const cssVariables = getCSSVariables();
+
   const [sortField, setSortField] = useState('');
   const [sortDirection, setSortDirection] = useState('asc');
   const [searchTerm, setSearchTerm] = useState('');
@@ -93,30 +105,54 @@ const DataTableWidget = ({ widget, isSelected, onClick }) => {
       {/* Search Bar */}
       <div className="mb-4">
         <div className="relative">
-          <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <FiSearch 
+            className="absolute left-3 top-1/2 transform -translate-y-1/2" 
+            style={{ color: colors.textSecondary }}
+          />
           <input
             type="text"
             placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
-                     bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                     focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            style={{
+              borderColor: colors.border,
+              backgroundColor: colors.background,
+              color: colors.text,
+              borderRadius: styleProps.borderRadius,
+              fontFamily: styleProps.fontFamily
+            }}
           />
         </div>
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
-        <table className="w-full text-sm" style={{ fontFamily: "'Figtree', sans-serif" }}>
-          <thead className="bg-gray-50 dark:bg-gray-700">
+      <div 
+        className="overflow-x-auto rounded-lg border"
+        style={{
+          borderColor: colors.border,
+          borderRadius: styleProps.borderRadius
+        }}
+      >
+        <table 
+          className="w-full text-sm" 
+          style={{ 
+            fontFamily: styleProps.fontFamily,
+            ...cssVariables
+          }}
+        >
+          <thead style={{ backgroundColor: colors.surface }}>
             <tr>
               {columns.map(column => (
                 <th
                   key={column.key}
-                  className={`text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 
-                            ${column.sortable ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600' : ''}
-                            first:rounded-tl-lg last:rounded-tr-lg`}
+                  className={`text-left py-3 px-4 font-semibold ${
+                    column.sortable ? 'cursor-pointer hover:opacity-80' : ''
+                  }`}
+                  style={{
+                    color: colors.text,
+                    borderRadius: column.sortable ? styleProps.borderRadius : '0'
+                  }}
                   onClick={() => column.sortable && handleSort(column.key)}
                 >
                   <div className="flex items-center gap-1">
@@ -131,26 +167,41 @@ const DataTableWidget = ({ widget, isSelected, onClick }) => {
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white dark:bg-gray-800">
+          <tbody style={{ backgroundColor: colors.background }}>
             {paginatedData.map((row, index) => (
               <tr 
                 key={row.id}
-                className={`border-b border-gray-100 dark:border-gray-700 
-                          hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200
-                          ${index === paginatedData.length - 1 ? 'last:border-b-0' : ''}`}
+                className="border-b transition-colors duration-200 hover:opacity-80"
+                style={{
+                  borderBottomColor: colors.border,
+                  transitionDuration: styleProps.animationDuration
+                }}
               >
                 {columns.map(column => (
-                  <td key={column.key} className="py-3 px-4 text-gray-900 dark:text-gray-100">
+                  <td 
+                    key={column.key} 
+                    className="py-3 px-4"
+                    style={{ color: colors.text }}
+                  >
                     {column.key === 'status' ? (
-                      <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
-                        row[column.key] === 'active' 
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                          : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                      }`}>
+                      <span 
+                        className="inline-flex px-2 py-1 text-xs rounded-full"
+                        style={{
+                          backgroundColor: row[column.key] === 'active' 
+                            ? '#dcfce7' : colors.surface,
+                          color: row[column.key] === 'active' 
+                            ? '#166534' : colors.textSecondary,
+                          borderRadius: styleProps.borderRadius
+                        }}
+                      >
                         {row[column.key]}
                       </span>
                     ) : column.key === 'growth' ? (
-                      <span className={row[column.key] > 0 ? 'text-green-500' : 'text-red-500'}>
+                      <span 
+                        style={{
+                          color: row[column.key] > 0 ? '#22c55e' : '#ef4444'
+                        }}
+                      >
                         {formatValue(row[column.key], column.format)}
                       </span>
                     ) : (
@@ -165,24 +216,44 @@ const DataTableWidget = ({ widget, isSelected, onClick }) => {
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-        <div className="text-sm text-gray-500 dark:text-gray-400">
+      <div 
+        className="flex items-center justify-between mt-4 pt-4 border-t"
+        style={{
+          borderTopColor: colors.border
+        }}
+      >
+        <div 
+          className="text-sm"
+          style={{ color: colors.textSecondary }}
+        >
           Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, processedData.length)} of {processedData.length}
         </div>
         <div className="flex gap-2">
           <button
             onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}
-            className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded
-                     hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3 py-1 text-sm border rounded hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              borderColor: colors.border,
+              backgroundColor: colors.background,
+              color: colors.text,
+              borderRadius: styleProps.borderRadius,
+              fontFamily: styleProps.fontFamily
+            }}
           >
             Previous
           </button>
           <button
             onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
             disabled={currentPage === totalPages}
-            className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded
-                     hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3 py-1 text-sm border rounded hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              borderColor: colors.border,
+              backgroundColor: colors.background,
+              color: colors.text,
+              borderRadius: styleProps.borderRadius,
+              fontFamily: styleProps.fontFamily
+            }}
           >
             Next
           </button>

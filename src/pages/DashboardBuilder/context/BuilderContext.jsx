@@ -5,6 +5,8 @@ import React, {
   useState,
   useCallback,
   useEffect,
+  useMemo,
+  memo,
 } from "react";
 import { generateUniqueId } from "../utils/gridHelpers";
 import { KPI_WIDGET_TYPES, WIDGET_TYPES } from "../constants";
@@ -177,7 +179,7 @@ export const BuilderProvider = ({ children }) => {
           subtitle: "",
           showKPIs: true,
           showFilters: true,
-          color: "#3B82F6",
+          color: "#27D0FC",
           dataPoints: 12,
           refreshInterval: 0,
           aggregation: "sum",
@@ -578,15 +580,24 @@ export const BuilderProvider = ({ children }) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedWidget, undo, redo, selectAll, duplicateWidget, removeWidget]);
 
-  const value = {
+  // Split context value to reduce re-renders
+  const coreValue = useMemo(() => ({
     widgets,
     rows,
     selectedWidget,
     selectedRow,
     isDragging,
     gridConfig,
+  }), [widgets, rows, selectedWidget, selectedRow, isDragging, gridConfig]);
+
+  const historyValue = useMemo(() => ({
     history,
     historyIndex,
+    undo,
+    redo,
+  }), [history, historyIndex, undo, redo]);
+
+  const actionsValue = useMemo(() => ({
     addWidget,
     removeWidget,
     updateWidget,
@@ -601,13 +612,36 @@ export const BuilderProvider = ({ children }) => {
     reorderRows,
     recalculateRowWidgetSizes,
     loadTemplate,
-    undo,
-    redo,
     selectAll,
     setSelectedWidget,
     setSelectedRow,
     setIsDragging,
-  };
+  }), [
+    addWidget,
+    removeWidget,
+    updateWidget,
+    updateWidgetProperty,
+    updateWidgetRowPosition,
+    duplicateWidget,
+    toggleLockWidget,
+    addRow,
+    removeRow,
+    clearCanvas,
+    updateRow,
+    reorderRows,
+    recalculateRowWidgetSizes,
+    loadTemplate,
+    selectAll,
+    setSelectedWidget,
+    setSelectedRow,
+    setIsDragging,
+  ]);
+
+  const value = useMemo(() => ({
+    ...coreValue,
+    ...historyValue,
+    ...actionsValue,
+  }), [coreValue, historyValue, actionsValue]);
 
   return (
     <BuilderContext.Provider value={value}>{children}</BuilderContext.Provider>

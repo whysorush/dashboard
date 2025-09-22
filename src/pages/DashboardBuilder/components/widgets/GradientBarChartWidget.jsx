@@ -84,7 +84,6 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
 
   return (
     <div style={styles.container}>
-      {console.log("dddddddddddddddddddddddddddddddddd", data)}
       <div style={styles.header}>
         <div>
           <h3 style={styles.title}>Bar Chart</h3>

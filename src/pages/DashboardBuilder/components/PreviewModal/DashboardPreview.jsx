@@ -3,6 +3,7 @@ import React, { useMemo } from "react";
 
 // Import widget components
 import LineChartWidget from "../widgets/LineChartWidget";
+import MultiLineChartWidget from "../widgets/MultiLineChartWidget";
 import BarChartWidget from "../widgets/BarChartWidget";
 import AreaChartWidget from "../widgets/AreaChartWidget";
 import PieChartWidget from "../widgets/PieChartWidget";
@@ -83,9 +84,11 @@ const DashboardPreview = ({
       case WIDGET_TYPES.PROFESSIONAL_TABLE:
         return <ProfessionalTableWidget {...props} />;
 
-      // Basic othetrs widgets
+      // Basic other widgets
       case WIDGET_TYPES.LINE_CHART:
         return <LineChartWidget {...props} />;
+      case WIDGET_TYPES.MULTI_LINE_CHART:
+        return <MultiLineChartWidget {...props} />;
       case WIDGET_TYPES.BAR_CHART:
         return <BarChartWidget {...props} />;
       case WIDGET_TYPES.AREA_CHART:

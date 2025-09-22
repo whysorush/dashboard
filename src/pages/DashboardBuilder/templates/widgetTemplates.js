@@ -38,7 +38,7 @@ export const getWidgetTemplate = (widget, dataVariable) => {
             <Line 
               type="${config.smoothCurves ? 'monotone' : 'linear'}"
               dataKey="value" 
-              stroke="${config.color || '#3B82F6'}"
+              stroke="${config.color || '#27D0FC'}"
               strokeWidth={2}
             />
           </LineChart>
@@ -63,7 +63,7 @@ export const getWidgetTemplate = (widget, dataVariable) => {
             <Legend />
             <Bar 
               dataKey="value" 
-              fill="${config.color || '#3B82F6'}"
+              fill="${config.color || '#27D0FC'}"
               radius={[4, 4, 0, 0]}
             />
           </BarChart>
@@ -89,8 +89,8 @@ export const getWidgetTemplate = (widget, dataVariable) => {
             <Area 
               type="${config.smoothCurves ? 'monotone' : 'linear'}"
               dataKey="value" 
-              stroke="${config.color || '#3B82F6'}"
-              fill="${config.color || '#3B82F6'}"
+              stroke="${config.color || '#27D0FC'}"
+              fill="${config.color || '#27D0FC'}"
               fillOpacity={0.6}
             />
           </AreaChart>
