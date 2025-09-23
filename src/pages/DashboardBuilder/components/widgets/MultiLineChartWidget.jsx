@@ -25,22 +25,22 @@ const MultiLineChartWidget = ({ widget }) => {
   const globalColors = useGlobalColors();
   // Memoize configuration values to prevent unnecessary recalculations
   const config = useMemo(() => ({
-    dataPoints: widget.config?.dataPoints || 12,
-    trend: widget.config?.trend || "up",
-    timeRange: widget.config?.timeRange || "monthly",
-    includeComparison: widget.config?.comparisonPeriod,
-    seriesCount: widget.config?.seriesCount || 3,
-    seriesNames: widget.config?.seriesNames || ["Revenue", "Expenses", "Profit"],
-    showKPIs: widget.config?.showKPIs !== false,
-    showFilters: widget.config?.showFilters !== false,
-    showGrid: widget.config?.showGrid !== false,
-    showLegend: widget.config?.showLegend !== false,
-    showDataPoints: widget.config?.showDataPoints !== false,
-    showAverage: widget.config?.showAverage,
-    smoothCurves: widget.config?.smoothCurves !== false,
-    animations: widget.config?.animations !== false,
-    kpiPosition: widget.config?.kpiPosition || "top",
-  }), [widget.config]);
+    dataPoints: widget?.config?.dataPoints || 12,
+    trend: widget?.config?.trend || "up",
+    timeRange: widget?.config?.timeRange || "monthly",
+    includeComparison: widget?.config?.comparisonPeriod,
+    seriesCount: widget?.config?.seriesCount || 3,
+    seriesNames: widget?.config?.seriesNames || ["Revenue", "Expenses", "Profit"],
+    showKPIs: widget?.config?.showKPIs !== false,
+    showFilters: widget?.config?.showFilters !== false,
+    showGrid: widget?.config?.showGrid !== false,
+    showLegend: widget?.config?.showLegend !== false,
+    showDataPoints: widget?.config?.showDataPoints !== false,
+    showAverage: widget?.config?.showAverage,
+    smoothCurves: widget?.config?.smoothCurves !== false,
+    animations: widget?.config?.animations !== false,
+    kpiPosition: widget?.config?.kpiPosition || "top",
+  }), [widget?.config]);
 
   // Generate mock data with multiple series - optimized with stable data generation
   const data = useMemo(() => {
@@ -90,9 +90,9 @@ const MultiLineChartWidget = ({ widget }) => {
 
   // Calculate height based on widget size - memoized
   const chartHeight = useMemo(() => {
-    const size = widget.position?.size || "medium";
+    const size = widget?.position?.size || "medium";
     return size === "large" ? 350 : size === "medium" ? 300 : 250;
-  }, [widget.position?.size]);
+  }, [widget?.position?.size]);
 
   // Memoize series configuration with global colors support
   const seriesConfig = useMemo(() => {
@@ -104,12 +104,12 @@ const MultiLineChartWidget = ({ widget }) => {
     ];
     
     return {
-      colors: widget.config?.seriesColors || defaultColors,
-      styles: widget.config?.seriesStyles || ["solid", "dashed", "dotted"],
+      colors: widget?.config?.seriesColors || defaultColors,
+      styles: widget?.config?.seriesStyles || ["solid", "dashed", "dotted"],
       names: config.seriesNames,
       count: config.seriesCount,
     };
-  }, [globalColors, widget.config?.seriesColors, widget.config?.seriesStyles, config]);
+  }, [globalColors, widget?.config?.seriesColors, widget?.config?.seriesStyles, config]);
 
   // Calculate average for reference line (using primary series) - memoized
   const average = useMemo(() => {

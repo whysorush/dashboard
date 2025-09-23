@@ -11,7 +11,7 @@ const BaseWidget = memo(({
   error = null 
 }) => {
   const borderStyle = useMemo(() => {
-    switch (widget.config?.borderStyle) {
+    switch (widget?.config?.borderStyle) {
       case 'none':
         return 'border-0';
       case 'thin':
@@ -23,11 +23,11 @@ const BaseWidget = memo(({
       default:
         return 'border';
     }
-  }, [widget.config?.borderStyle]);
+  }, [widget?.config?.borderStyle]);
 
   const opacity = useMemo(() => {
-    return widget.config?.opacity || 1;
-  }, [widget.config?.opacity]);
+    return widget?.config?.opacity || 1;
+  }, [widget?.config?.opacity]);
 
   return (
     <div
@@ -35,7 +35,7 @@ const BaseWidget = memo(({
                 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer
                 ${borderStyle} border-gray-200 dark:border-gray-700
                 ${isSelected ? 'ring-2 ring-blue-500 shadow-lg' : ''}
-                ${widget.locked ? 'cursor-not-allowed' : ''}
+                ${widget?.locked ? 'cursor-not-allowed' : ''}
                 hover:transform hover:scale-[1.02]`}
       onClick={onClick}
       style={{ 
@@ -44,18 +44,18 @@ const BaseWidget = memo(({
       }}
     >
       {/* Widget Header */}
-      {(widget.config?.title || widget.config?.subtitle) && (
+      {(widget?.config?.title || widget?.config?.subtitle) && (
         <div className="widget-header px-4 pt-4 pb-2 border-b border-gray-100 dark:border-gray-700">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              {widget.config?.title && (
+              {widget?.config?.title && (
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                  {widget.config.title}
+                  {widget?.config.title}
                 </h3>
               )}
-              {widget.config?.subtitle && (
+              {widget?.config?.subtitle && (
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  {widget.config.subtitle}
+                  {widget?.config.subtitle}
                 </p>
               )}
             </div>
@@ -94,14 +94,14 @@ const BaseWidget = memo(({
       </div>
 
       {/* Locked Indicator */}
-      {widget.locked && (
+      {widget?.locked && (
         <div className="absolute top-2 left-2 text-xs text-yellow-600 dark:text-yellow-400">
           🔒
         </div>
       )}
 
       {/* Refresh Indicator */}
-      {widget.config?.refreshInterval > 0 && (
+      {widget?.config?.refreshInterval > 0 && (
         <div className="absolute bottom-2 right-2 text-xs text-gray-400 dark:text-gray-500">
           <FiRefreshCw className="w-3 h-3 animate-spin" />
         </div>

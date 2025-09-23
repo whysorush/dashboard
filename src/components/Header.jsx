@@ -10,6 +10,7 @@ const styles = {
     gridTemplateColumns: "auto 1fr auto",
     alignItems: "center",
     gap: 14,
+    marginTop: 10,
   },
   searchBar: {
     display: "flex",
@@ -20,7 +21,7 @@ const styles = {
     padding: "10px 12px",
     borderRadius: 10,
     justifySelf: "start",
-    width: "80%",
+    width: "75%",
     justifyContent: "right",
   },
   searchInput: {
@@ -34,7 +35,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: 12,
-    width: "20%",
+    width: "25%",
     justifyContent: "end",
   },
   notificationIcon: {
@@ -43,6 +44,8 @@ const styles = {
     border: "1px solid var(--border)",
     background: "var(--panel)",
     padding: 6,
+    width: 38,
+    height: 38,
   },
   userAvatar: {
     display: "flex",

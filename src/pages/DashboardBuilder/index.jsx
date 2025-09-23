@@ -20,6 +20,7 @@ import createReferenceDashboard from "./templates/referenceTemplate";
 import PopupModal from "./components/PreviewModal";
 import ThemeToggle from "../../components/ThemeToggle";
 import StyleModeSelector from "../../components/StyleModeSelector";
+import ColorPalette from "../../components/ColorPalette";
 
 const styles = {
   container: {
@@ -117,7 +118,8 @@ const DashboardBuilderContent = () => {
 
           {/* Header Actions */}
           <div style={styles.actions}>
-            <StyleModeSelector />
+            {/* <StyleModeSelector /> */}
+            <ColorPalette />
             <ThemeToggle />
             <button
               onClick={() => setShowPreview(true)}

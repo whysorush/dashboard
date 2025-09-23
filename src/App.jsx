@@ -21,6 +21,10 @@ const DashboardBuilder = lazy(() =>
 
 // Lazy load dashboard components with better chunking
 const BarChartBox = lazy(() => import("./components/BarChart"));
+const LineChartWidget = lazy(() =>
+  import("./pages/DashboardBuilder/components/widgets/LineChartWidget")
+); //
+
 const DataTable = lazy(() => import("./components/DataTable"));
 const Filters = lazy(() => import("./components/Filters"));
 const Header = lazy(() => import("./components/Header"));
@@ -54,7 +58,7 @@ const styles = {
   sidebar: {
     background: "var(--panel)",
     borderRight: "1px solid var(--border)",
-    padding: "20px 16px",
+    padding: "10px",
     position: "relative",
     zIndex: 20,
     transition:
@@ -125,6 +129,10 @@ const DashboardLayout = memo(() => {
           </Suspense>
           <Suspense fallback={<ChartFallback />}>
             <PieChartWidget />
+          </Suspense>
+
+          <Suspense fallback={<ChartFallback />}>
+            <LineChartWidget />
           </Suspense>
         </section>
 

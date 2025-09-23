@@ -24,17 +24,17 @@ const LineChartWidget = ({ widget, isSelected, onClick }) => {
   // Generate mock data based on configuration
   const data = useMemo(() => {
     return generateMockData("time-series", {
-      points: widget.config?.dataPoints || 12,
-      trend: widget.config?.trend || "up",
-      timeRange: widget.config?.timeRange || "monthly",
-      includeComparison: widget.config?.comparisonPeriod,
+      points: widget?.config?.dataPoints || 12,
+      trend: widget?.config?.trend || "up",
+      timeRange: widget?.config?.timeRange || "monthly",
+      includeComparison: widget?.config?.comparisonPeriod,
     });
-  }, [widget.config]);
+  }, [widget?.config]);
 
   // Calculate KPIs from data
   const kpis = useMemo(() => {
-    return calculateKPIs(data, widget.config);
-  }, [data, widget.config]);
+    return calculateKPIs(data, widget?.config);
+  }, [data, widget?.config]);
 
   const handleFilterChange = (key, value) => {
     console.log("Filter changed:", key, value);
@@ -42,21 +42,21 @@ const LineChartWidget = ({ widget, isSelected, onClick }) => {
 
   // Calculate height based on widget size
   const chartHeight = useMemo(() => {
-    const size = widget.position?.size || "medium";
+    const size = widget?.position?.size || "medium";
     return size === "large" ? 350 : size === "medium" ? 300 : 250;
-  }, [widget.position?.size]);
+  }, [widget?.position?.size]);
 
   // Determine line colors and styles with theme-aware defaults
   const primaryColor =
-    widget.config?.color || themeConfig?.primary || "#27D0FC";
+    widget?.config?.color || themeConfig?.primary || "#27D0FC";
   const secondaryColor =
-    widget.config?.secondaryColor || themeConfig?.textSecondary || "#9CA3AF";
+    widget?.config?.secondaryColor || themeConfig?.textSecondary || "#9CA3AF";
 
   // Calculate average for reference line
   const average = useMemo(() => {
-    if (!widget.config?.showAverage) return null;
+    if (!widget?.config?.showAverage) return null;
     return data.reduce((sum, item) => sum + item.value, 0) / data.length;
-  }, [data, widget.config?.showAverage]);
+  }, [data, widget?.config?.showAverage]);
 
   return (
     <div
@@ -68,11 +68,11 @@ const LineChartWidget = ({ widget, isSelected, onClick }) => {
       }}
     >
       {/* KPIs */}
-      {widget.config?.showKPIs !== false && (
+      {widget?.config?.showKPIs !== false && (
         <KPIDisplay
           metrics={kpis}
-          config={widget.config}
-          position={widget.config?.kpiPosition || "top"}
+          config={widget?.config}
+          position={widget?.config?.kpiPosition || "top"}
         />
       )}
 
@@ -83,7 +83,7 @@ const LineChartWidget = ({ widget, isSelected, onClick }) => {
             data={data}
             margin={{ top: 10, right: 10, left: 0, bottom: 5 }}
           >
-            {widget.config?.showGrid !== false && (
+            {widget?.config?.showGrid !== false && (
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke={themeConfig?.chartGrid || "#e5e7eb"}
@@ -128,7 +128,7 @@ const LineChartWidget = ({ widget, isSelected, onClick }) => {
               }}
               formatter={(value) => [`${value.toLocaleString()}`, ""]}
             />
-            {widget.config?.showLegend !== false && (
+            {widget?.config?.showLegend !== false && (
               <Legend wrapperStyle={{ paddingTop: 10 }} iconType="circle" />
             )}
 
@@ -151,13 +151,13 @@ const LineChartWidget = ({ widget, isSelected, onClick }) => {
             <Line
               name="Current Period"
               type={
-                widget.config?.smoothCurves !== false ? "monotone" : "linear"
+                widget?.config?.smoothCurves !== false ? "monotone" : "linear"
               }
               dataKey="value"
               stroke={primaryColor}
               strokeWidth={3}
               dot={
-                widget.config?.showDataPoints !== false
+                widget?.config?.showDataPoints !== false
                   ? { fill: primaryColor, strokeWidth: 2, r: 4 }
                   : false
               }
@@ -167,15 +167,15 @@ const LineChartWidget = ({ widget, isSelected, onClick }) => {
                 strokeWidth: 2,
                 fill: "white",
               }}
-              animationDuration={widget.config?.animations !== false ? 1500 : 0}
+              animationDuration={widget?.config?.animations !== false ? 1500 : 0}
             />
 
             {/* Second line for comparison if needed */}
-            {widget.config?.comparisonPeriod && (
+            {widget?.config?.comparisonPeriod && (
               <Line
                 name="Previous Period"
                 type={
-                  widget.config?.smoothCurves !== false ? "monotone" : "linear"
+                  widget?.config?.smoothCurves !== false ? "monotone" : "linear"
                 }
                 dataKey="previousValue"
                 stroke={secondaryColor}
@@ -195,8 +195,8 @@ const LineChartWidget = ({ widget, isSelected, onClick }) => {
       </div>
 
       {/* Filters */}
-      {widget.config?.showFilters !== false && (
-        <FilterBar config={widget.config} onChange={handleFilterChange} />
+      {widget?.config?.showFilters !== false && (
+        <FilterBar config={widget?.config} onChange={handleFilterChange} />
       )}
     </div>
   );
