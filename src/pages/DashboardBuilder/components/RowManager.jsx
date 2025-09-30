@@ -1,21 +1,27 @@
 // src/pages/DashboardBuilder/components/RowManager.jsx
-import React from 'react';
-import { FiPlus, FiTrash2, FiArrowUp, FiArrowDown, FiEdit2 } from 'react-icons/fi';
-import { useBuilder } from '../context/BuilderContext';
-import { useTheme } from '../../../context/ThemeContext';
+import React from "react";
+import {
+  FiPlus,
+  FiTrash2,
+  FiArrowUp,
+  FiArrowDown,
+  FiEdit2,
+} from "react-icons/fi";
+import { useBuilder } from "../context/BuilderContext";
+import { useTheme } from "../../../context/ThemeContext";
 
 const RowManager = () => {
-  const { 
-    rows, 
+  const {
+    rows,
     widgets,
-    addRow, 
-    removeRow, 
-    updateRow, 
+    addRow,
+    removeRow,
+    updateRow,
     reorderRows,
     selectedRow,
-    setSelectedRow
+    setSelectedRow,
   } = useBuilder();
-  
+
   const { themeConfig, isDark } = useTheme();
 
   // Dynamic styles based on theme
@@ -57,16 +63,19 @@ const RowManager = () => {
 
   const getRowItemStyles = (isSelected) => ({
     padding: "8px",
-    border: `1px solid ${isSelected 
-      ? themeConfig?.primary || "#3b82f6"
-      : themeConfig?.border || (isDark ? "#374151" : "#e5e7eb")
+    border: `1px solid ${
+      isSelected
+        ? themeConfig?.primary || "#3b82f6"
+        : themeConfig?.border || (isDark ? "#374151" : "#e5e7eb")
     }`,
     borderRadius: "6px",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: isSelected 
-      ? (isDark ? "rgba(59, 130, 246, 0.1)" : "rgba(59, 130, 246, 0.05)")
+    backgroundColor: isSelected
+      ? isDark
+        ? "rgba(59, 130, 246, 0.1)"
+        : "rgba(59, 130, 246, 0.05)"
       : themeConfig?.background || (isDark ? "#1f2937" : "#ffffff"),
     cursor: "pointer",
     transition: "all 0.2s ease",
@@ -88,8 +97,11 @@ const RowManager = () => {
   };
 
   const inputStyles = {
-    backgroundColor: themeConfig?.background || (isDark ? "#1f2937" : "#ffffff"),
-    border: `1px solid ${themeConfig?.border || (isDark ? "#4b5563" : "#d1d5db")}`,
+    backgroundColor:
+      themeConfig?.background || (isDark ? "#1f2937" : "#ffffff"),
+    border: `1px solid ${
+      themeConfig?.border || (isDark ? "#4b5563" : "#d1d5db")
+    }`,
     borderRadius: "4px",
     padding: "4px 8px",
     fontSize: "14px",
@@ -124,7 +136,7 @@ const RowManager = () => {
 
   // Count widgets in each row
   const getRowWidgetsCount = (rowId) => {
-    return widgets.filter(w => w.position.rowId === rowId).length;
+    return widgets.filter((w) => w.position.rowId === rowId).length;
   };
 
   // Handle row selection
@@ -139,9 +151,9 @@ const RowManager = () => {
 
   // Handle row reordering
   const handleMoveRow = (rowId, direction) => {
-    const currentIndex = rows.findIndex(r => r.id === rowId);
-    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-    
+    const currentIndex = rows.findIndex((r) => r.id === rowId);
+    const newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+
     if (newIndex >= 0 && newIndex < rows.length) {
       reorderRows(currentIndex, newIndex);
     }
@@ -150,121 +162,21 @@ const RowManager = () => {
   return (
     <div className="row-manager" style={containerStyles}>
       <div style={headerStyles}>
-        <h3 style={titleStyles}>
-          Rows
-        </h3>
+        <h3 style={titleStyles}>Rows</h3>
         <button
           onClick={addRow}
           style={addButtonStyles}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = themeConfig?.primary || "#2563eb";
+            e.currentTarget.style.backgroundColor =
+              themeConfig?.primary || "#2563eb";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = themeConfig?.primary || "#3b82f6";
+            e.currentTarget.style.backgroundColor =
+              themeConfig?.primary || "#3b82f6";
           }}
         >
           <FiPlus style={{ marginRight: "4px" }} /> Add Row
         </button>
-      </div>
-      
-      <div className="row-list">
-        {rows.length === 0 ? (
-          <div style={emptyStateStyles}>
-            No rows yet. Add your first row to get started.
-          </div>
-        ) : (
-          rows.map((row, index) => (
-            <div 
-              key={row.id}
-              className="row-item"
-              style={getRowItemStyles(selectedRow === row.id)}
-              onClick={() => handleRowSelect(row.id)}
-            >
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <div style={rowNumberStyles}>
-                  {index + 1}
-                </div>
-                {selectedRow === row.id ? (
-                  <input
-                    type="text"
-                    value={row.title}
-                    onChange={(e) => handleRowTitleChange(row.id, e.target.value)}
-                    style={inputStyles}
-                    onClick={(e) => e.stopPropagation()}
-                    autoFocus
-                  />
-                ) : (
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    <span style={rowTitleStyles}>{row.title}</span>
-                    <span style={widgetCountStyles}>
-                      ({getRowWidgetsCount(row.id)} widgets)
-                    </span>
-                  </div>
-                )}
-              </div>
-              
-              <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                {selectedRow === row.id && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRowTitleChange(row.id, `Row ${index + 1}`);
-                    }}
-                    style={buttonStyles}
-                    title="Edit title"
-                  >
-                    <FiEdit2 size={14} />
-                  </button>
-                )}
-                
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleMoveRow(row.id, 'up');
-                  }}
-                  style={{
-                    ...buttonStyles,
-                    opacity: index === 0 ? 0.5 : 1,
-                    cursor: index === 0 ? 'not-allowed' : 'pointer',
-                  }}
-                  disabled={index === 0}
-                  title="Move up"
-                >
-                  <FiArrowUp size={14} />
-                </button>
-                
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleMoveRow(row.id, 'down');
-                  }}
-                  style={{
-                    ...buttonStyles,
-                    opacity: index === rows.length - 1 ? 0.5 : 1,
-                    cursor: index === rows.length - 1 ? 'not-allowed' : 'pointer',
-                  }}
-                  disabled={index === rows.length - 1}
-                  title="Move down"
-                >
-                  <FiArrowDown size={14} />
-                </button>
-                
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (confirm(`Delete row "${row.title}"? This will remove all widgets in this row.`)) {
-                      removeRow(row.id);
-                    }
-                  }}
-                  style={deleteButtonStyles}
-                  title="Delete row"
-                >
-                  <FiTrash2 size={14} />
-                </button>
-              </div>
-            </div>
-          ))
-        )}
       </div>
     </div>
   );
