@@ -6,16 +6,17 @@ import { useMemo, useCallback } from 'react';
  * Hook to get theme-aware styling utilities
  */
 export const useThemeStyles = () => {
-  const { theme, styleMode, themeConfig, isDark } = useTheme();
+  const { theme, styleMode, themeConfig, isDark, globalColors } = useTheme();
 
   /**
    * Get chart colors based on current theme and style mode
    */
   const getChartColors = useCallback(() => {
+    // Use global colors if available, otherwise fall back to theme colors
     return {
-      primary: themeConfig.primary,
-      secondary: themeConfig.secondary,
-      accent: themeConfig.accent,
+      primary: globalColors?.primary || themeConfig.primary,
+      secondary: globalColors?.secondary || themeConfig.secondary,
+      accent: globalColors?.accent || themeConfig.accent,
       background: themeConfig.background,
       surface: themeConfig.surface,
       text: themeConfig.text,
@@ -23,7 +24,7 @@ export const useThemeStyles = () => {
       border: themeConfig.border,
       grid: themeConfig.chartGrid
     };
-  }, [themeConfig]);
+  }, [themeConfig, globalColors]);
 
   /**
    * Get style mode specific properties
@@ -104,10 +105,11 @@ export const useThemeStyles = () => {
    * Get color palette for charts with multiple data series
    */
   const getColorPalette = (count = 5) => {
+    const colors = getChartColors();
     const baseColors = [
-      themeConfig.primary,
-      themeConfig.secondary,
-      themeConfig.accent,
+      colors.primary,
+      colors.secondary,
+      colors.accent,
       '#8B5CF6', // purple
       '#EC4899', // pink
       '#F59E0B', // amber
@@ -121,16 +123,18 @@ export const useThemeStyles = () => {
   /**
    * Generate gradient colors for area charts and fills
    */
-  const getGradientColors = (baseColor = themeConfig.primary) => {
+  const getGradientColors = (baseColor) => {
+    const colors = getChartColors();
+    const primaryColor = baseColor || colors.primary;
     if (isDark) {
       return {
-        start: `${baseColor}40`,
-        end: `${baseColor}10`
+        start: `${primaryColor}40`,
+        end: `${primaryColor}10`
       };
     }
     return {
-      start: `${baseColor}60`,
-      end: `${baseColor}20`
+      start: `${primaryColor}60`,
+      end: `${primaryColor}20`
     };
   };
 

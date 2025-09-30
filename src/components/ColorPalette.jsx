@@ -57,7 +57,7 @@ const COLOR_PALETTES = {
 };
 
 const ColorPalette = memo(() => {
-  const { themeConfig, setGlobalColors } = useTheme();
+  const { themeConfig, globalColors, setGlobalColors } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPalette, setSelectedPalette] = useState("default");
 
@@ -72,14 +72,14 @@ const ColorPalette = memo(() => {
 
   const handleCustomColorChange = useCallback(
     (colorType, color) => {
-      const currentColors = themeConfig?.globalColors || COLOR_PALETTES.default;
+      const currentColors = globalColors || COLOR_PALETTES.default;
       const updatedColors = {
         ...currentColors,
         [colorType]: color,
       };
       setGlobalColors(updatedColors);
     },
-    [themeConfig?.globalColors, setGlobalColors]
+    [globalColors, setGlobalColors]
   );
 
   return (
@@ -159,14 +159,14 @@ const ColorPalette = memo(() => {
                   <div className="flex items-center gap-2">
                     <input
                       type="color"
-                      value={themeConfig?.globalColors?.primary || "#27D0FC"}
+                      value={globalColors?.primary || "#27D0FC"}
                       onChange={(e) =>
                         handleCustomColorChange("primary", e.target.value)
                       }
                       className="w-8 h-8 rounded border border-gray-300 cursor-pointer"
                     />
                     <span className="text-xs text-gray-500 font-mono">
-                      {themeConfig?.globalColors?.primary || "#27D0FC"}
+                      {globalColors?.primary || "#27D0FC"}
                     </span>
                   </div>
                 </div>
@@ -178,14 +178,14 @@ const ColorPalette = memo(() => {
                   <div className="flex items-center gap-2">
                     <input
                       type="color"
-                      value={themeConfig?.globalColors?.secondary || "#10B981"}
+                      value={globalColors?.secondary || "#10B981"}
                       onChange={(e) =>
                         handleCustomColorChange("secondary", e.target.value)
                       }
                       className="w-8 h-8 rounded border border-gray-300 cursor-pointer"
                     />
                     <span className="text-xs text-gray-500 font-mono">
-                      {themeConfig?.globalColors?.secondary || "#10B981"}
+                      {globalColors?.secondary || "#10B981"}
                     </span>
                   </div>
                 </div>
@@ -197,14 +197,14 @@ const ColorPalette = memo(() => {
                   <div className="flex items-center gap-2">
                     <input
                       type="color"
-                      value={themeConfig?.globalColors?.accent || "#F59E0B"}
+                      value={globalColors?.accent || "#F59E0B"}
                       onChange={(e) =>
                         handleCustomColorChange("accent", e.target.value)
                       }
                       className="w-8 h-8 rounded border border-gray-300 cursor-pointer"
                     />
                     <span className="text-xs text-gray-500 font-mono">
-                      {themeConfig?.globalColors?.accent || "#F59E0B"}
+                      {globalColors?.accent || "#F59E0B"}
                     </span>
                   </div>
                 </div>

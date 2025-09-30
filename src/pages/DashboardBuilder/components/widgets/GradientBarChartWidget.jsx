@@ -11,10 +11,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import BaseWidget from "./BaseWidget";
-import KPIDisplay from "./KPIDisplay";
-import FilterBar from "./FilterBar";
-import { generateMockData, calculateKPIs } from "../../utils/mockDataGenerator";
-import { GRADIENT_CHART_COLORS } from "../../constants";
+import { generateMockData } from "../../utils/mockDataGenerator";
+import { useThemeStyles } from "../../../../utils/themeUtils";
 
 const styles = {
   container: {
@@ -30,7 +28,12 @@ const styles = {
     marginBottom: 8,
   },
   title: { margin: 0, fontSize: 16, color: "var(--text)" },
-  total: { fontSize: 22, fontWeight: 700, margin: "6px 0 10px", color: "var(--text)" },
+  total: {
+    fontSize: 22,
+    fontWeight: 700,
+    margin: "6px 0 10px",
+    color: "var(--text)",
+  },
   select: {
     background: "var(--bg)",
     color: "var(--text)",
@@ -41,7 +44,23 @@ const styles = {
 };
 
 const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
-  const config = widget?.config || {};
+  const {
+    styleMode,
+    getChartColors,
+    getCSSVariables,
+    getChartHeight,
+    getTooltipStyle,
+    getAnimationConfig,
+  } = useThemeStyles();
+
+  const config = useMemo(() => widget?.config || {}, [widget?.config]);
+
+  // Get theme-aware colors and styles
+  const colors = getChartColors();
+  const cssVariables = getCSSVariables();
+  const chartHeight = getChartHeight(widget?.position?.size || "medium");
+  const tooltipStyle = getTooltipStyle();
+  const animationConfig = getAnimationConfig(config.animations !== false);
 
   const data = useMemo(() => {
     return generateMockData("categories", {
@@ -52,10 +71,6 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
     });
   }, [config]);
 
-  const kpis = useMemo(() => {
-    return calculateKPIs(data, config);
-  }, [data, config]);
-
   const total = useMemo(() => {
     const sum = data.reduce((acc, item) => acc + item.value, 0);
     return new Intl.NumberFormat("en-US", {
@@ -65,39 +80,30 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
     }).format(sum);
   }, [data]);
 
-  const handleFilterChange = (key, value) => {
-    console.log("Filter changed:", key, value);
-  };
-
-  const chartHeight = useMemo(() => {
-    const size = widget?.position?.size || "medium";
-    return size === "large" ? 350 : size === "medium" ? 300 : 250;
-  }, [widget?.position?.size]);
-
-  const gradientColors = useMemo(() => {
-    return {
-      startColor:
-        config.startColor || GRADIENT_CHART_COLORS.BAR_CHART.startColor,
-      endColor: config.endColor || GRADIENT_CHART_COLORS.BAR_CHART.endColor,
-    };
-  }, [config.startColor, config.endColor]);
-
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
-        <div>
-          <h3 style={styles.title}>Bar Chart</h3>
-          <div style={styles.total}>{total}</div>
+      <div
+        className={`gradient-bar-chart-widget style-mode-${styleMode}`}
+        style={{
+          fontFamily: "var(--font-family)",
+          color: colors.text,
+          backgroundColor: colors.background,
+          ...cssVariables,
+        }}
+      >
+        <div style={styles.header}>
+          <div>
+            <h3 style={styles.title}>Bar Chart</h3>
+            <div style={styles.total}>{total}</div>
+          </div>
+
+          <select style={styles.select}>
+            <option>Week</option>
+            <option>Month</option>
+            <option>Year</option>
+          </select>
         </div>
 
-        <select style={styles.select}>
-          <option>Week</option>
-          <option>Month</option>
-          <option>Year</option>
-        </select>
-      </div>
-
-      <div style={{ width: "100%", height: 260 }}>
+        <div style={{ width: "100%", height: chartHeight }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
@@ -105,39 +111,41 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
             barGap={6}
             margin={{ top: 4, right: 8, bottom: 0, left: 0 }}
           >
-            <CartesianGrid stroke={"rgba(0,0,0,0.06)"} vertical={false} />
+            <CartesianGrid stroke={colors.grid} vertical={false} />
 
             <XAxis
               dataKey="name"
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12 }}
+              tick={{ 
+                fontSize: 12,
+                fill: colors.textSecondary,
+                fontFamily: "var(--font-family)"
+              }}
               dy={10}
             />
 
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12 }}
+              tick={{ 
+                fontSize: 12,
+                fill: colors.textSecondary,
+                fontFamily: "var(--font-family)"
+              }}
               width={30}
             />
 
             <Tooltip
               cursor={{ fill: "rgba(0, 0, 0, 0.05)" }}
-              contentStyle={{
-                backgroundColor: "rgba(255, 255, 255, 0.95)",
-                border: "1px solid #E5E7EB",
-                borderRadius: "6px",
-                boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-              }}
+              contentStyle={tooltipStyle}
               formatter={(value) => [`${value.toLocaleString()}`, ""]}
             />
 
             <defs>
               <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="rgba(0, 201, 255, 0.85)" />
-
-                <stop offset="100%" stopColor="rgba(146, 254, 157, 0.85)" />
+                <stop offset="0%" stopColor={colors.primary} />
+                <stop offset="100%" stopColor={colors.secondary} />
               </linearGradient>
             </defs>
 
@@ -146,9 +154,9 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
               fill="url(#barGradient)"
               radius={[16, 16, 0, 0]}
               maxBarSize={60}
-              animationDuration={config.animations !== false ? 1500 : 0}
+              animationDuration={animationConfig.duration}
               background={{
-                fill: "var(--bar-track)",
+                fill: colors.grid,
                 radius: [16, 16, 0, 0],
               }}
             />
@@ -156,18 +164,18 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
         </ResponsiveContainer>
       </div>
 
-      <div>
+      <div style={{ marginTop: "16px", fontSize: "14px", color: colors.textSecondary }}>
         <span
           style={{
             display: "inline-block",
             width: "12px",
             height: "12px",
             borderRadius: "50%",
-            marginRight: "4px",
-            background: "linear-gradient(180deg, #00E5FF 0%, #00FF85 100%)",
+            marginRight: "8px",
+            background: `linear-gradient(180deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
           }}
         ></span>
-        Lorem ipsum simply dummy text of the printing and typesetting industry.
+        Revenue by Category
       </div>
     </div>
   );

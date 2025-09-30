@@ -283,10 +283,27 @@ export const ThemeProvider = ({ children }) => {
           root.style.setProperty("--global-primary", globalColors.primary);
           root.style.setProperty("--global-secondary", globalColors.secondary);
           root.style.setProperty("--global-accent", globalColors.accent);
+          
+          // Also set legacy variables for DashboardBuilder compatibility
+          root.style.setProperty("--primary", globalColors.primary);
+          root.style.setProperty("--secondary", globalColors.secondary);
+          root.style.setProperty("--accent", globalColors.accent);
         }
-
+        
+        // Set DashboardBuilder-specific CSS variables
+        root.style.setProperty("--bg", mergedThemeConfig.background);
+        root.style.setProperty("--panel", mergedThemeConfig.surface);
+        root.style.setProperty("--text", mergedThemeConfig.text);
+        root.style.setProperty("--border", mergedThemeConfig.border);
+        root.style.setProperty("--muted", mergedThemeConfig.textSecondary);
+        root.style.setProperty("--stat-card-bg", mergedThemeConfig.surface);
+        root.style.setProperty("--search-bar-bg", mergedThemeConfig.background);
+        root.style.setProperty("--table-th-font", mergedThemeConfig.text);
+        root.style.setProperty("--table-td-font", mergedThemeConfig.text);
+        root.style.setProperty("--bar-track", mergedThemeConfig.chartGrid);
         // Apply style mode specific variables
         const styleModeConfig = getStyleModeConfig(styleMode);
+        root.style.setProperty("--font-family", styleModeConfig.fontFamily);
         Object.entries(styleModeConfig).forEach(([key, value]) => {
           root.style.setProperty(`--style-${key}`, value);
         });

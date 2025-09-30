@@ -47,6 +47,8 @@ const PieChartWidget = memo(({ widget, isSelected, onClick }) => {
 
   // Function to get colors dynamically based on percentage ranking
   const getDynamicColors = useCallback((data) => {
+    const colors = getChartColors();
+    
     // Calculate percentages for all segments
     const total = data.reduce((sum, item) => sum + item.value, 0);
     const segmentsWithPercentages = data.map((entry, index) => ({
@@ -60,11 +62,11 @@ const PieChartWidget = memo(({ widget, isSelected, onClick }) => {
       (a, b) => b.percentage - a.percentage
     );
 
-    // Define color palette (highest to lowest)
+    // Define color palette using global colors (highest to lowest)
     const colorPalette = [
-      "#27D0FC", // Highest percentage
-      "#63E6D5", // Second highest
-      "#92FE9D", // Third highest
+      colors.primary, // Highest percentage
+      colors.secondary, // Second highest
+      colors.accent, // Third highest
       "#FFE066", // Fourth highest
       "#FFB3BA", // Fifth highest
       "#c0f0fc", // Lowest percentage
@@ -78,7 +80,7 @@ const PieChartWidget = memo(({ widget, isSelected, onClick }) => {
     });
 
     return colorMap;
-  }, []);
+  }, [getChartColors]);
 
   const RADIAN = Math.PI / 180;
   const renderCustomizedLabel = useCallback(

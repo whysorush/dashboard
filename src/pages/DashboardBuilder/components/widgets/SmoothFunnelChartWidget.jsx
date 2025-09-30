@@ -9,7 +9,7 @@ import {
   Cell,
 } from "recharts";
 import BaseWidget from "./BaseWidget";
-import { GRADIENT_CHART_COLORS } from "../../constants";
+import { useThemeStyles } from "../../../../utils/themeUtils";
 
 const styles = {
   container: {
@@ -38,24 +38,28 @@ const styles = {
  * Funnel Chart Widget (Recharts FunnelChart)
  */
 const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
-  const config = widget?.config || {
-    id: "widget-1757576664743-8kc63guf7",
-    type: "smooth-funnel-chart",
-    position: {
-      rowId: "row-widget-1757576664743-hkiu1k3ul",
-      row: 2,
-      index: 1,
-      size: "medium",
-    },
-    config: {
-      title: "Funnel Chart",
-      startColor: "#00E5FF",
-      endColor: "#00FF85",
-      showGrid: false,
-      showLegend: true,
-      animations: true,
-    },
-  };
+  const {
+    styleMode,
+    getChartColors,
+    getCSSVariables,
+    getChartHeight,
+    getTooltipStyle,
+    getAnimationConfig,
+  } = useThemeStyles();
+
+  const config = useMemo(() => widget?.config || {
+    title: "Funnel Chart",
+    showGrid: false,
+    showLegend: true,
+    animations: true,
+  }, [widget?.config]);
+
+  // Get theme-aware colors and styles
+  const colors = getChartColors();
+  const cssVariables = getCSSVariables();
+  const chartHeight = getChartHeight(widget?.position?.size || "medium");
+  const tooltipStyle = getTooltipStyle();
+  const animationConfig = getAnimationConfig(config.animations !== false);
 
   // Stage data for the funnel (top -> bottom)
   const stageData = useMemo(
@@ -71,44 +75,44 @@ const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
     []
   );
 
-  // Colors
-  const gradientColors = useMemo(() => {
-    return {
-      startColor:
-        config.startColor || GRADIENT_CHART_COLORS.FUNNEL_CHART.startColor,
-      endColor: config.endColor || GRADIENT_CHART_COLORS.FUNNEL_CHART.endColor,
-    };
-  }, [config.startColor, config.endColor]);
-
-  // Build a small palette from start->end for cells
+  // Colors using global theme colors
   const cellColors = useMemo(() => {
     return [
-      gradientColors.startColor,
-      gradientColors.endColor + "CC",
-      gradientColors.endColor,
+      colors.primary,
+      colors.secondary,
+      colors.accent,
+      colors.primary + "CC",
+      colors.secondary + "CC",
+      colors.accent + "CC",
+      colors.primary + "99",
     ];
-  }, [gradientColors]);
+  }, [colors]);
 
-  // Height by widget size
-  const chartHeight = useMemo(() => {
-    const size = widget?.position?.size || "medium";
-    return size === "large" ? 350 : size === "medium" ? 300 : 250;
-  }, [widget?.position?.size]);
 
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
-        <h3 style={styles.title}>Funnel Chart</h3>
-        <select style={styles.select}>
-          <option>Week</option>
-          <option>Month</option>
-          <option>Year</option>
-        </select>
-      </div>
-      <div style={{ width: "100%", height: chartHeight }}>
+    <BaseWidget widget={widget} isSelected={isSelected} onClick={onClick}>
+      <div
+        className={`smooth-funnel-chart-widget style-mode-${styleMode}`}
+        style={{
+          fontFamily: "var(--font-family)",
+          color: colors.text,
+          backgroundColor: colors.background,
+          ...cssVariables,
+        }}
+      >
+        <div style={styles.header}>
+          <h3 style={styles.title}>Funnel Chart</h3>
+          <select style={styles.select}>
+            <option>Week</option>
+            <option>Month</option>
+            <option>Year</option>
+          </select>
+        </div>
+        <div style={{ width: "100%", height: chartHeight }}>
         <ResponsiveContainer>
           <FunnelChart>
             <Tooltip
+              contentStyle={tooltipStyle}
               formatter={(val) =>
                 new Intl.NumberFormat("en-US", {
                   style: "currency",
@@ -118,16 +122,28 @@ const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
               }
             />
             <Funnel dataKey="value" data={stageData} width={600}>
-              <LabelList position="inside" fill="#fff" stroke="none" dataKey="display" />
-              <LabelList dataKey="name" position="right" fill="#525252" />
+              <LabelList 
+                position="inside" 
+                fill={colors.text} 
+                stroke="none" 
+                dataKey="display"
+                style={{ fontFamily: "var(--font-family)", fontSize: "12px" }}
+              />
+              <LabelList 
+                dataKey="name" 
+                position="right" 
+                fill={colors.textSecondary}
+                style={{ fontFamily: "var(--font-family)", fontSize: "12px" }}
+              />
               {stageData.map((entry, idx) => (
                 <Cell key={`cell-${idx}`} fill={cellColors[idx % cellColors.length]} />
               ))}
             </Funnel>
           </FunnelChart>
         </ResponsiveContainer>
+        </div>
       </div>
-    </div>
+    </BaseWidget>
   );
 };
 

@@ -15,11 +15,19 @@ import BaseWidget from "./BaseWidget";
 import KPIDisplay from "./KPIDisplay";
 import FilterBar from "./FilterBar";
 import { generateMockData, calculateKPIs } from "../../utils/mockDataGenerator";
-import { useTheme } from "../../../../context/ThemeContext";
+import { useThemeStyles } from "../../../../utils/themeUtils";
 
 const LineChartWidget = ({ widget, isSelected, onClick }) => {
   // Get theme configuration
-  const { themeConfig, styleMode } = useTheme();
+  const {
+    styleMode,
+    themeConfig,
+    getChartColors,
+    getCSSVariables,
+    getChartHeight,
+    getTooltipStyle,
+    getAnimationConfig,
+  } = useThemeStyles();
 
   // Generate mock data based on configuration
   const data = useMemo(() => {
@@ -40,17 +48,16 @@ const LineChartWidget = ({ widget, isSelected, onClick }) => {
     console.log("Filter changed:", key, value);
   };
 
-  // Calculate height based on widget size
-  const chartHeight = useMemo(() => {
-    const size = widget?.position?.size || "medium";
-    return size === "large" ? 350 : size === "medium" ? 300 : 250;
-  }, [widget?.position?.size]);
+  // Get theme-aware colors and styles
+  const colors = getChartColors();
+  const cssVariables = getCSSVariables();
+  const chartHeight = getChartHeight(widget?.position?.size || "medium");
+  const tooltipStyle = getTooltipStyle();
+  const animationConfig = getAnimationConfig(widget?.config?.animations !== false);
 
   // Determine line colors and styles with theme-aware defaults
-  const primaryColor =
-    widget?.config?.color || themeConfig?.primary || "#27D0FC";
-  const secondaryColor =
-    widget?.config?.secondaryColor || themeConfig?.textSecondary || "#9CA3AF";
+  const primaryColor = widget?.config?.color || colors.primary;
+  const secondaryColor = widget?.config?.secondaryColor || colors.textSecondary;
 
   // Calculate average for reference line
   const average = useMemo(() => {
@@ -86,7 +93,7 @@ const LineChartWidget = ({ widget, isSelected, onClick }) => {
             {widget?.config?.showGrid !== false && (
               <CartesianGrid
                 strokeDasharray="3 3"
-                stroke={themeConfig?.chartGrid || "#e5e7eb"}
+                stroke={colors.grid}
                 horizontal={true}
                 vertical={false}
               />
@@ -95,17 +102,17 @@ const LineChartWidget = ({ widget, isSelected, onClick }) => {
               dataKey="name"
               tick={{
                 fontSize: 12,
-                fill: themeConfig?.textSecondary || "#6b7280",
+                fill: colors.textSecondary,
                 fontFamily: "var(--font-family)",
               }}
-              axisLine={{ stroke: themeConfig?.border || "#e5e7eb" }}
+              axisLine={{ stroke: colors.border }}
               tickLine={false}
               padding={{ left: 10, right: 10 }}
             />
             <YAxis
               tick={{
                 fontSize: 12,
-                fill: themeConfig?.textSecondary || "#6b7280",
+                fill: colors.textSecondary,
                 fontFamily: "var(--font-family)",
               }}
               axisLine={false}
@@ -113,16 +120,9 @@ const LineChartWidget = ({ widget, isSelected, onClick }) => {
               width={30}
             />
             <Tooltip
-              contentStyle={{
-                backgroundColor: themeConfig?.background || "#ffffff",
-                border: `1px solid ${themeConfig?.border || "#e5e7eb"}`,
-                borderRadius: "var(--border-radius, 6px)",
-                boxShadow: "var(--shadow, 0 2px 5px rgba(0,0,0,0.1))",
-                color: themeConfig?.text || "#1f2937",
-                fontFamily: "var(--font-family)",
-              }}
+              contentStyle={tooltipStyle}
               cursor={{
-                stroke: themeConfig?.textSecondary || "#9CA3AF",
+                stroke: colors.textSecondary,
                 strokeWidth: 1,
                 strokeDasharray: "3 3",
               }}
@@ -136,12 +136,12 @@ const LineChartWidget = ({ widget, isSelected, onClick }) => {
             {average !== null && (
               <ReferenceLine
                 y={average}
-                stroke={themeConfig?.accent || "#F59E0B"}
+                stroke={colors.accent}
                 strokeDasharray="3 3"
                 label={{
                   value: "Average",
                   position: "insideTopRight",
-                  fill: themeConfig?.accent || "#F59E0B",
+                  fill: colors.accent,
                   fontSize: 12,
                   fontFamily: "var(--font-family)",
                 }}
