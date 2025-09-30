@@ -9,23 +9,25 @@ import { useDrag } from "react-dnd";
 import { FiPlus, FiChevronDown, FiChevronUp, FiLayout } from "react-icons/fi";
 import { WIDGET_CATEGORIES, WIDGET_TYPES } from "../constants";
 import { useBuilder } from "../context/BuilderContext";
+import { useTheme } from "../../../context/ThemeContext";
 
 /* ---------- THEME ---------- */
-const makeTheme = (mode = "light") => {
-  const isDark = mode === "dark";
+const makeTheme = (theme, themeConfig, isDark) => {
   return {
     isDark,
-    bg: isDark ? "#0f172a" : "#ffffff",
-    panel: isDark ? "#0d1326" : "#f8fafc",
-    card: isDark ? "#0b1020" : "#ffffff",
-    border: isDark ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.08)",
-    text: isDark ? "#e5e7eb" : "#0f172a",
-    subtext: isDark ? "#94a3b8" : "#475569",
-    accent: "#2563eb",
-    accentHover: "#1d4ed8",
-    muted: isDark ? "#0f172a" : "#eef2f7",
-    pill: isDark ? "#0f172a" : "#f1f5f9",
-    shadow: "0 1px 2px rgba(0,0,0,0.05), 0 8px 24px rgba(0,0,0,0.08)",
+    bg: themeConfig?.background || (isDark ? "#1f2937" : "#ffffff"),
+    panel: themeConfig?.surface || (isDark ? "#111827" : "#f8fafc"),
+    card: themeConfig?.background || (isDark ? "#1f2937" : "#ffffff"),
+    border: themeConfig?.border || (isDark ? "#374151" : "#e5e7eb"),
+    text: themeConfig?.text || (isDark ? "#f9fafb" : "#1f2937"),
+    subtext: themeConfig?.textSecondary || (isDark ? "#d1d5db" : "#6b7280"),
+    accent: themeConfig?.primary || "#2563eb",
+    accentHover: themeConfig?.primary || "#1d4ed8",
+    muted: isDark ? "#111827" : "#f1f5f9",
+    pill: isDark ? "#111827" : "#f1f5f9",
+    shadow: isDark 
+      ? "0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.2)" 
+      : "0 1px 2px rgba(0,0,0,0.05), 0 8px 24px rgba(0,0,0,0.08)",
     radius: 14,
     activeRing: isDark
       ? "0 0 0 2px rgba(37,99,235,0.35) inset"
@@ -284,8 +286,10 @@ const CategorySection = ({
 };
 
 /* ---------- MAIN ---------- */
-const ComponentPalette = ({ styleMode = "light", accordionMode = false }) => {
-  const t = useMemo(() => makeTheme(styleMode), [styleMode]);
+const ComponentPalette = ({ accordionMode = false }) => {
+  // Use global theme context instead of local styleMode
+  const { theme, themeConfig, isDark } = useTheme();
+  const t = useMemo(() => makeTheme(theme, themeConfig, isDark), [theme, themeConfig, isDark]);
   const { addRow } = useBuilder();
 
   const initialExpanded = useMemo(

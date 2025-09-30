@@ -17,7 +17,7 @@ import {
 } from "react-icons/fi";
 import createReferenceDashboard from "./templates/referenceTemplate";
 // import "./styles/builder.css";
-import PopupModal from "./components/PreviewModal";
+import PreviewPopupModal from "./components/PreviewModal";
 import ThemeToggle from "../../components/ThemeToggle";
 import StyleModeSelector from "../../components/StyleModeSelector";
 import ColorPalette from "../../components/ColorPalette";
@@ -118,7 +118,6 @@ const DashboardBuilderContent = () => {
 
           {/* Header Actions */}
           <div style={styles.actions}>
-            {/* <StyleModeSelector /> */}
             <ColorPalette />
             <ThemeToggle />
             <button
@@ -198,7 +197,7 @@ const DashboardBuilderContent = () => {
       </div>
 
       {showPreview && (
-        <PopupModal
+        <PreviewPopupModal
           isOpen={showPreview}
           onClose={() => setShowPreview(false)}
           widgets={widgets}

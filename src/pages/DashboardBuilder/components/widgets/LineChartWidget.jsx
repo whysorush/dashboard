@@ -53,7 +53,9 @@ const LineChartWidget = ({ widget, isSelected, onClick }) => {
   const cssVariables = getCSSVariables();
   const chartHeight = getChartHeight(widget?.position?.size || "medium");
   const tooltipStyle = getTooltipStyle();
-  const animationConfig = getAnimationConfig(widget?.config?.animations !== false);
+  const animationConfig = getAnimationConfig(
+    widget?.config?.animations !== false
+  );
 
   // Determine line colors and styles with theme-aware defaults
   const primaryColor = widget?.config?.color || colors.primary;
@@ -67,137 +69,116 @@ const LineChartWidget = ({ widget, isSelected, onClick }) => {
 
   return (
     <div
-      className={`line-chart-widget style-mode-${styleMode}`}
-      style={{
-        fontFamily: "var(--font-family)",
-        color: themeConfig?.text,
-        backgroundColor: themeConfig?.background,
-      }}
+      style={{ width: "100%", height: chartHeight, ...cssVariables }}
+      className="chart-container"
     >
-      {/* KPIs */}
-      {widget?.config?.showKPIs !== false && (
-        <KPIDisplay
-          metrics={kpis}
-          config={widget?.config}
-          position={widget?.config?.kpiPosition || "top"}
-        />
-      )}
+      <ResponsiveContainer>
+        <LineChart
+          data={data}
+          margin={{ top: 10, right: 10, left: 0, bottom: 5 }}
+        >
+          {widget?.config?.showGrid !== false && (
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke={colors.grid}
+              horizontal={true}
+              vertical={false}
+            />
+          )}
+          <XAxis
+            dataKey="name"
+            tick={{
+              fontSize: 12,
+              fill: colors.textSecondary,
+              fontFamily: "var(--font-family)",
+            }}
+            axisLine={{ stroke: colors.border }}
+            tickLine={false}
+            padding={{ left: 10, right: 10 }}
+          />
+          <YAxis
+            tick={{
+              fontSize: 12,
+              fill: colors.textSecondary,
+              fontFamily: "var(--font-family)",
+            }}
+            axisLine={false}
+            tickLine={false}
+            width={30}
+          />
+          <Tooltip
+            contentStyle={tooltipStyle}
+            cursor={{
+              stroke: colors.textSecondary,
+              strokeWidth: 1,
+              strokeDasharray: "3 3",
+            }}
+            formatter={(value) => [`${value.toLocaleString()}`, ""]}
+          />
+          {widget?.config?.showLegend !== false && (
+            <Legend wrapperStyle={{ paddingTop: 10 }} iconType="circle" />
+          )}
 
-      {/* Chart */}
-      <div style={{ width: "100%", height: chartHeight }}>
-        <ResponsiveContainer>
-          <LineChart
-            data={data}
-            margin={{ top: 10, right: 10, left: 0, bottom: 5 }}
-          >
-            {widget?.config?.showGrid !== false && (
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke={colors.grid}
-                horizontal={true}
-                vertical={false}
-              />
-            )}
-            <XAxis
-              dataKey="name"
-              tick={{
+          {/* Average reference line */}
+          {average !== null && (
+            <ReferenceLine
+              y={average}
+              stroke={colors.accent}
+              strokeDasharray="3 3"
+              label={{
+                value: "Average",
+                position: "insideTopRight",
+                fill: colors.accent,
                 fontSize: 12,
-                fill: colors.textSecondary,
                 fontFamily: "var(--font-family)",
               }}
-              axisLine={{ stroke: colors.border }}
-              tickLine={false}
-              padding={{ left: 10, right: 10 }}
             />
-            <YAxis
-              tick={{
-                fontSize: 12,
-                fill: colors.textSecondary,
-                fontFamily: "var(--font-family)",
-              }}
-              axisLine={false}
-              tickLine={false}
-              width={30}
-            />
-            <Tooltip
-              contentStyle={tooltipStyle}
-              cursor={{
-                stroke: colors.textSecondary,
-                strokeWidth: 1,
-                strokeDasharray: "3 3",
-              }}
-              formatter={(value) => [`${value.toLocaleString()}`, ""]}
-            />
-            {widget?.config?.showLegend !== false && (
-              <Legend wrapperStyle={{ paddingTop: 10 }} iconType="circle" />
-            )}
+          )}
 
-            {/* Average reference line */}
-            {average !== null && (
-              <ReferenceLine
-                y={average}
-                stroke={colors.accent}
-                strokeDasharray="3 3"
-                label={{
-                  value: "Average",
-                  position: "insideTopRight",
-                  fill: colors.accent,
-                  fontSize: 12,
-                  fontFamily: "var(--font-family)",
-                }}
-              />
-            )}
+          <Line
+            name="Current Period"
+            type={
+              widget?.config?.smoothCurves !== false ? "monotone" : "linear"
+            }
+            dataKey="value"
+            stroke={primaryColor}
+            strokeWidth={3}
+            dot={
+              widget?.config?.showDataPoints !== false
+                ? { fill: primaryColor, strokeWidth: 2, r: 4 }
+                : false
+            }
+            activeDot={{
+              r: 6,
+              stroke: primaryColor,
+              strokeWidth: 2,
+              fill: "white",
+            }}
+            animationDuration={widget?.config?.animations !== false ? 1500 : 0}
+          />
 
+          {/* Second line for comparison if needed */}
+          {widget?.config?.comparisonPeriod && (
             <Line
-              name="Current Period"
+              name="Previous Period"
               type={
                 widget?.config?.smoothCurves !== false ? "monotone" : "linear"
               }
-              dataKey="value"
-              stroke={primaryColor}
-              strokeWidth={3}
-              dot={
-                widget?.config?.showDataPoints !== false
-                  ? { fill: primaryColor, strokeWidth: 2, r: 4 }
-                  : false
-              }
+              dataKey="previousValue"
+              stroke={secondaryColor}
+              strokeWidth={2}
+              strokeDasharray="5 5"
+              dot={false}
               activeDot={{
-                r: 6,
-                stroke: primaryColor,
-                strokeWidth: 2,
+                r: 5,
+                stroke: secondaryColor,
+                strokeWidth: 1,
                 fill: "white",
               }}
-              animationDuration={widget?.config?.animations !== false ? 1500 : 0}
             />
-
-            {/* Second line for comparison if needed */}
-            {widget?.config?.comparisonPeriod && (
-              <Line
-                name="Previous Period"
-                type={
-                  widget?.config?.smoothCurves !== false ? "monotone" : "linear"
-                }
-                dataKey="previousValue"
-                stroke={secondaryColor}
-                strokeWidth={2}
-                strokeDasharray="5 5"
-                dot={false}
-                activeDot={{
-                  r: 5,
-                  stroke: secondaryColor,
-                  strokeWidth: 1,
-                  fill: "white",
-                }}
-              />
-            )}
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Filters */}
-      {widget?.config?.showFilters !== false && (
-        <FilterBar config={widget?.config} onChange={handleFilterChange} />
-      )}
+          )}
+        </LineChart>
+      </ResponsiveContainer>
     </div>
   );
 };

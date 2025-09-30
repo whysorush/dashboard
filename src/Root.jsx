@@ -23,7 +23,7 @@ function Root() {
       "--status-delivered-text": "#07d91e",
       "--status-in-transit-bg": "#e6f9ff",
       "--status-in-transit-text": "#25cffd",
-      "--icon-stat-bg": "#e5faff",
+      "--icon-stat-bg": "#005366",
       "--icon-stat-font": "#00c9ff",
       "--search-bar-bg": "#f5f5f5",
       "--search-bar-border": "#e7e7e7",

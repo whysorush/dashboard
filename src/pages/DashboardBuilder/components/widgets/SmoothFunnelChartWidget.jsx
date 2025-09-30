@@ -47,12 +47,16 @@ const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
     getAnimationConfig,
   } = useThemeStyles();
 
-  const config = useMemo(() => widget?.config || {
-    title: "Funnel Chart",
-    showGrid: false,
-    showLegend: true,
-    animations: true,
-  }, [widget?.config]);
+  const config = useMemo(
+    () =>
+      widget?.config || {
+        title: "Funnel Chart",
+        showGrid: false,
+        showLegend: true,
+        animations: true,
+      },
+    [widget?.config]
+  );
 
   // Get theme-aware colors and styles
   const colors = getChartColors();
@@ -88,27 +92,23 @@ const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
     ];
   }, [colors]);
 
-
   return (
-    <BaseWidget widget={widget} isSelected={isSelected} onClick={onClick}>
-      <div
-        className={`smooth-funnel-chart-widget style-mode-${styleMode}`}
-        style={{
-          fontFamily: "var(--font-family)",
-          color: colors.text,
-          backgroundColor: colors.background,
-          ...cssVariables,
-        }}
-      >
-        <div style={styles.header}>
-          <h3 style={styles.title}>Funnel Chart</h3>
-          <select style={styles.select}>
-            <option>Week</option>
-            <option>Month</option>
-            <option>Year</option>
-          </select>
-        </div>
-        <div style={{ width: "100%", height: chartHeight }}>
+    <div
+      style={{
+        ...cssVariables,
+      }}
+      className="chart-container"
+    >
+      <div style={styles.header}>
+        <h3 style={styles.title}>Funnel Chart</h3>
+
+        <select style={styles.select}>
+          <option>Week</option>
+          <option>Month</option>
+          <option>Year</option>
+        </select>
+      </div>
+      <div style={{ width: "100%", height: chartHeight }}>
         <ResponsiveContainer>
           <FunnelChart>
             <Tooltip
@@ -122,28 +122,30 @@ const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
               }
             />
             <Funnel dataKey="value" data={stageData} width={600}>
-              <LabelList 
-                position="inside" 
-                fill={colors.text} 
-                stroke="none" 
+              <LabelList
+                position="inside"
+                fill={colors.text}
+                stroke="none"
                 dataKey="display"
                 style={{ fontFamily: "var(--font-family)", fontSize: "12px" }}
               />
-              <LabelList 
-                dataKey="name" 
-                position="right" 
+              <LabelList
+                dataKey="name"
+                position="right"
                 fill={colors.textSecondary}
                 style={{ fontFamily: "var(--font-family)", fontSize: "12px" }}
               />
               {stageData.map((entry, idx) => (
-                <Cell key={`cell-${idx}`} fill={cellColors[idx % cellColors.length]} />
+                <Cell
+                  key={`cell-${idx}`}
+                  fill={cellColors[idx % cellColors.length]}
+                />
               ))}
             </Funnel>
           </FunnelChart>
         </ResponsiveContainer>
-        </div>
       </div>
-    </BaseWidget>
+    </div>
   );
 };
 

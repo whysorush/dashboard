@@ -24,6 +24,7 @@ import AdvancedFilterBarWidget from "../widgets/AdvancedFilterBarWidget";
 // Import exact design professional widgets
 
 import { WIDGET_TYPES } from "../../constants";
+import { useTheme } from "../../../../context/ThemeContext";
 
 const DashboardPreview = ({
   widgets,
@@ -32,6 +33,8 @@ const DashboardPreview = ({
   theme = "light",
   layout = "standard",
 }) => {
+  // Get theme context for proper theming
+  const { themeConfig, isDark } = useTheme();
   // Group widgets by row
   const widgetsByRow = useMemo(() => {
     const grouped = {};
@@ -121,12 +124,37 @@ const DashboardPreview = ({
 
   // No-op spacing helper (since all class names removed)
 
+  // Dynamic styles based on theme
+  const containerStyles = {
+    backgroundColor: themeConfig?.background || (isDark ? "#1f2937" : "#ffffff"),
+    color: themeConfig?.text || (isDark ? "#f9fafb" : "#1f2937"),
+    minHeight: "100%",
+  };
+
+  const headerStyles = {
+    padding: "20px",
+    borderBottom: `1px solid ${themeConfig?.border || (isDark ? "#374151" : "#e5e7eb")}`,
+    backgroundColor: themeConfig?.surface || (isDark ? "#111827" : "#f8fafc"),
+  };
+
+  const titleStyles = {
+    fontSize: "1.5rem",
+    fontWeight: "600",
+    color: themeConfig?.text || (isDark ? "#f9fafb" : "#1f2937"),
+    margin: "0 0 8px 0",
+  };
+
+  const subtitleStyles = {
+    fontSize: "0.875rem",
+    color: themeConfig?.textSecondary || (isDark ? "#d1d5db" : "#6b7280"),
+    margin: 0,
+  };
+
   return (
-    <div>
+    <div style={containerStyles}>
       {/* Header */}
-      <div>
-        <h1>
-          <span />
+      {/* <div style={headerStyles}>
+        <h1 style={titleStyles}>
           {viewMode === "desktop"
             ? "Desktop"
             : viewMode === "tablet"
@@ -134,7 +162,7 @@ const DashboardPreview = ({
             : "Mobile"}{" "}
           Preview
         </h1>
-        <div>
+        <div style={subtitleStyles}>
           <span>
             {viewMode === "desktop"
               ? "Full Width"
@@ -142,10 +170,10 @@ const DashboardPreview = ({
               ? "768px"
               : "375px"}
           </span>
-          <span />
+          <span style={{ margin: "0 8px" }}>•</span>
           <span>{layout}</span>
         </div>
-      </div>
+      </div> */}
 
       {/* Rows */}
       <div>
@@ -175,7 +203,19 @@ const DashboardPreview = ({
                       height: "100%",
                     }}
                   >
-                    <div className={theme === "dark" ? "dark" : ""}>
+                    <div 
+                      className={isDark ? "dark" : ""}
+                      style={{
+                        // backgroundColor: themeConfig?.surface || (isDark ? "#111827" : "#ffffff"),
+                        borderRadius: "8px",
+                        // border: `1px solid ${themeConfig?.border || (isDark ? "#374151" : "#e5e7eb")}`,
+                        // padding: "16px",
+                        height: "100%",
+                        // boxShadow: isDark 
+                        //   ? "0 1px 3px rgba(0, 0, 0, 0.3)" 
+                        //   : "0 1px 3px rgba(0, 0, 0, 0.1)",
+                      }}
+                    >
                       {renderWidget(widget)}
                     </div>
                   </div>
@@ -188,10 +228,25 @@ const DashboardPreview = ({
 
       {/* Empty state */}
       {widgets.length === 0 && (
-        <div>
-          <div>📊</div>
-          <h3>No widgets to preview</h3>
-          <p>Add widgets to your dashboard to see a preview</p>
+        <div style={{
+          padding: "40px 20px",
+          textAlign: "center",
+          backgroundColor: themeConfig?.surface || (isDark ? "#111827" : "#f8fafc"),
+          borderRadius: "8px",
+          margin: "20px",
+          border: `1px solid ${themeConfig?.border || (isDark ? "#374151" : "#e5e7eb")}`,
+        }}>
+          <div style={{ fontSize: "3rem", marginBottom: "16px" }}>📊</div>
+          <h3 style={{
+            color: themeConfig?.text || (isDark ? "#f9fafb" : "#1f2937"),
+            margin: "0 0 8px 0",
+            fontSize: "1.25rem",
+          }}>No widgets to preview</h3>
+          <p style={{
+            color: themeConfig?.textSecondary || (isDark ? "#d1d5db" : "#6b7280"),
+            margin: 0,
+            fontSize: "0.875rem",
+          }}>Add widgets to your dashboard to see a preview</p>
         </div>
       )}
     </div>

@@ -1,16 +1,141 @@
 // src/pages/DashboardBuilder/components/RowContainer.jsx
-import React from "react";
-import { FiPlus, FiMove, FiAlertCircle } from "react-icons/fi";
+import React, { useState } from "react";
+import { FiPlus, FiMove, FiAlertCircle, FiEdit2, FiTrash2, FiCheck, FiX } from "react-icons/fi";
 import { useBuilder } from "../context/BuilderContext";
+import { useTheme } from "../../../context/ThemeContext";
 
 const RowContainer = ({
   row,
   children,
   isSelected,
-  onAddWidget,
   canAddMore = true,
 }) => {
-  const { setSelectedRow } = useBuilder();
+  const { setSelectedRow, updateRow, removeRow } = useBuilder();
+  const { themeConfig, isDark } = useTheme();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(row.title);
+
+  // Dynamic styles based on theme
+  const containerStyles = {
+    position: "relative",
+    marginBottom: "16px",
+    padding: "8px",
+    borderRadius: "8px",
+    border: `2px dashed ${isSelected 
+      ? themeConfig?.primary || "#3b82f6" 
+      : themeConfig?.border || (isDark ? "#374151" : "#e5e7eb")
+    }`,
+    backgroundColor: isSelected 
+      ? (isDark ? "rgba(59, 130, 246, 0.1)" : "rgba(59, 130, 246, 0.05)")
+      : "transparent",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+  };
+
+  const headerStyles = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: "8px",
+    padding: "0 8px",
+  };
+
+  const iconStyles = {
+    width: "24px",
+    height: "24px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: themeConfig?.surface || (isDark ? "#374151" : "#e5e7eb"),
+    borderRadius: "50%",
+    fontSize: "12px",
+    fontWeight: "500",
+    marginRight: "8px",
+    color: themeConfig?.textSecondary || (isDark ? "#9ca3af" : "#6b7280"),
+  };
+
+  const titleStyles = {
+    fontSize: "14px",
+    fontWeight: "500",
+    color: themeConfig?.text || (isDark ? "#d1d5db" : "#374151"),
+  };
+
+  const maxReachedStyles = {
+    display: "flex",
+    alignItems: "center",
+    fontSize: "12px",
+    padding: "4px 8px",
+    backgroundColor: themeConfig?.surface || (isDark ? "#374151" : "#e5e7eb"),
+    color: themeConfig?.textSecondary || (isDark ? "#9ca3af" : "#6b7280"),
+    borderRadius: "4px",
+    cursor: "not-allowed",
+  };
+
+  const contentStyles = {
+    display: "flex",
+    flexDirection: "row",
+    flexWrap: "nowrap",
+    gap: "16px",
+    width: "100%",
+    minHeight: "100px",
+    overflowX: "auto",
+    alignItems: "stretch",
+    padding: "8px 0",
+  };
+
+  const emptyStateStyles = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    height: "96px",
+    backgroundColor: themeConfig?.surface || (isDark ? "rgba(17, 24, 39, 0.5)" : "#f9fafb"),
+    borderRadius: "8px",
+    border: `1px dashed ${themeConfig?.border || (isDark ? "#4b5563" : "#d1d5db")}`,
+  };
+
+  const emptyTextStyles = {
+    fontSize: "14px",
+    color: themeConfig?.textSecondary || (isDark ? "#9ca3af" : "#6b7280"),
+  };
+
+  const buttonStyles = {
+    padding: "4px",
+    backgroundColor: "transparent",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    color: themeConfig?.textSecondary || (isDark ? "#9ca3af" : "#6b7280"),
+    transition: "all 0.2s ease",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  };
+
+  const editButtonStyles = {
+    ...buttonStyles,
+    color: themeConfig?.primary || "#3b82f6",
+  };
+
+  const deleteButtonStyles = {
+    ...buttonStyles,
+    color: themeConfig?.accent || "#ef4444",
+  };
+
+  const inputStyles = {
+    backgroundColor: themeConfig?.background || (isDark ? "#1f2937" : "#ffffff"),
+    border: `1px solid ${themeConfig?.border || (isDark ? "#4b5563" : "#d1d5db")}`,
+    borderRadius: "4px",
+    padding: "4px 8px",
+    fontSize: "14px",
+    color: themeConfig?.text || (isDark ? "#f9fafb" : "#374151"),
+    outline: "none",
+  };
+
+  const buttonGroupStyles = {
+    display: "flex",
+    alignItems: "center",
+    gap: "4px",
+  };
 
   const handleRowClick = (e) => {
     // Only select row if clicking directly on the row container (not on widgets)
@@ -22,83 +147,130 @@ const RowContainer = ({
     }
   };
 
+  const handleEditClick = (e) => {
+    e.stopPropagation();
+    setIsEditing(true);
+    setEditTitle(row.title);
+  };
+
+  const handleSaveEdit = (e) => {
+    e.stopPropagation();
+    updateRow(row.id, { title: editTitle });
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = (e) => {
+    e.stopPropagation();
+    setEditTitle(row.title);
+    setIsEditing(false);
+  };
+
+  const handleDeleteClick = (e) => {
+    e.stopPropagation();
+    if (confirm(`Delete row "${row.title}"? This will remove all widgets in this row.`)) {
+      removeRow(row.id);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    setEditTitle(e.target.value);
+  };
+
+  const handleInputKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSaveEdit(e);
+    } else if (e.key === 'Escape') {
+      handleCancelEdit(e);
+    }
+  };
+
   return (
     <div
-      className={`row-container relative mb-4 p-2 rounded-lg border-2 border-dashed
-        ${
-          isSelected
-            ? "border-blue-500 bg-blue-50/20 dark:bg-blue-900/10"
-            : "border-gray-200 dark:border-gray-700"
-        }
-      `}
+      className="row-container"
+      style={containerStyles}
       onClick={handleRowClick}
       data-row-id={row.id}
     >
       {/* Row header */}
-      <div className="row-header flex items-center justify-between mb-2 px-2">
-        <div className="flex items-center">
-          <div className="w-6 h-6 flex items-center justify-center bg-gray-200 dark:bg-gray-700 rounded-full text-xs font-medium mr-2">
-            <FiMove className="text-gray-500 dark:text-gray-400" />
+      <div className="row-header" style={headerStyles}>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <div style={iconStyles}>
+            <FiMove />
           </div>
-          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            {row.title}
-          </h4>
+          {isEditing ? (
+            <input
+              type="text"
+              value={editTitle}
+              onChange={handleInputChange}
+              onKeyDown={handleInputKeyPress}
+              style={inputStyles}
+              onClick={(e) => e.stopPropagation()}
+              autoFocus
+            />
+          ) : (
+            <h4 style={titleStyles}>
+              {row.title}
+            </h4>
+          )}
         </div>
 
-        {/* {canAddMore ? (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onAddWidget(row.id);
-            }}
-            className="flex items-center text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-            title="Add widget to this row"
-          >
-            <FiPlus className="mr-1" size={12} /> Add Widget
-          </button>
-        ) : (
-          <div className="flex items-center text-xs px-2 py-1 bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded cursor-not-allowed"
-            title="Max 2 widgets/row for charts; Max 4 widgets/row for KPIs; KPI rows cannot mix with other types"
-          >
-            <FiAlertCircle className="mr-1" size={12} /> Max Reached
-          </div>
-        )} */}
-        {!canAddMore && (
-          <div
-            className="flex items-center text-xs px-2 py-1 bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded cursor-not-allowed"
-            title="Max 2 widgets/row for charts; Max 4 widgets/row for KPIs; KPI rows cannot mix with other types"
-          >
-            <FiAlertCircle className="mr-1" size={12} /> Max Reached
-          </div>
-        )}
+        <div style={buttonGroupStyles}>
+          {isEditing ? (
+            <>
+              <button
+                onClick={handleSaveEdit}
+                style={editButtonStyles}
+                title="Save changes"
+              >
+                <FiCheck size={14} />
+              </button>
+              <button
+                onClick={handleCancelEdit}
+                style={buttonStyles}
+                title="Cancel editing"
+              >
+                <FiX size={14} />
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={handleEditClick}
+                style={editButtonStyles}
+                title="Edit row title"
+              >
+                <FiEdit2 size={14} />
+              </button>
+              <button
+                onClick={handleDeleteClick}
+                style={deleteButtonStyles}
+                title="Delete row"
+              >
+                <FiTrash2 size={14} />
+              </button>
+            </>
+          )}
+          
+          {!canAddMore && (
+            <div
+              style={maxReachedStyles}
+              title="Max 2 widgets/row for charts; Max 4 widgets/row for KPIs; KPI rows cannot mix with other types"
+            >
+              <FiAlertCircle style={{ marginRight: "4px" }} size={12} /> Max Reached
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Row content - widgets container */}
-      {/* <div 
-      // className="row-content flex flex-row flex-nowrap gap-4 justify-center items-stretch"
-      > */}
-
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          flexWrap: "nowrap",
-          gap: 16,
-          width: "100%",
-          minHeight: 100,
-          overflowX: "auto",
-          alignItems: "stretch",
-          padding: "8px 0",
-        }}
-      >
+      <div style={contentStyles}>
         {children}
       </div>
-      {/* </div> */}
 
       {/* Empty state */}
       {React.Children.count(children) === 0 && (
-        <div className="empty-row flex items-center justify-center h-24 bg-gray-50 dark:bg-gray-800/50 rounded border border-dashed border-gray-300 dark:border-gray-600">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="empty-row" style={emptyStateStyles}>
+          <p style={emptyTextStyles}>
             Drag widgets here or click "Add Widget"
           </p>
         </div>

@@ -1,5 +1,5 @@
 // src/components/ColorPalette.jsx
-import React, { useState, useCallback, memo } from "react";
+import React, { useState, useCallback, memo, useEffect, useRef } from "react";
 import { FiCheck } from "react-icons/fi";
 import { FaPalette } from "react-icons/fa";
 import { useTheme } from "../context/ThemeContext";
@@ -60,6 +60,7 @@ const ColorPalette = memo(() => {
   const { themeConfig, globalColors, setGlobalColors } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPalette, setSelectedPalette] = useState("default");
+  const dropdownRef = useRef(null);
 
   const handlePaletteSelect = useCallback(
     (paletteKey, palette) => {
@@ -82,15 +83,36 @@ const ColorPalette = memo(() => {
     [globalColors, setGlobalColors]
   );
 
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       {/* Color Palette Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+        className="flex items-center gap-2 px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:opacity-80 transition-opacity"
+        style={{
+          background:
+            "linear-gradient(90deg, rgba(237, 221, 83, 1) 0%, rgba(87, 199, 133, 1) 50%, rgba(42, 123, 155, 1) 100%)",
+        }}
         title="Global Color Palette"
       >
-        <FaPalette className="w-4 h-4" color="#34D399" />
+        <FaPalette className="w-4 h-4" color="#3b82f6" />
         <span className="text-sm font-medium"> Theme Colors</span>
       </button>
 

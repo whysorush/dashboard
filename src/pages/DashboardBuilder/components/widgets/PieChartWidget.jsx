@@ -46,41 +46,44 @@ const PieChartWidget = memo(({ widget, isSelected, onClick }) => {
   );
 
   // Function to get colors dynamically based on percentage ranking
-  const getDynamicColors = useCallback((data) => {
-    const colors = getChartColors();
-    
-    // Calculate percentages for all segments
-    const total = data.reduce((sum, item) => sum + item.value, 0);
-    const segmentsWithPercentages = data.map((entry, index) => ({
-      ...entry,
-      percentage: entry.value / total,
-      originalIndex: index,
-    }));
+  const getDynamicColors = useCallback(
+    (data) => {
+      const colors = getChartColors();
 
-    // Sort by percentage (highest to lowest)
-    const sortedSegments = [...segmentsWithPercentages].sort(
-      (a, b) => b.percentage - a.percentage
-    );
+      // Calculate percentages for all segments
+      const total = data.reduce((sum, item) => sum + item.value, 0);
+      const segmentsWithPercentages = data.map((entry, index) => ({
+        ...entry,
+        percentage: entry.value / total,
+        originalIndex: index,
+      }));
 
-    // Define color palette using global colors (highest to lowest)
-    const colorPalette = [
-      colors.primary, // Highest percentage
-      colors.secondary, // Second highest
-      colors.accent, // Third highest
-      "#FFE066", // Fourth highest
-      "#FFB3BA", // Fifth highest
-      "#c0f0fc", // Lowest percentage
-    ];
+      // Sort by percentage (highest to lowest)
+      const sortedSegments = [...segmentsWithPercentages].sort(
+        (a, b) => b.percentage - a.percentage
+      );
 
-    // Create color mapping based on ranking
-    const colorMap = {};
-    sortedSegments.forEach((segment, rank) => {
-      colorMap[segment.originalIndex] =
-        colorPalette[rank] || colorPalette[colorPalette.length - 1];
-    });
+      // Define color palette using global colors (highest to lowest)
+      const colorPalette = [
+        colors.primary, // Highest percentage
+        colors.secondary, // Second highest
+        colors.accent, // Third highest
+        "#FFE066", // Fourth highest
+        "#FFB3BA", // Fifth highest
+        "#c0f0fc", // Lowest percentage
+      ];
 
-    return colorMap;
-  }, [getChartColors]);
+      // Create color mapping based on ranking
+      const colorMap = {};
+      sortedSegments.forEach((segment, rank) => {
+        colorMap[segment.originalIndex] =
+          colorPalette[rank] || colorPalette[colorPalette.length - 1];
+      });
+
+      return colorMap;
+    },
+    [getChartColors]
+  );
 
   const RADIAN = Math.PI / 180;
   const renderCustomizedLabel = useCallback(
@@ -106,59 +109,47 @@ const PieChartWidget = memo(({ widget, isSelected, onClick }) => {
   );
 
   return (
-    <BaseWidget widget={widget} isSelected={isSelected} onClick={onClick}>
-      {widget?.config?.showKPIs !== false && (
-        <KPIDisplay
-          metrics={kpis}
-          config={widget?.config}
-          position={widget?.config?.kpiPosition || "top"}
-        />
-      )}
+    <div
+      style={{
+        width: "100%",
+        height: chartHeight,
+        ...cssVariables,
+      }}
+      className="chart-container"
+    >
+      <ResponsiveContainer>
+        <PieChart>
+          <Pie
+            data={data}
+            cx="50%"
+            cy="50%"
+            labelLine={false}
+            label={renderCustomizedLabel}
+            outerRadius={80}
+            fill={colors.primary}
+            dataKey="value"
+            animationDuration={animationConfig.duration}
+          >
+            {(() => {
+              // Get dynamic color mapping based on percentage ranking
+              const colorMap = getDynamicColors(data);
 
-      <div
-        style={{
-          width: "100%",
-          height: chartHeight,
-          ...cssVariables,
-        }}
-        className="chart-container"
-      >
-        <ResponsiveContainer>
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              label={renderCustomizedLabel}
-              outerRadius={80}
-              fill={colors.primary}
-              dataKey="value"
-              animationDuration={animationConfig.duration}
-            >
-              {(() => {
-                // Get dynamic color mapping based on percentage ranking
-                const colorMap = getDynamicColors(data);
-
-                return data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={colorMap[index]} />
-                ));
-              })()}
-            </Pie>
-            <Tooltip contentStyle={tooltipStyle} />
-            {widget?.config?.showLegend !== false && (
-              <Legend
-                wrapperStyle={{
-                  color: colors.text,
-                }}
-              />
-            )}
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-
-      <FilterBar config={widget?.config} onChange={handleFilterChange} />
-    </BaseWidget>
+              return data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={colorMap[index]} />
+              ));
+            })()}
+          </Pie>
+          <Tooltip contentStyle={tooltipStyle} />
+          {widget?.config?.showLegend !== false && (
+            <Legend
+              wrapperStyle={{
+                color: colors.text,
+              }}
+            />
+          )}
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
   );
 });
 

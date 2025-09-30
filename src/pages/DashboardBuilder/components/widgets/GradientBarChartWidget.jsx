@@ -81,29 +81,30 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
   }, [data]);
 
   return (
-      <div
-        className={`gradient-bar-chart-widget style-mode-${styleMode}`}
-        style={{
-          fontFamily: "var(--font-family)",
-          color: colors.text,
-          backgroundColor: colors.background,
-          ...cssVariables,
-        }}
-      >
-        <div style={styles.header}>
-          <div>
-            <h3 style={styles.title}>Bar Chart</h3>
-            <div style={styles.total}>{total}</div>
-          </div>
-
-          <select style={styles.select}>
-            <option>Week</option>
-            <option>Month</option>
-            <option>Year</option>
-          </select>
+    <div
+      // className={`gradient-bar-chart-widget style-mode-${styleMode}`}
+      style={{
+        // fontFamily: "var(--font-family)",
+        // color: colors.text,
+        // backgroundColor: colors.background,
+        ...cssVariables,
+      }}
+      className="chart-container"
+    >
+      <div style={styles.header}>
+        <div>
+          <h3 style={styles.title}>Bar Chart</h3>
+          <div style={styles.total}>{total}</div>
         </div>
 
-        <div style={{ width: "100%", height: chartHeight }}>
+        <select style={styles.select}>
+          <option>Week</option>
+          <option>Month</option>
+          <option>Year</option>
+        </select>
+      </div>
+
+      <div style={{ width: "100%", height: chartHeight }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
@@ -117,10 +118,10 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
               dataKey="name"
               axisLine={false}
               tickLine={false}
-              tick={{ 
+              tick={{
                 fontSize: 12,
                 fill: colors.textSecondary,
-                fontFamily: "var(--font-family)"
+                fontFamily: "var(--font-family)",
               }}
               dy={10}
             />
@@ -128,10 +129,10 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ 
+              tick={{
                 fontSize: 12,
                 fill: colors.textSecondary,
-                fontFamily: "var(--font-family)"
+                fontFamily: "var(--font-family)",
               }}
               width={30}
             />
@@ -164,7 +165,13 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
         </ResponsiveContainer>
       </div>
 
-      <div style={{ marginTop: "16px", fontSize: "14px", color: colors.textSecondary }}>
+      <div
+        style={{
+          marginTop: "16px",
+          fontSize: "14px",
+          color: colors.textSecondary,
+        }}
+      >
         <span
           style={{
             display: "inline-block",
