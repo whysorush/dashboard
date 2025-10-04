@@ -295,7 +295,7 @@ export const PROFESSIONAL_KPI_CONFIGS = {
     value: 847293,
     currency: "$",
     growth: 4.1,
-    icon: "💰",
+    icon: "FaDollarSign",
     iconBgColor: "rgba(16, 185, 129, 0.1)", // Emerald bg with opacity
     iconColor: "#A0FCAA", // Emerald
     subtitle: "from last week",
@@ -358,7 +358,7 @@ export const PROFESSIONAL_WIDGET_CONFIGS = {
     growth: 4.1,
     growthDirection: "up",
     growthText: "from last week",
-    icon: "💰",
+    // icon: "💰",
     iconBg: "#E6F7FF",
     growthColor: "#F0F9FF",
     growthTextColor: "#0EA5E9",

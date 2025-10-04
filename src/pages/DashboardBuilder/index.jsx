@@ -18,6 +18,7 @@ import {
 import createReferenceDashboard from "./templates/referenceTemplate";
 // import "./styles/builder.css";
 import PreviewPopupModal from "./components/PreviewModal";
+import WarningNotification from "./components/WarningNotification";
 import ThemeToggle from "../../components/ThemeToggle";
 import StyleModeSelector from "../../components/StyleModeSelector";
 import ColorPalette from "../../components/ColorPalette";
@@ -92,7 +93,7 @@ const styles = {
 };
 
 const DashboardBuilderContent = () => {
-  const { widgets, rows, clearCanvas, loadTemplate, addRow, addWidget } =
+  const { widgets, rows, clearCanvas, loadTemplate, addRow, addWidget, notification, hideNotification } =
     useBuilder();
   const [showPreview, setShowPreview] = useState(false);
   const [showExport, setShowExport] = useState(false);
@@ -210,6 +211,14 @@ const DashboardBuilderContent = () => {
         onClose={() => setShowExport(false)}
         widgets={widgets}
         rows={rows}
+      />
+
+      <WarningNotification
+        isOpen={!!notification}
+        onClose={hideNotification}
+        title={notification?.title}
+        message={notification?.message}
+        type={notification?.type}
       />
     </div>
   );

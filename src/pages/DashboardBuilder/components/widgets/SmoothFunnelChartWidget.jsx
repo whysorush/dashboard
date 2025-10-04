@@ -10,6 +10,7 @@ import {
 } from "recharts";
 import BaseWidget from "./BaseWidget";
 import { useThemeStyles } from "../../../../utils/themeUtils";
+import { generateMockData } from "../../utils/mockDataGenerator";
 
 const styles = {
   container: {
@@ -57,6 +58,23 @@ const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
       },
     [widget?.config]
   );
+  const data = useMemo(() => {
+    return generateMockData("categories", {
+      categories: config.dataPoints || 10,
+      includeComparison: config.comparisonPeriod,
+      timeRange: config.timeRange || "monthly",
+      trend: config.trend || "random",
+    });
+  }, [config]);
+
+  const total = useMemo(() => {
+    const sum = data.reduce((acc, item) => acc + item.value, 0);
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    }).format(sum);
+  }, [data]);
 
   // Get theme-aware colors and styles
   const colors = getChartColors();
@@ -101,6 +119,7 @@ const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
     >
       <div style={styles.header}>
         <h3 style={styles.title}>Funnel Chart</h3>
+        <div style={styles.total}>{total}</div>
 
         <select style={styles.select}>
           <option>Week</option>

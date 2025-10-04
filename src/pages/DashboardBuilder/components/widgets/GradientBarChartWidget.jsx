@@ -164,26 +164,6 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
           </BarChart>
         </ResponsiveContainer>
       </div>
-
-      <div
-        style={{
-          marginTop: "16px",
-          fontSize: "14px",
-          color: colors.textSecondary,
-        }}
-      >
-        <span
-          style={{
-            display: "inline-block",
-            width: "12px",
-            height: "12px",
-            borderRadius: "50%",
-            marginRight: "8px",
-            background: `linear-gradient(180deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
-          }}
-        ></span>
-        Revenue by Category
-      </div>
     </div>
   );
 };

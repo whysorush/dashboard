@@ -1,7 +1,7 @@
 // src/pages/DashboardBuilder/components/widgets/ProfessionalKPIWidget.jsx
 import React from "react";
 import { PROFESSIONAL_WIDGET_CONFIGS } from "../../constants";
-import { FaArrowDown, FaArrowUp, FaPercent } from "react-icons/fa";
+import { FaArrowDown, FaArrowUp, FaPercent, FaDollarSign, FaShoppingCart, FaUsers } from "react-icons/fa";
 
 /**
  * Professional KPI Widget with exact design standards
@@ -13,6 +13,24 @@ import { FaArrowDown, FaArrowUp, FaPercent } from "react-icons/fa";
  * - Growth percentage with up/down arrows and colors
  * - Figtree font family with specific weights and colors
  */
+
+// Icon mapping for string-based icon names to React components
+const iconMap = {
+  FaDollarSign: FaDollarSign,
+  FaShoppingCart: FaShoppingCart,
+  FaUsers: FaUsers,
+  // Add more icons as needed
+};
+
+// Helper function to render icon
+const renderIcon = (icon) => {
+  if (typeof icon === 'string' && iconMap[icon]) {
+    const IconComponent = iconMap[icon];
+    return <IconComponent />;
+  }
+  // If it's already a React component or emoji, render as is
+  return icon;
+};
 const ProfessionalKPIWidget = ({ widget, isSelected, onClick }) => {
   const config = widget.config || {};
 
@@ -37,7 +55,7 @@ const ProfessionalKPIWidget = ({ widget, isSelected, onClick }) => {
   return (
     <div className="stat-card">
       <div className={`stat-icon ${title.toLowerCase().split(" ")[0]}`}>
-        {icon}
+        {renderIcon(icon)}
       </div>
       <div className="stat-content">
         <h3>{title}</h3>

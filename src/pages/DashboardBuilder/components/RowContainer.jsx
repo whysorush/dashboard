@@ -1,16 +1,19 @@
 // src/pages/DashboardBuilder/components/RowContainer.jsx
 import React, { useState } from "react";
-import { FiPlus, FiMove, FiAlertCircle, FiEdit2, FiTrash2, FiCheck, FiX } from "react-icons/fi";
+import {
+  FiPlus,
+  FiMove,
+  FiAlertCircle,
+  FiEdit2,
+  FiTrash2,
+  FiCheck,
+  FiX,
+} from "react-icons/fi";
 import { useBuilder } from "../context/BuilderContext";
 import { useTheme } from "../../../context/ThemeContext";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 
-const RowContainer = ({
-  row,
-  children,
-  isSelected,
-  canAddMore = true,
-}) => {
+const RowContainer = ({ row, children, isSelected, canAddMore = true }) => {
   const { setSelectedRow, updateRow, removeRow } = useBuilder();
   const { themeConfig, isDark } = useTheme();
   const [isEditing, setIsEditing] = useState(false);
@@ -23,12 +26,15 @@ const RowContainer = ({
     marginBottom: "16px",
     padding: "8px",
     borderRadius: "8px",
-    border: `2px dashed ${isSelected 
-      ? themeConfig?.primary || "#3b82f6" 
-      : themeConfig?.border || (isDark ? "#374151" : "#e5e7eb")
+    border: `2px dashed ${
+      isSelected
+        ? themeConfig?.primary || "#3b82f6"
+        : themeConfig?.border || (isDark ? "#374151" : "#e5e7eb")
     }`,
-    backgroundColor: isSelected 
-      ? (isDark ? "rgba(59, 130, 246, 0.1)" : "rgba(59, 130, 246, 0.05)")
+    backgroundColor: isSelected
+      ? isDark
+        ? "rgba(59, 130, 246, 0.1)"
+        : "rgba(59, 130, 246, 0.05)"
       : "transparent",
     cursor: "pointer",
     transition: "all 0.2s ease",
@@ -90,9 +96,12 @@ const RowContainer = ({
     alignItems: "center",
     justifyContent: "center",
     height: "96px",
-    backgroundColor: themeConfig?.surface || (isDark ? "rgba(17, 24, 39, 0.5)" : "#f9fafb"),
+    backgroundColor:
+      themeConfig?.surface || (isDark ? "rgba(17, 24, 39, 0.5)" : "#f9fafb"),
     borderRadius: "8px",
-    border: `1px dashed ${themeConfig?.border || (isDark ? "#4b5563" : "#d1d5db")}`,
+    border: `1px dashed ${
+      themeConfig?.border || (isDark ? "#4b5563" : "#d1d5db")
+    }`,
   };
 
   const emptyTextStyles = {
@@ -124,8 +133,11 @@ const RowContainer = ({
   };
 
   const inputStyles = {
-    backgroundColor: themeConfig?.background || (isDark ? "#1f2937" : "#ffffff"),
-    border: `1px solid ${themeConfig?.border || (isDark ? "#4b5563" : "#d1d5db")}`,
+    backgroundColor:
+      themeConfig?.background || (isDark ? "#1f2937" : "#ffffff"),
+    border: `1px solid ${
+      themeConfig?.border || (isDark ? "#4b5563" : "#d1d5db")
+    }`,
     borderRadius: "4px",
     padding: "4px 8px",
     fontSize: "14px",
@@ -186,9 +198,9 @@ const RowContainer = ({
   };
 
   const handleInputKeyPress = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleSaveEdit(e);
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       handleCancelEdit(e);
     }
   };
@@ -217,9 +229,7 @@ const RowContainer = ({
               autoFocus
             />
           ) : (
-            <h4 style={titleStyles}>
-              {row.title}
-            </h4>
+            <h4 style={titleStyles}>{row.title}</h4>
           )}
         </div>
 
@@ -259,30 +269,32 @@ const RowContainer = ({
               </button>
             </>
           )}
-          
+
           {!canAddMore && (
             <div
               style={maxReachedStyles}
               title="Max 2 widgets/row for charts; Max 4 widgets/row for KPIs; KPI rows cannot mix with other types"
             >
-              <FiAlertCircle style={{ marginRight: "4px" }} size={12} /> Max Reached
+              <FiAlertCircle style={{ marginRight: "4px" }} size={12} /> Max
+              Reached
             </div>
           )}
         </div>
       </div>
 
       {/* Row content - widgets container */}
-      <div style={contentStyles}>
+
+      {/* <div style={contentStyles}>
         {children}
-      </div>
+      </div> */}
 
       {/* Empty state */}
-      {React.Children.count(children) === 0 && (
+      {React.Children.count(children) === 0 ? (
         <div className="empty-row" style={emptyStateStyles}>
-          <p style={emptyTextStyles}>
-            Drag widgets here or click "Add Widget"
-          </p>
+          <p style={emptyTextStyles}>Drag widgets here or click "Add Widget"</p>
         </div>
+      ) : (
+        <div style={contentStyles}>{children}</div>
       )}
 
       {/* Delete Confirmation Modal */}

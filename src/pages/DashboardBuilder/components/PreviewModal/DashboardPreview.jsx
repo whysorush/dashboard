@@ -68,6 +68,7 @@ const DashboardPreview = ({
       widget,
       isSelected: false,
       onClick: () => {},
+      isPreview: true,
     };
 
     switch (widget.type) {

@@ -26,6 +26,7 @@ export const BuilderProvider = ({ children }) => {
   const [selectedWidget, setSelectedWidget] = useState(null);
   const [selectedRow, setSelectedRow] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [notification, setNotification] = useState(null);
 
   const [gridConfig] = useState({
     cols: 12,
@@ -37,6 +38,16 @@ export const BuilderProvider = ({ children }) => {
 
   const [history, setHistory] = useState([[]]);
   const [historyIndex, setHistoryIndex] = useState(0);
+
+  // Show notification function
+  const showNotification = useCallback((notificationData) => {
+    setNotification(notificationData);
+  }, []);
+
+  // Hide notification function
+  const hideNotification = useCallback(() => {
+    setNotification(null);
+  }, []);
 
   const saveToHistory = useCallback(
     (newWidgets) => {
@@ -77,6 +88,51 @@ export const BuilderProvider = ({ children }) => {
 
   const addWidget = useCallback(
     (type, position = null, rowId = null) => {
+      // Check for duplicate Advanced Filter Bar widgets
+      if (type === WIDGET_TYPES.ADVANCED_FILTER_BAR) {
+        const existingFilterWidgets = widgets.filter(
+          (w) => w.type === WIDGET_TYPES.ADVANCED_FILTER_BAR
+        );
+        
+        if (existingFilterWidgets.length > 0) {
+          // Find the first existing filter widget and its row
+          const existingWidget = existingFilterWidgets[0];
+          const existingRow = rows.find(r => r.id === existingWidget.position.rowId);
+          
+          // Show warning notification
+          showNotification({
+            title: "Filter section already exists",
+            message: "Please remove the existing one or add it in a new row.",
+            type: "warning"
+          });
+          
+          // Highlight and scroll to existing filter widget
+          setTimeout(() => {
+            const existingRowElement = document.querySelector(`[data-row-id="${existingWidget.position.rowId}"]`);
+            if (existingRowElement) {
+              // Scroll to the row
+              existingRowElement.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+              });
+              
+              // Highlight the row temporarily
+              existingRowElement.style.transition = 'all 0.3s ease';
+              existingRowElement.style.border = '2px solid #f59e0b';
+              existingRowElement.style.backgroundColor = 'rgba(245, 158, 11, 0.1)';
+              
+              // Remove highlight after 3 seconds
+              setTimeout(() => {
+                existingRowElement.style.border = '';
+                existingRowElement.style.backgroundColor = '';
+              }, 3000);
+            }
+          }, 100);
+          
+          return null; // Prevent adding the duplicate widget
+        }
+      }
+
       const targetRowId =
         rowId || (rows.length ? rows[0].id : `row-${Date.now()}`);
 
@@ -588,7 +644,8 @@ export const BuilderProvider = ({ children }) => {
     selectedRow,
     isDragging,
     gridConfig,
-  }), [widgets, rows, selectedWidget, selectedRow, isDragging, gridConfig]);
+    notification,
+  }), [widgets, rows, selectedWidget, selectedRow, isDragging, gridConfig, notification]);
 
   const historyValue = useMemo(() => ({
     history,
@@ -616,6 +673,8 @@ export const BuilderProvider = ({ children }) => {
     setSelectedWidget,
     setSelectedRow,
     setIsDragging,
+    showNotification,
+    hideNotification,
   }), [
     addWidget,
     removeWidget,
@@ -635,6 +694,8 @@ export const BuilderProvider = ({ children }) => {
     setSelectedWidget,
     setSelectedRow,
     setIsDragging,
+    showNotification,
+    hideNotification,
   ]);
 
   const value = useMemo(() => ({

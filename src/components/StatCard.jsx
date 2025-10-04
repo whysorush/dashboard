@@ -37,7 +37,7 @@ const styles = {
   change: { display: "flex", alignItems: "center", gap: 6, color: "#22c55e", fontSize: 12, marginTop: 24 },
 };
 
-function StatCard({ icon: Icon, title, value, changeText }) {
+function StatCard({ icon: Icon, title, value, changeText }) { // eslint-disable-line no-unused-vars
   return (
     <div style={styles.card}>
       <div style={styles.icon}>
@@ -54,6 +54,8 @@ function StatCard({ icon: Icon, title, value, changeText }) {
     </div>
   );
 }
+
+
 
 export default function StatCards() {
   return (
@@ -79,3 +81,5 @@ export default function StatCards() {
     </section>
   );
 }
+
+

@@ -1,7 +1,14 @@
 // src/pages/DashboardBuilder/components/widgets/AdvancedFilterBarWidget?.jsx
-import React, { useState } from "react";
-import { FiCalendar, FiChevronDown, FiFilter } from "react-icons/fi";
+import React, { useState, useCallback } from "react";
+import {
+  FiCalendar,
+  FiChevronDown,
+  FiFilter,
+  FiX,
+  FiMove,
+} from "react-icons/fi";
 import BaseWidget from "./BaseWidget";
+import { useBuilder } from "../../context/BuilderContext";
 
 const styles = {
   section: {
@@ -15,6 +22,62 @@ const styles = {
     border: "1px solid var(--border)",
     borderRadius: 12,
     padding: "10px 12px",
+    position: "relative",
+    transition: "all 0.2s ease",
+  },
+  groupPreview: {
+    background: "var(--panel)",
+    border: "1px solid var(--border)",
+    borderRadius: 12,
+    padding: "10px 12px",
+    position: "relative",
+    transition: "all 0.2s ease",
+    cursor: "default",
+  },
+  groupSelected: {
+    background: "var(--panel)",
+    border: "2px solid #3b82f6",
+    borderRadius: 12,
+    padding: "10px 12px",
+    position: "relative",
+    transition: "all 0.2s ease",
+    boxShadow: "0 0 0 1px #3b82f6",
+  },
+  groupControls: {
+    position: "absolute",
+    top: "-8px",
+    right: "-8px",
+    display: "flex",
+    gap: "4px",
+    opacity: 0,
+    transition: "opacity 0.2s ease",
+  },
+  groupControlsVisible: {
+    position: "absolute",
+    top: "-8px",
+    right: "-8px",
+    display: "flex",
+    gap: "4px",
+    opacity: 1,
+    transition: "opacity 0.2s ease",
+  },
+  controlButton: {
+    background: "#3b82f6",
+    color: "white",
+    border: "none",
+    borderRadius: "50%",
+    width: "20px",
+    height: "20px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    fontSize: "10px",
+    transition: "all 0.2s ease",
+  },
+  controlButtonHover: {
+    background: "#2563eb",
+    transform: "scale(1.1)",
   },
   label: {
     display: "block",
@@ -46,11 +109,20 @@ const styles = {
  * - Range sliders
  * - Clean, modern styling
  * - Responsive design
+ * - Individual section selection and management
  */
-const AdvancedFilterBarWidget = ({ widget, isSelected, onClick }) => {
-  console.log("advanced filter widget", widget);
-
+const AdvancedFilterBarWidget = ({
+  widget,
+  isSelected,
+  onClick,
+  isPreview = false,
+}) => {
   const config = widget?.config || {};
+
+  const { updateWidgetProperty } = useBuilder();
+
+  // Don't persist changes in preview mode
+  const shouldPersist = !isPreview;
 
   // State for filter values
   const [dateRange, setDateRange] = useState({ from: "", to: "" });
@@ -59,11 +131,182 @@ const AdvancedFilterBarWidget = ({ widget, isSelected, onClick }) => {
   const [status, setStatus] = useState("All");
   const [orderQuantity, setOrderQuantity] = useState("1-100");
 
-  return (
-    <div>
-      <section style={styles.section}>
-        <div style={styles.group}>
-          <label style={styles.label}>Date Filter</label>
+  // State for section management
+  const [selectedSection, setSelectedSection] = useState(null);
+  const [hoveredSection, setHoveredSection] = useState(null);
+
+  // Initialize sections from config or use defaults
+  const [sections, setSections] = useState(() => {
+    if (config.sections) {
+      return config.sections;
+    }
+    return [
+      { id: "date", label: "Date Filter", type: "date", visible: true },
+      {
+        id: "transaction",
+        label: "Transaction Amount",
+        type: "select",
+        visible: true,
+      },
+      { id: "product", label: "Product", type: "select", visible: true },
+      { id: "status", label: "Status", type: "select", visible: true },
+      {
+        id: "quantity",
+        label: "Order Quantity",
+        type: "select",
+        visible: true,
+      },
+    ];
+  });
+
+  // Helper function to persist sections to widget config
+  const persistSections = useCallback(
+    (newSections) => {
+      if (shouldPersist && widget?.id) {
+        updateWidgetProperty(widget.id, "config.sections", newSections);
+      }
+    },
+    [shouldPersist, widget?.id, updateWidgetProperty]
+  );
+
+  // Handle section selection
+  const handleSectionClick = useCallback(
+    (sectionId, event) => {
+      event.stopPropagation();
+      setSelectedSection(selectedSection === sectionId ? null : sectionId);
+    },
+    [selectedSection]
+  );
+
+  // Handle section deletion
+  const handleDeleteSection = useCallback(
+    (sectionId, event) => {
+      event.stopPropagation();
+      setSections((prev) => {
+        const newSections = prev.map((section) =>
+          section.id === sectionId ? { ...section, visible: false } : section
+        );
+        persistSections(newSections);
+        return newSections;
+      });
+      setSelectedSection(null);
+    },
+    [persistSections]
+  );
+
+  // Handle section reordering (drag and drop)
+  const handleDragStart = useCallback((sectionId, event) => {
+    event.dataTransfer.setData("text/plain", sectionId);
+    event.dataTransfer.effectAllowed = "move";
+  }, []);
+
+  const handleDragOver = useCallback((event) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+  }, []);
+
+  const handleDrop = useCallback(
+    (targetSectionId, event) => {
+      event.preventDefault();
+      const draggedSectionId = event.dataTransfer.getData("text/plain");
+
+      if (draggedSectionId !== targetSectionId) {
+        setSections((prev) => {
+          const sections = [...prev];
+          const draggedIndex = sections.findIndex(
+            (s) => s.id === draggedSectionId
+          );
+          const targetIndex = sections.findIndex(
+            (s) => s.id === targetSectionId
+          );
+
+          if (draggedIndex !== -1 && targetIndex !== -1) {
+            const [draggedSection] = sections.splice(draggedIndex, 1);
+            sections.splice(targetIndex, 0, draggedSection);
+          }
+
+          persistSections(sections);
+          return sections;
+        });
+      }
+    },
+    [persistSections]
+  );
+
+  // Render individual section
+  const renderSection = (section) => {
+    if (!section.visible) return null;
+
+    const isSelected = selectedSection === section.id;
+    const isHovered = hoveredSection === section.id;
+    const showControls = !isPreview && (isSelected || isHovered);
+
+    const sectionStyle = isPreview
+      ? styles.groupPreview
+      : isSelected
+      ? styles.groupSelected
+      : styles.group;
+    const controlsStyle = showControls
+      ? styles.groupControlsVisible
+      : styles.groupControls;
+
+    return (
+      <div
+        key={section.id}
+        style={sectionStyle}
+        onClick={
+          !isPreview ? (e) => handleSectionClick(section.id, e) : undefined
+        }
+        onMouseEnter={
+          !isPreview ? () => setHoveredSection(section.id) : undefined
+        }
+        onMouseLeave={!isPreview ? () => setHoveredSection(null) : undefined}
+        draggable={!isPreview}
+        onDragStart={
+          !isPreview ? (e) => handleDragStart(section.id, e) : undefined
+        }
+        onDragOver={!isPreview ? handleDragOver : undefined}
+        onDrop={!isPreview ? (e) => handleDrop(section.id, e) : undefined}
+      >
+        {/* Section Controls - Only show in builder mode */}
+        {!isPreview && (
+          <div style={controlsStyle}>
+            <button
+              style={styles.controlButton}
+              onClick={(e) => handleDeleteSection(section.id, e)}
+              title="Delete section"
+              onMouseEnter={(e) => {
+                e.target.style.background = "#dc2626";
+                e.target.style.transform = "scale(1.1)";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = "#3b82f6";
+                e.target.style.transform = "scale(1)";
+              }}
+            >
+              <FiX />
+            </button>
+            <button
+              style={styles.controlButton}
+              title="Drag to reorder"
+              onMouseEnter={(e) => {
+                e.target.style.background = "#059669";
+                e.target.style.transform = "scale(1.1)";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = "#3b82f6";
+                e.target.style.transform = "scale(1)";
+              }}
+            >
+              <FiMove />
+            </button>
+          </div>
+        )}
+
+        {/* Section Content */}
+        <label style={styles.label}>{section.label}</label>
+
+        {section.id === "date" && (
           <div style={styles.dateInputs}>
             <input
               type="date"
@@ -84,9 +327,9 @@ const AdvancedFilterBarWidget = ({ widget, isSelected, onClick }) => {
               }
             />
           </div>
-        </div>
-        <div style={styles.group}>
-          <label style={styles.label}>Transaction Amount</label>
+        )}
+
+        {section.id === "transaction" && (
           <select
             style={styles.control}
             value={transactionAmount}
@@ -97,30 +340,35 @@ const AdvancedFilterBarWidget = ({ widget, isSelected, onClick }) => {
             <option>$50K-100K</option>
             <option>$100K+</option>
           </select>
-        </div>
+        )}
 
-        <div style={styles.group}>
-          <label style={styles.label}>Product</label>
-          <select style={styles.control} value={product} onChange={(e) => setProduct(e.target.value)}>
+        {section.id === "product" && (
+          <select
+            style={styles.control}
+            value={product}
+            onChange={(e) => setProduct(e.target.value)}
+          >
             <option>All Type</option>
             <option>Manufacturing</option>
             <option>Marketing</option>
             <option>Branding</option>
           </select>
-        </div>
+        )}
 
-        <div style={styles.group}>
-          <label style={styles.label}>Status</label>
-          <select style={styles.control} value={status} onChange={(e) => setStatus(e.target.value)}>
+        {section.id === "status" && (
+          <select
+            style={styles.control}
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+          >
             <option>All</option>
             <option>Pending</option>
             <option>Delivered</option>
             <option>In-Transit</option>
           </select>
-        </div>
+        )}
 
-        <div style={styles.group}>
-          <label style={styles.label}>Order Quantity</label>
+        {section.id === "quantity" && (
           <select
             style={styles.control}
             value={orderQuantity}
@@ -130,9 +378,17 @@ const AdvancedFilterBarWidget = ({ widget, isSelected, onClick }) => {
             <option>101-500</option>
             <option>500+</option>
           </select>
-        </div>
-      </section>
-    </div>
+        )}
+      </div>
+    );
+  };
+
+  return isPreview ? (
+    <section style={styles.section}>{sections.map(renderSection)}</section>
+  ) : (
+    <BaseWidget widget={widget} isSelected={isSelected} onClick={onClick}>
+      <section style={styles.section}>{sections.map(renderSection)}</section>
+    </BaseWidget>
   );
 };
 
