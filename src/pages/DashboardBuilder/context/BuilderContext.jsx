@@ -179,7 +179,7 @@ export const BuilderProvider = ({ children }) => {
           subtitle: "",
           showKPIs: true,
           showFilters: true,
-          color: "#27D0FC",
+          color: "#25CFFD",
           dataPoints: 12,
           refreshInterval: 0,
           aggregation: "sum",

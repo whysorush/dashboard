@@ -1,13 +1,20 @@
 // src/pages/DashboardBuilder/components/widgets/AreaChartWidget.jsx
-import React, { useMemo } from 'react';
+import React, { useMemo } from "react";
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
-} from 'recharts';
-import BaseWidget from './BaseWidget';
-import KPIDisplay from './KPIDisplay';
-import FilterBar from './FilterBar';
-import { generateMockData, calculateKPIs } from '../../utils/mockDataGenerator';
-import { useThemeStyles } from '../../../../utils/themeUtils';
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+import BaseWidget from "./BaseWidget";
+import KPIDisplay from "./KPIDisplay";
+import FilterBar from "./FilterBar";
+import { generateMockData, calculateKPIs } from "../../utils/mockDataGenerator";
+import { useThemeStyles } from "../../../../utils/themeUtils";
 
 const AreaChartWidget = ({ widget, isSelected, onClick }) => {
   const {
@@ -17,13 +24,13 @@ const AreaChartWidget = ({ widget, isSelected, onClick }) => {
     getChartHeight,
     getGradientColors,
     getTooltipStyle,
-    getAnimationConfig
+    getAnimationConfig,
   } = useThemeStyles();
 
   const data = useMemo(() => {
-    return generateMockData('time-series', {
+    return generateMockData("time-series", {
       points: widget.config?.dataPoints || 12,
-      trend: 'increasing'
+      trend: "increasing",
     });
   }, [widget.config?.dataPoints]);
 
@@ -32,84 +39,71 @@ const AreaChartWidget = ({ widget, isSelected, onClick }) => {
   }, [data, widget.config]);
 
   const handleFilterChange = (key, value) => {
-    console.log('Filter changed:', key, value);
+    console.log("Filter changed:", key, value);
   };
 
   // Get theme-aware colors and styles
   const colors = getChartColors();
   const styleProps = getStyleProperties();
   const cssVariables = getCSSVariables();
-  const chartHeight = getChartHeight(widget.position?.size || 'medium');
-  const gradientColors = getGradientColors(widget.config?.color || colors.primary);
+  const chartHeight = getChartHeight(widget.position?.size || "medium");
+  const gradientColors = getGradientColors(
+    colors.primary
+  );
   const tooltipStyle = getTooltipStyle();
-  const animationConfig = getAnimationConfig(widget.config?.animations !== false);
+  const animationConfig = getAnimationConfig(
+    widget.config?.animations !== false
+  );
 
   return (
-    <BaseWidget widget={widget} isSelected={isSelected} onClick={onClick}>
-      {widget.config?.showKPIs !== false && (
-        <KPIDisplay
-          metrics={kpis}
-          config={widget.config}
-          position={widget.config?.kpiPosition || 'top'}
-        />
-      )}
-
-      <div 
-        style={{ 
-          width: '100%', 
-          height: chartHeight,
-          ...cssVariables
-        }}
-        className="chart-container"
-      >
-        <ResponsiveContainer>
-          <AreaChart
-            data={data}
-            margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
-          >
-            {widget.config?.showGrid !== false && (
-              <CartesianGrid 
-                strokeDasharray="3 3" 
-                stroke={colors.grid}
-              />
-            )}
-            <XAxis 
-              dataKey="name"
-              tick={{ 
-                fontSize: 12,
-                fill: colors.textSecondary
+    <div
+      style={{
+        width: "100%",
+        height: chartHeight,
+        ...cssVariables,
+      }}
+      className="chart-container"
+    >
+      <ResponsiveContainer>
+        <AreaChart
+          data={data}
+          margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+        >
+          {widget.config?.showGrid !== false && (
+            <CartesianGrid strokeDasharray="3 3" stroke={colors.grid} />
+          )}
+          <XAxis
+            dataKey="name"
+            tick={{
+              fontSize: 12,
+              fill: colors.textSecondary,
+            }}
+          />
+          <YAxis
+            tick={{
+              fontSize: 12,
+              fill: colors.textSecondary,
+            }}
+          />
+          <Tooltip contentStyle={tooltipStyle} />
+          {widget.config?.showLegend !== false && (
+            <Legend
+              wrapperStyle={{
+                color: colors.text,
               }}
             />
-            <YAxis 
-              tick={{ 
-                fontSize: 12,
-                fill: colors.textSecondary
-              }}
-            />
-            <Tooltip
-              contentStyle={tooltipStyle}
-            />
-            {widget.config?.showLegend !== false && (
-              <Legend 
-                wrapperStyle={{ 
-                  color: colors.text
-                }}
-              />
-            )}
-            <Area
-              type={widget.config?.smoothCurves ? 'monotone' : 'linear'}
-              dataKey="value"
-              stroke={widget.config?.color || colors.primary}
-              fill={widget.config?.color || colors.primary}
-              fillOpacity={0.6}
-              animationDuration={animationConfig.duration}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-
-      <FilterBar config={widget.config} onChange={handleFilterChange} />
-    </BaseWidget>
+          )}
+          <Area
+            type={widget.config?.smoothCurves ? "monotone" : "linear"}
+            dataKey="value"
+            stroke={colors.primary}
+            fill={colors.primary}
+            fillOpacity={0.6}
+            animationDuration={animationConfig.duration}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
   );
 };
 

@@ -223,13 +223,13 @@ const MultiLineChartWidget = ({ widget }) => {
               name={seriesConfig.names[0] || "Series 1"}
               type={config.smoothCurves ? "monotone" : "linear"}
               dataKey="value"
-              stroke={seriesConfig.colors[0] || "#27D0FC"}
+              stroke={seriesConfig.colors[0] || "#25CFFD"}
               strokeWidth={3}
               strokeDasharray={getStrokeDashArray(seriesConfig.styles[0] || "solid")}
               dot={
                 config.showDataPoints
                   ? {
-                      fill: seriesConfig.colors[0] || "#27D0FC",
+                      fill: seriesConfig.colors[0] || "#25CFFD",
                       strokeWidth: 2,
                       r: 4,
                     }
@@ -237,7 +237,7 @@ const MultiLineChartWidget = ({ widget }) => {
               }
               activeDot={{
                 r: 6,
-                stroke: seriesConfig.colors[0] || "#27D0FC",
+                stroke: seriesConfig.colors[0] || "#25CFFD",
                 strokeWidth: 2,
                 fill: "white",
               }}

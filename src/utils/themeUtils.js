@@ -112,8 +112,8 @@ export const useThemeStyles = () => {
       colors.accent,
       '#8B5CF6', // purple
       '#EC4899', // pink
-      '#F59E0B', // amber
-      '#10B981', // emerald
+      '#63E6D4', // amber
+      '#A0FCAA', // emerald
       '#EF4444'  // red
     ];
 

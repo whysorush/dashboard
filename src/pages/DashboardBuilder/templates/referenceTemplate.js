@@ -56,7 +56,7 @@ export const createReferenceDashboard = () => {
         growth: 4.1,
         icon: '💰',
         iconBgColor: 'rgba(16, 185, 129, 0.1)', // Emerald bg with opacity
-        iconColor: '#10B981', // Emerald
+        iconColor: '#A0FCAA', // Emerald
         subtitle: 'from last week',
         formatType: 'currency'
       }
@@ -77,7 +77,7 @@ export const createReferenceDashboard = () => {
         growth: 2.6,
         icon: '📦',
         iconBgColor: 'rgba(59, 130, 246, 0.1)', // Blue bg with opacity
-        iconColor: '#27D0FC', // Blue
+        iconColor: '#25CFFD', // Blue
         subtitle: 'from last week',
         formatType: 'number'
       }

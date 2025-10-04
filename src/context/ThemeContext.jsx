@@ -1,5 +1,11 @@
 // src/context/ThemeContext.jsx
-import React, { createContext, useState, useContext, useEffect, useCallback } from "react";
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  useCallback,
+} from "react";
 
 // Define available themes and style modes
 export const THEMES = {
@@ -19,9 +25,9 @@ export const STYLE_MODES = {
 export const THEME_CONFIGS = {
   [STYLE_MODES.DEFAULT]: {
     light: {
-      primary: "#27D0FC",
-      secondary: "#10B981",
-      accent: "#F59E0B",
+      primary: "#25CFFD",
+      secondary: "#A0FCAA",
+      accent: "#63E6D4",
       background: "#ffffff",
       surface: "#f8fafc",
       text: "#181D28",
@@ -263,7 +269,10 @@ export const ThemeProvider = ({ children }) => {
 
         // Apply additional CSS variables for comprehensive theming
         root.style.setProperty("--chart-primary", mergedThemeConfig.primary);
-        root.style.setProperty("--chart-secondary", mergedThemeConfig.secondary);
+        root.style.setProperty(
+          "--chart-secondary",
+          mergedThemeConfig.secondary
+        );
         root.style.setProperty("--chart-accent", mergedThemeConfig.accent);
         root.style.setProperty(
           "--chart-background",
@@ -283,13 +292,13 @@ export const ThemeProvider = ({ children }) => {
           root.style.setProperty("--global-primary", globalColors.primary);
           root.style.setProperty("--global-secondary", globalColors.secondary);
           root.style.setProperty("--global-accent", globalColors.accent);
-          
+
           // Also set legacy variables for DashboardBuilder compatibility
           root.style.setProperty("--primary", globalColors.primary);
           root.style.setProperty("--secondary", globalColors.secondary);
           root.style.setProperty("--accent", globalColors.accent);
         }
-        
+
         // Set DashboardBuilder-specific CSS variables
         root.style.setProperty("--bg", mergedThemeConfig.background);
         root.style.setProperty("--panel", mergedThemeConfig.surface);

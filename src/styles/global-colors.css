@@ -1,9 +1,9 @@
 /* Global Colors CSS Variables */
 :root {
   /* Global color variables that can be overridden */
-  --global-primary: #27D0FC;
-  --global-secondary: #10B981;
-  --global-accent: #F59E0B;
+  --global-primary: #25CFFD;
+  --global-secondary: #A0FCAA;
+  --global-accent: #63E6D4;
 }
 
 /* Apply global colors to all chart elements */
@@ -175,4 +175,14 @@ textarea {
 
 .shadow-accent {
   box-shadow: 0 4px 6px -1px color-mix(in oklab, var(--global-accent) 20%, transparent);
+}
+
+/* Status indicator colors using global colors */
+:root {
+  --status-pending-bg: color-mix(in oklab, var(--global-accent) 15%, transparent);
+  --status-pending-text: var(--global-accent);
+  --status-delivered-bg: color-mix(in oklab, var(--global-secondary) 15%, transparent);
+  --status-delivered-text: var(--global-secondary);
+  --status-in-transit-bg: color-mix(in oklab, var(--global-primary) 15%, transparent);
+  --status-in-transit-text: var(--global-primary);
 }

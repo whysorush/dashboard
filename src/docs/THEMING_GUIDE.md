@@ -114,9 +114,9 @@ The system provides comprehensive CSS variables that automatically update based 
 
 ### Theme Variables
 ```css
---theme-primary: #27D0FC;
---theme-secondary: #10B981;
---theme-accent: #F59E0B;
+--theme-primary: #25CFFD;
+--theme-secondary: #A0FCAA;
+--theme-accent: #63E6D4;
 --theme-background: #ffffff;
 --theme-surface: #f8fafc;
 --theme-text: #1f2937;

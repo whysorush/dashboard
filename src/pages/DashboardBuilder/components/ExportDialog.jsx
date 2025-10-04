@@ -3,8 +3,10 @@ import React, { useState, useMemo } from 'react';
 import { FiCode, FiCopy, FiDownload, FiCheck, FiX, FiFileText } from 'react-icons/fi';
 import { generateDashboardCode, generateCSSFile } from '../utils/newCodeGenerator';
 import { downloadFile, createDataExportFile, createReadmeFile } from '../utils/exportHelpers';
+import { useTheme } from '../../../context/ThemeContext';
 
 const ExportDialog = ({ widgets, isOpen, onClose }) => {
+  const { isDark } = useTheme();
   const [componentName, setComponentName] = useState('MyDashboard');
   const [includeData, setIncludeData] = useState('inline');
   const [includeStyles, setIncludeStyles] = useState(true);
@@ -95,48 +97,46 @@ const ExportDialog = ({ widgets, isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-5xl max-h-[90vh] flex flex-col">
+      <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg w-full max-w-5xl max-h-[90vh] flex flex-col`}>
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+        <div className={`flex items-center justify-between p-4 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+          <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} flex items-center gap-2`}>
             <FiCode /> Export Dashboard
           </h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            className={`p-2 ${isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} rounded-lg transition-colors`}
           >
             <FiX size={20} />
           </button>
         </div>
 
         {/* Options */}
-        <div className="p-4 border-b dark:border-gray-700">
+        <div className={`p-4 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
           <div className="grid grid-cols-4 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className={`block text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
                 Component Name
               </label>
               <input
                 type="text"
                 value={componentName}
                 onChange={handleComponentNameChange}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
-                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                         focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full px-3 py-2 border ${isDark ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-900'} rounded-lg 
+                         focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                 placeholder="MyDashboard"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className={`block text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
                 Data
               </label>
               <select
                 value={includeData}
                 onChange={(e) => setIncludeData(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
-                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                         focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full px-3 py-2 border ${isDark ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-900'} rounded-lg 
+                         focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
               >
                 <option value="inline">Include inline</option>
                 <option value="separate">Separate file</option>
@@ -150,15 +150,14 @@ const ExportDialog = ({ widgets, isOpen, onClose }) => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className={`block text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
                 Style Mode
               </label>
               <select
                 value={styleMode}
                 onChange={(e) => setStyleMode(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
-                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                         focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full px-3 py-2 border ${isDark ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-900'} rounded-lg 
+                         focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
               >
                 <option value="tailwind">Tailwind CSS (requires Tailwind)</option>
                 <option value="inline">Inline styles (no dependencies)</option>
@@ -172,15 +171,14 @@ const ExportDialog = ({ widgets, isOpen, onClose }) => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className={`block text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
                 File Type
               </label>
               <select
                 value={fileType}
                 onChange={(e) => setFileType(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
-                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                         focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full px-3 py-2 border ${isDark ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-900'} rounded-lg 
+                         focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
               >
                 <option value="jsx">JSX (.jsx)</option>
                 <option value="js">JavaScript (.js)</option>
@@ -191,15 +189,14 @@ const ExportDialog = ({ widgets, isOpen, onClose }) => {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className={`block text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
                 Export Type
               </label>
               <select
                 value={exportMode}
                 onChange={(e) => setExportMode(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
-                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                         focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full px-3 py-2 border ${isDark ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-900'} rounded-lg 
+                         focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
               >
                 <option value="single">Single file</option>
                 <option value="multiple">Multiple files (complete package)</option>
@@ -214,10 +211,10 @@ const ExportDialog = ({ widgets, isOpen, onClose }) => {
                   type="checkbox"
                   checked={includeStyles}
                   onChange={(e) => setIncludeStyles(e.target.checked)}
-                  className="rounded border-gray-300 dark:border-gray-600 text-blue-500 
-                           focus:ring-blue-500 focus:ring-2"
+                  className={`rounded ${isDark ? 'border-gray-600' : 'border-gray-300'} text-blue-500 
+                           focus:ring-blue-500 focus:ring-2`}
                 />
-                <span className="text-sm text-gray-700 dark:text-gray-300">
+                <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                   Include styling
                 </span>
               </label>
@@ -229,16 +226,16 @@ const ExportDialog = ({ widgets, isOpen, onClose }) => {
                   type="checkbox"
                   checked={includeRowLayout}
                   onChange={(e) => setIncludeRowLayout(e.target.checked)}
-                  className="rounded border-gray-300 dark:border-gray-600 text-blue-500 
-                           focus:ring-blue-500 focus:ring-2"
+                  className={`rounded ${isDark ? 'border-gray-600' : 'border-gray-300'} text-blue-500 
+                           focus:ring-blue-500 focus:ring-2`}
                 />
-                <span className="text-sm text-gray-700 dark:text-gray-300">
+                <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                   Use row-based layout
                 </span>
               </label>
             </div>
             
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+            <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
               <span>Widgets: {widgets.length}</span>
               {widgets.length > 0 && (
                 <span className="ml-2">•</span>
@@ -256,8 +253,8 @@ const ExportDialog = ({ widgets, isOpen, onClose }) => {
               onClick={() => setActiveTab('code')}
               className={`px-4 py-2 rounded-t-lg flex items-center gap-2 transition-colors ${
                 activeTab === 'code'
-                  ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  ? `${isDark ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'}`
+                  : `${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`
               }`}
             >
               <FiCode /> Code
@@ -266,8 +263,8 @@ const ExportDialog = ({ widgets, isOpen, onClose }) => {
               onClick={() => setActiveTab('instructions')}
               className={`px-4 py-2 rounded-t-lg flex items-center gap-2 transition-colors ${
                 activeTab === 'instructions'
-                  ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  ? `${isDark ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'}`
+                  : `${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`
               }`}
             >
               <FiFileText /> Instructions
@@ -275,17 +272,17 @@ const ExportDialog = ({ widgets, isOpen, onClose }) => {
           </div>
           
           {activeTab === 'code' ? (
-            <div className="flex-1 bg-gray-100 dark:bg-gray-900 p-4 overflow-auto">
+            <div className={`flex-1 ${isDark ? 'bg-gray-900' : 'bg-gray-100'} p-4 overflow-auto`}>
               <pre className="text-black-100 p-4 rounded-lg overflow-auto text-sm font-mono">
                 <code>{code}</code>
               </pre>
             </div>
           ) : (
             <div className="flex-1 p-6 overflow-auto">
-              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+              <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 How to use this code:
               </h3>
-              <ol className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
+              <ol className={`space-y-3 text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                 <li className="flex gap-2">
                   <span className="font-bold text-blue-500">1.</span>
                   <span>Copy the generated code using the "Copy Code" button below</span>
@@ -329,7 +326,7 @@ function App() {
                 </pre>
               </div>
               
-              <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="mt-6 p-4 aaaaaa dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                 <h4 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">
                   Required Dependencies:
                 </h4>
@@ -384,8 +381,8 @@ function App() {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-between p-4 border-t dark:border-gray-700">
-          <div className="text-sm text-gray-500">
+        <div className={`flex items-center justify-between p-4 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+          <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
             {widgets.length} widget{widgets.length !== 1 ? 's' : ''} • {code.split('\n').length} lines of code • 
             {styleMode === 'tailwind' ? 'Tailwind CSS' : styleMode === 'inline' ? 'Inline styles' : 'CSS file'} • 
             {includeRowLayout ? 'Row layout' : 'Grid layout'}

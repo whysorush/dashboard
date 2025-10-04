@@ -12,9 +12,9 @@ export const useGlobalColors = () => {
   return useMemo(() => {
     // Use global colors if available, otherwise fall back to theme colors
     return {
-      primary: globalColors?.primary || themeConfig?.primary || "#27D0FC",
-      secondary: globalColors?.secondary || themeConfig?.secondary || "#10B981",
-      accent: globalColors?.accent || themeConfig?.accent || "#F59E0B",
+      primary: globalColors?.primary || themeConfig?.primary || "#25CFFD",
+      secondary: globalColors?.secondary || themeConfig?.secondary || "#A0FCAA",
+      accent: globalColors?.accent || themeConfig?.accent || "#63E6D4",
     };
   }, [themeConfig, globalColors]);
 };

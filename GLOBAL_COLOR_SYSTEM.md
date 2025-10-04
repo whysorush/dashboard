@@ -65,7 +65,7 @@ Default Colors (Final Fallback)
 ```javascript
 // Predefined color palettes
 const COLOR_PALETTES = {
-  default: { name: 'Default', primary: '#27D0FC', secondary: '#10B981', accent: '#F59E0B' },
+  default: { name: 'Default', primary: '#25CFFD', secondary: '#A0FCAA', accent: '#63E6D4' },
   ocean: { name: 'Ocean', primary: '#0EA5E9', secondary: '#06B6D4', accent: '#8B5CF6' },
   // ... more palettes
 };
@@ -99,9 +99,9 @@ const mergedThemeConfig = {
 ### **3. CSS Custom Properties**
 ```css
 :root {
-  --global-primary: #27D0FC;
-  --global-secondary: #10B981;
-  --global-accent: #F59E0B;
+  --global-primary: #25CFFD;
+  --global-secondary: #A0FCAA;
+  --global-accent: #63E6D4;
 }
 
 /* Applied to all components */
@@ -130,9 +130,9 @@ const seriesConfig = useMemo(() => ({
 ## 📊 **Predefined Color Palettes**
 
 ### **1. Default Palette**
-- **Primary**: #27D0FC (Cyan)
-- **Secondary**: #10B981 (Emerald)
-- **Accent**: #F59E0B (Amber)
+- **Primary**: #25CFFD (Cyan)
+- **Secondary**: #A0FCAA (Emerald)
+- **Accent**: #63E6D4 (Amber)
 
 ### **2. Ocean Palette**
 - **Primary**: #0EA5E9 (Sky Blue)
@@ -141,13 +141,13 @@ const seriesConfig = useMemo(() => ({
 
 ### **3. Forest Palette**
 - **Primary**: #059669 (Green)
-- **Secondary**: #10B981 (Emerald)
-- **Accent**: #F59E0B (Amber)
+- **Secondary**: #A0FCAA (Emerald)
+- **Accent**: #63E6D4 (Amber)
 
 ### **4. Sunset Palette**
 - **Primary**: #F97316 (Orange)
 - **Secondary**: #EF4444 (Red)
-- **Accent**: #F59E0B (Amber)
+- **Accent**: #63E6D4 (Amber)
 
 ### **5. Midnight Palette**
 - **Primary**: #6366F1 (Indigo)
@@ -157,12 +157,12 @@ const seriesConfig = useMemo(() => ({
 ### **6. Earth Palette**
 - **Primary**: #A3A3A3 (Gray)
 - **Secondary**: #6B7280 (Slate)
-- **Accent**: #F59E0B (Amber)
+- **Accent**: #63E6D4 (Amber)
 
 ### **7. Vibrant Palette**
 - **Primary**: #EC4899 (Pink)
 - **Secondary**: #8B5CF6 (Violet)
-- **Accent**: #F59E0B (Amber)
+- **Accent**: #63E6D4 (Amber)
 
 ### **8. Corporate Palette**
 - **Primary**: #1E40AF (Blue)

@@ -148,16 +148,16 @@ export default function TestMultiLineDashboard() {
                     name="Revenue"
                     type="monotone"
                     dataKey="value"
-                    stroke="#27D0FC"
+                    stroke="#25CFFD"
                     strokeWidth={3}
                     dot={{
-                      fill: "#27D0FC",
+                      fill: "#25CFFD",
                       strokeWidth: 2,
                       r: 4
                     }}
                     activeDot={{
                       r: 6,
-                      stroke: "#27D0FC",
+                      stroke: "#25CFFD",
                       strokeWidth: 2,
                       fill: "white"
                     }}
@@ -169,16 +169,16 @@ export default function TestMultiLineDashboard() {
                     name="Expenses"
                     type="monotone"
                     dataKey="value2"
-                    stroke="#10B981"
+                    stroke="#A0FCAA"
                     strokeWidth={2.5}
                     dot={{
-                      fill: "#10B981",
+                      fill: "#A0FCAA",
                       strokeWidth: 2,
                       r: 3
                     }}
                     activeDot={{
                       r: 5,
-                      stroke: "#10B981",
+                      stroke: "#A0FCAA",
                       strokeWidth: 2,
                       fill: "white"
                     }}
@@ -190,16 +190,16 @@ export default function TestMultiLineDashboard() {
                     name="Profit"
                     type="monotone"
                     dataKey="value3"
-                    stroke="#F59E0B"
+                    stroke="#63E6D4"
                     strokeWidth={2.5}
                     dot={{
-                      fill: "#F59E0B",
+                      fill: "#63E6D4",
                       strokeWidth: 2,
                       r: 3
                     }}
                     activeDot={{
                       r: 5,
-                      stroke: "#F59E0B",
+                      stroke: "#63E6D4",
                       strokeWidth: 2,
                       fill: "white"
                     }}

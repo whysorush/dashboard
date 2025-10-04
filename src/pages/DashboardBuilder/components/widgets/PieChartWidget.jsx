@@ -68,8 +68,8 @@ const PieChartWidget = memo(({ widget, isSelected, onClick }) => {
         colors.primary, // Highest percentage
         colors.secondary, // Second highest
         colors.accent, // Third highest
-        "#FFE066", // Fourth highest
-        "#FFB3BA", // Fifth highest
+        "#B100CC", // Fourth highest
+        "#E044A7", // Fifth highest
         "#c0f0fc", // Lowest percentage
       ];
 

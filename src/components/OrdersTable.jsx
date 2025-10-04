@@ -1,4 +1,7 @@
 // components/OrdersTable.jsx
+import React from "react";
+import { useTheme } from "../context/ThemeContext";
+
 const orders = [
   {
     id: 1,
@@ -29,13 +32,63 @@ const orders = [
   },
 ];
 
-const statusClass = {
-  Pending: "bg-yellow-400 text-black",
-  Delivered: "bg-green-500 text-white",
-  "In Progress": "bg-blue-400 text-white",
+const getStatusStyle = (status, isDark) => {
+  const baseStyle = {
+    display: "inline-block",
+    padding: "4px 8px",
+    borderRadius: 6,
+    fontSize: 12,
+    fontWeight: 600,
+    textTransform: "capitalize",
+  };
+  
+  // Define status colors for light and dark modes
+  const statusColors = {
+    pending: {
+      light: { color: "#FF9500", background: "#FFF0DB" },
+      dark: { color: "#FF9500", background: "#7A4800" }
+    },
+    delivered: {
+      light: { color: "#07D91E", background: "#E6FEE9" },
+      dark: { color: "#07D91E", background: "#057613" }
+    },
+    "in progress": {
+      light: { color: "#25CFFD", background: "#E6F9FF" },
+      dark: { color: "#25CFFD", background: "#005D7A" }
+    },
+    "in transit": {
+      light: { color: "#25CFFD", background: "#E6F9FF" },
+      dark: { color: "#25CFFD", background: "#005D7A" }
+    },
+    processing: {
+      light: { color: "#6B7280", background: "#F3F4F6" },
+      dark: { color: "#9CA3AF", background: "#374151" }
+    },
+    active: {
+      light: { color: "#07D91E", background: "#E6FEE9" },
+      dark: { color: "#07D91E", background: "#057613" }
+    },
+    inactive: {
+      light: { color: "#FF9500", background: "#FFF0DB" },
+      dark: { color: "#FF9500", background: "#7A4800" }
+    }
+  };
+
+  const statusKey = status.toLowerCase();
+  const colorConfig = statusColors[statusKey];
+  
+  if (colorConfig) {
+    const modeColors = isDark ? colorConfig.dark : colorConfig.light;
+    return { ...baseStyle, ...modeColors };
+  }
+  
+  // Default fallback
+  return { ...baseStyle, color: "var(--text)", background: "var(--muted)" };
 };
 
 const OrdersTable = () => {
+  const { isDark } = useTheme();
+  
   return (
     <div className="bg-[#1e293b] p-6 rounded-lg overflow-x-auto">
       <h3 className="text-lg mb-4">Orders</h3>
@@ -61,7 +114,7 @@ const OrdersTable = () => {
               <td className="py-2 px-4">{o.qty}</td>
               <td className="py-2 px-4">₹ {o.amount}</td>
               <td className="py-2 px-4">
-                <span className={`px-2 py-1 rounded text-xs ${statusClass[o.status]}`}>
+                <span style={getStatusStyle(o.status, isDark)}>
                   {o.status}
                 </span>
               </td>

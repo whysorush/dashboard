@@ -146,7 +146,7 @@ const DashboardBuilderContent = () => {
               <FiImage style={styles.icon} />
               <span style={{ display: "inline" }}>Template</span>
             </button>
-
+{/* 
             <button
               onClick={() => {
                 clearCanvas();
@@ -169,7 +169,7 @@ const DashboardBuilderContent = () => {
             >
               <FiZap style={styles.icon} />
               <span style={{ display: "inline" }}>Quick Start</span>
-            </button>
+            </button> */}
 
             <button
               onClick={clearCanvas}

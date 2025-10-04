@@ -13,7 +13,8 @@ const getStyles = (theme, themeConfig) => ({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: theme === "dark" ? "rgba(0, 0, 0, 0.8)" : "rgba(0, 0, 0, 0.6)",
+    backgroundColor:
+      theme === "dark" ? "rgba(0, 0, 0, 0.8)" : "rgba(0, 0, 0, 0.6)",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
@@ -21,11 +22,13 @@ const getStyles = (theme, themeConfig) => ({
     animation: "fadeIn 0.3s ease-out",
   },
   content: {
-    background: themeConfig?.background || (theme === "dark" ? "#1f2937" : "white"),
+    background:
+      themeConfig?.background || (theme === "dark" ? "#1f2937" : "white"),
     borderRadius: 8,
-    boxShadow: theme === "dark" 
-      ? "0 10px 25px rgba(0, 0, 0, 0.5)" 
-      : "0 10px 25px rgba(0, 0, 0, 0.3)",
+    boxShadow:
+      theme === "dark"
+        ? "0 10px 25px rgba(0, 0, 0, 0.5)"
+        : "0 10px 25px rgba(0, 0, 0, 0.3)",
     maxWidth: "100%",
     maxHeight: "90%",
     width: "90%",
@@ -34,11 +37,14 @@ const getStyles = (theme, themeConfig) => ({
   },
   header: {
     display: "flex",
-    justifyContent: "space-between",
+    justifyContent: "right",
     alignItems: "center",
     padding: 20,
-    borderBottom: `1px solid ${themeConfig?.border || (theme === "dark" ? "#374151" : "#e0e0e0")}`,
-    backgroundColor: themeConfig?.surface || (theme === "dark" ? "#111827" : "#f8f9fa"),
+    borderBottom: `1px solid ${
+      themeConfig?.border || (theme === "dark" ? "#374151" : "#e0e0e0")
+    }`,
+    backgroundColor:
+      themeConfig?.surface || (theme === "dark" ? "#111827" : "#f8f9fa"),
   },
   title: {
     margin: 0,
@@ -50,7 +56,8 @@ const getStyles = (theme, themeConfig) => ({
     border: "none",
     fontSize: "2rem",
     cursor: "pointer",
-    color: themeConfig?.textSecondary || (theme === "dark" ? "#d1d5db" : "#666"),
+    color:
+      themeConfig?.textSecondary || (theme === "dark" ? "#d1d5db" : "#666"),
     padding: 0,
     width: 30,
     height: 30,
@@ -61,7 +68,9 @@ const getStyles = (theme, themeConfig) => ({
   },
   themeToggleButton: {
     background: "none",
-    border: `1px solid ${themeConfig?.border || (theme === "dark" ? "#374151" : "#e0e0e0")}`,
+    border: `1px solid ${
+      themeConfig?.border || (theme === "dark" ? "#374151" : "#e0e0e0")
+    }`,
     borderRadius: 6,
     padding: "8px 12px",
     cursor: "pointer",
@@ -76,7 +85,8 @@ const getStyles = (theme, themeConfig) => ({
     padding: 20,
     overflowY: "auto",
     maxHeight: "calc(90vh - 100px)",
-    backgroundColor: themeConfig?.background || (theme === "dark" ? "#1f2937" : "white"),
+    backgroundColor:
+      themeConfig?.background || (theme === "dark" ? "#1f2937" : "white"),
   },
 });
 
@@ -101,7 +111,7 @@ const PreviewPopupModal = ({
       onClose();
     }
   };
-  
+
   // Get dynamic styles based on current theme
   const styles = getStyles(theme, themeConfig);
   return (
@@ -110,19 +120,21 @@ const PreviewPopupModal = ({
         <div style={styles.header}>
           {title && <h2 style={styles.title}>{title}</h2>}
           <div style={{ display: "flex", alignItems: "center" }}>
-         
             {showCloseButton && (
               <button
                 style={styles.closeButton}
                 onClick={onClose}
                 aria-label="Close modal"
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = theme === "dark" ? "#374151" : "#e9ecef";
-                  e.currentTarget.style.color = theme === "dark" ? "#f9fafb" : "#333";
+                  e.currentTarget.style.backgroundColor =
+                    theme === "dark" ? "#374151" : "#e9ecef";
+                  e.currentTarget.style.color =
+                    theme === "dark" ? "#f9fafb" : "#333";
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor = "transparent";
-                  e.currentTarget.style.color = theme === "dark" ? "#d1d5db" : "#666";
+                  e.currentTarget.style.color =
+                    theme === "dark" ? "#d1d5db" : "#666";
                 }}
               >
                 &times;

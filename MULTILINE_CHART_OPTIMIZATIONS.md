@@ -88,9 +88,9 @@ const seriesStyles = widget.config?.seriesStyles || ["solid", "dashed", "dotted"
 // After: Memoized series configuration
 const seriesConfig = useMemo(() => {
   const defaultColors = [
-    themeConfig?.primary || "#27D0FC",
-    themeConfig?.secondary || "#10B981",
-    themeConfig?.accent || "#F59E0B",
+    themeConfig?.primary || "#25CFFD",
+    themeConfig?.secondary || "#A0FCAA",
+    themeConfig?.accent || "#63E6D4",
   ];
   
   return {

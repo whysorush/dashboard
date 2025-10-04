@@ -236,7 +236,7 @@ const Canvas = () => {
     <div
       ref={drop}
       className={`canvas-container relative w-full h-full p-4 ${
-        isOver && canDrop ? "bg-blue-50 dark:bg-blue-900/20" : ""
+        isOver && canDrop ? "aaaaaa dark:bg-blue-900/20" : ""
       }`}
     >
       <div className="mb-4">

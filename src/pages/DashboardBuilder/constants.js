@@ -201,13 +201,13 @@ export const WIDGET_CATEGORIES = {
 };
 
 export const COLOR_SCHEMES = [
-  { name: "Blue", value: "#27D0FC" },
-  { name: "Green", value: "#10B981" },
+  { name: "Blue", value: "#25CFFD" },
+  { name: "Green", value: "#A0FCAA" },
   { name: "Purple", value: "#8B5CF6" },
   { name: "Orange", value: "#F97316" },
   { name: "Red", value: "#EF4444" },
   { name: "Pink", value: "#EC4899" },
-  { name: "Yellow", value: "#F59E0B" },
+  { name: "Yellow", value: "#63E6D4" },
   { name: "Teal", value: "#14B8A6" },
 ];
 
@@ -278,7 +278,7 @@ export const DEFAULT_WIDGET_CONFIG = {
   showLegend: true,
   showGrid: true,
   animations: true,
-  color: "#27D0FC",
+  color: "#25CFFD",
   dataPoints: 12,
   refreshInterval: 0,
   aggregation: "sum",
@@ -297,7 +297,7 @@ export const PROFESSIONAL_KPI_CONFIGS = {
     growth: 4.1,
     icon: "💰",
     iconBgColor: "rgba(16, 185, 129, 0.1)", // Emerald bg with opacity
-    iconColor: "#10B981", // Emerald
+    iconColor: "#A0FCAA", // Emerald
     subtitle: "from last week",
     formatType: "currency",
   },
@@ -308,7 +308,7 @@ export const PROFESSIONAL_KPI_CONFIGS = {
     growth: 2.6,
     icon: "📦",
     iconBgColor: "rgba(59, 130, 246, 0.1)", // Blue bg with opacity
-    iconColor: "#27D0FC", // Blue
+    iconColor: "#25CFFD", // Blue
     subtitle: "from last week",
     formatType: "number",
   },

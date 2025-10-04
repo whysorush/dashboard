@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { FiPlus, FiMove, FiAlertCircle, FiEdit2, FiTrash2, FiCheck, FiX } from "react-icons/fi";
 import { useBuilder } from "../context/BuilderContext";
 import { useTheme } from "../../../context/ThemeContext";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
 
 const RowContainer = ({
   row,
@@ -14,6 +15,7 @@ const RowContainer = ({
   const { themeConfig, isDark } = useTheme();
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(row.title);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // Dynamic styles based on theme
   const containerStyles = {
@@ -167,9 +169,16 @@ const RowContainer = ({
 
   const handleDeleteClick = (e) => {
     e.stopPropagation();
-    if (confirm(`Delete row "${row.title}"? This will remove all widgets in this row.`)) {
-      removeRow(row.id);
-    }
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = () => {
+    removeRow(row.id);
+    setShowDeleteModal(false);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setShowDeleteModal(false);
   };
 
   const handleInputChange = (e) => {
@@ -275,6 +284,16 @@ const RowContainer = ({
           </p>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+        title="Delete Row"
+        message="Are you sure you want to delete this row? This will remove all widgets in this row and cannot be undone."
+        rowTitle={row.title}
+      />
     </div>
   );
 };

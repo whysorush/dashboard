@@ -1,29 +1,52 @@
 // src/pages/DashboardBuilder/utils/codeGenerator.js
-import { getChartDataTemplate } from './mockDataTemplates';
+import { getChartDataTemplate } from "./mockDataTemplates";
 
-export const generateDashboardCode = (widgets, componentName = 'Dashboard', options = {}) => {
-  const { includeData = 'inline', includeStyles = true, styleMode = 'tailwind', includeRowLayout = true, fileType = 'jsx' } = options;
-  
+export const generateDashboardCode = (
+  widgets,
+  componentName = "Dashboard",
+  options = {}
+) => {
+  const {
+    includeData = "inline",
+    includeStyles = true,
+    styleMode = "tailwind",
+    includeRowLayout = true,
+    fileType = "jsx",
+  } = options;
+
   // Determine required imports
   const imports = generateImports(widgets, styleMode, fileType);
-  
+
   // Generate mock data if needed
-  const mockData = includeData === 'inline' ? generateMockDataCode(widgets) : '';
-  
+  const mockData =
+    includeData === "inline" ? generateMockDataCode(widgets) : "";
+
   // Generate widget components based on layout mode
-  const layoutCode = includeRowLayout 
-    ? generateRowBasedLayout(widgets, includeData, styleMode, includeStyles, fileType)
-    : generateGridLayout(widgets, includeData, styleMode, includeStyles, fileType);
-  
+  const layoutCode = includeRowLayout
+    ? generateRowBasedLayout(
+        widgets,
+        includeData,
+        styleMode,
+        includeStyles,
+        fileType
+      )
+    : generateGridLayout(
+        widgets,
+        includeData,
+        styleMode,
+        includeStyles,
+        fileType
+      );
+
   // Generate CSS if using inline styles
-  const cssStyles = styleMode === 'inline' ? generateInlineCSS() : '';
-  
+  const cssStyles = styleMode === "inline" ? generateInlineCSS() : "";
+
   // Generate the complete component
   const componentCode = `
 import React, { useState } from 'react';
 ${imports}
-${includeData === 'separate' ? "import { mockData } from './mockData';" : ''}
-${styleMode === 'css' ? "import './dashboard.css';" : ''}
+${includeData === "separate" ? "import { mockData } from './mockData';" : ""}
+${styleMode === "css" ? "import './dashboard.css';" : ""}
 
 ${mockData}
 
@@ -60,17 +83,20 @@ const ${componentName} = () => {
   };
   
   return (
-    ${styleMode === 'tailwind' 
-      ? '<div className="min-h-screen bg-gray-50 p-6" style={{fontFamily: "\'Figtree\', ui-sans-serif, system-ui, -apple-system, sans-serif"}}>'
-      : '<div style={styles.dashboardContainer}>'
+    ${
+      styleMode === "tailwind"
+        ? '<div className="min-h-screen bg-gray-50 p-6" style={{fontFamily: "\'Figtree\', ui-sans-serif, system-ui, -apple-system, sans-serif"}}>'
+        : "<div style={styles.dashboardContainer}>"
     }
-      ${styleMode === 'tailwind' 
-        ? '<div className="max-w-7xl mx-auto">'
-        : '<div style={styles.dashboardHeader}>'
+      ${
+        styleMode === "tailwind"
+          ? '<div className="max-w-7xl mx-auto">'
+          : "<div style={styles.dashboardHeader}>"
       }
-        ${styleMode === 'tailwind' 
-          ? `<h1 className="text-3xl font-bold text-gray-900 mb-6" style={{fontFamily: "'Figtree', sans-serif"}}>${componentName} Dashboard</h1>`
-          : `<h1 style={styles.dashboardTitle}>${componentName} Dashboard</h1>`
+        ${
+          styleMode === "tailwind"
+            ? `<h1 className="text-3xl font-bold text-gray-900 mb-6" style={{fontFamily: "'Figtree', sans-serif"}}>${componentName} Dashboard</h1>`
+            : `<h1 style={styles.dashboardTitle}>${componentName} Dashboard</h1>`
         }
         <div>
 ${layoutCode}
@@ -86,87 +112,123 @@ export default ${componentName};
   return formatCode(convertJSXToJS(componentCode, fileType));
 };
 
-const generateImports = (widgets, styleMode, fileType = 'jsx') => {
-  const chartTypes = new Set(widgets.map(w => w.type));
+const generateImports = (widgets, styleMode, fileType = "jsx") => {
+  const chartTypes = new Set(widgets.map((w) => w.type));
   const rechartsImports = [];
-  
+
   // Base imports always needed for charts
-  const baseImports = ['ResponsiveContainer', 'Tooltip'];
-  
+  const baseImports = ["ResponsiveContainer", "Tooltip"];
+
   // Chart-specific imports
   const chartImportMap = {
-    'line-chart': ['LineChart', 'Line', 'XAxis', 'YAxis', 'CartesianGrid', 'Legend'],
-    'bar-chart': ['BarChart', 'Bar', 'XAxis', 'YAxis', 'CartesianGrid', 'Legend'], 
-    'gradient-bar-chart': ['BarChart', 'Bar', 'XAxis', 'YAxis', 'CartesianGrid', 'defs', 'linearGradient', 'stop'],
-    'area-chart': ['AreaChart', 'Area', 'XAxis', 'YAxis', 'CartesianGrid', 'Legend'],
-    'pie-chart': ['PieChart', 'Pie', 'Cell'],
-    'funnel-chart': ['FunnelChart', 'Funnel', 'LabelList'],
-    'smooth-funnel-chart': ['ResponsiveContainer']
+    "line-chart": [
+      "LineChart",
+      "Line",
+      "XAxis",
+      "YAxis",
+      "CartesianGrid",
+      "Legend",
+    ],
+    "bar-chart": [
+      "BarChart",
+      "Bar",
+      "XAxis",
+      "YAxis",
+      "CartesianGrid",
+      "Legend",
+    ],
+    "gradient-bar-chart": [
+      "BarChart",
+      "Bar",
+      "XAxis",
+      "YAxis",
+      "CartesianGrid",
+      "defs",
+      "linearGradient",
+      "stop",
+    ],
+    "area-chart": [
+      "AreaChart",
+      "Area",
+      "XAxis",
+      "YAxis",
+      "CartesianGrid",
+      "Legend",
+    ],
+    "pie-chart": ["PieChart", "Pie", "Cell"],
+    "funnel-chart": ["FunnelChart", "Funnel", "LabelList"],
+    "smooth-funnel-chart": ["ResponsiveContainer"],
   };
-  
-  chartTypes.forEach(chartType => {
+
+  chartTypes.forEach((chartType) => {
     if (chartImportMap[chartType]) {
-      chartImportMap[chartType].forEach(imp => {
+      chartImportMap[chartType].forEach((imp) => {
         if (!rechartsImports.includes(imp) && !baseImports.includes(imp)) {
           rechartsImports.push(imp);
         }
       });
     }
   });
-  
+
   // Add base imports
-  chartTypes.forEach(chartType => {
-    if (chartType.includes('chart') && chartType !== 'smooth-funnel-chart') {
-      baseImports.forEach(imp => {
+  chartTypes.forEach((chartType) => {
+    if (chartType.includes("chart") && chartType !== "smooth-funnel-chart") {
+      baseImports.forEach((imp) => {
         if (!rechartsImports.includes(imp)) {
           rechartsImports.push(imp);
         }
       });
     }
   });
-  
-  const hasCharts = Array.from(chartTypes).some(type => type.includes('chart'));
-  
-  let imports = '';
-  
+
+  const hasCharts = Array.from(chartTypes).some((type) =>
+    type.includes("chart")
+  );
+
+  let imports = "";
+
   // React import based on file type
-  if (fileType === 'jsx') {
+  if (fileType === "jsx") {
     imports += `import React from 'react';\n`;
   } else {
     imports += `import React from 'react';\n`;
     imports += `// Note: This file uses React.createElement instead of JSX\n`;
   }
-  
+
   if (hasCharts && rechartsImports.length > 0) {
-    imports += `import {\n  ${rechartsImports.join(',\n  ')}\n} from 'recharts';\n`;
+    imports += `import {\n  ${rechartsImports.join(
+      ",\n  "
+    )}\n} from 'recharts';\n`;
   }
-  
+
   // Add icon imports for professional widgets
-  const needsIcons = Array.from(chartTypes).some(type => 
-    ['revenue-kpi', 'orders-kpi', 'customers-kpi', 'professional-kpi'].includes(type)
+  const needsIcons = Array.from(chartTypes).some((type) =>
+    ["revenue-kpi", "orders-kpi", "customers-kpi", "professional-kpi"].includes(
+      type
+    )
   );
-  
+
   if (needsIcons) {
     imports += `import { FiTrendingUp, FiTrendingDown, FiDollarSign, FiShoppingCart, FiUsers } from 'react-icons/fi';\n`;
   }
-  
+
   return imports;
 };
 
 const generateMockDataCode = (widgets) => {
   const dataSets = [];
-  const usePieChart = widgets.some(w => w.type === 'pie-chart');
+  const usePieChart = widgets.some((w) => w.type === "pie-chart");
   const generatedNames = new Set(); // Track generated names to avoid duplicates
-  
+
   widgets.forEach((widget, index) => {
     // Convert widget type to valid JavaScript variable name
     const cleanType = widget.type
-      .replace(/[-]/g, '') // Remove hyphens
-      .replace(/[^a-zA-Z0-9]/g, '') // Remove any other invalid characters
+      .replace(/[-]/g, "") // Remove hyphens
+      .replace(/[^a-zA-Z0-9]/g, "") // Remove any other invalid characters
       .toLowerCase();
-    
+
     let dataName = `${cleanType}Data${index}`;
-    
+
     // Ensure uniqueness
     let counter = 0;
     while (generatedNames.has(dataName)) {
@@ -174,130 +236,225 @@ const generateMockDataCode = (widgets) => {
       dataName = `${cleanType}Data${index}_${counter}`;
     }
     generatedNames.add(dataName);
-    
+
     const data = getChartDataTemplate(widget.type);
     dataSets.push(`const ${dataName} = ${JSON.stringify(data, null, 2)};`);
   });
-  
-  const pieColors = usePieChart ? "const CHART_COLORS = ['#27D0FC', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];" : '';
-  
+
+  const pieColors = usePieChart
+    ? "const CHART_COLORS = ['#25CFFD', '#A0FCAA', '#63E6D4', '#EF4444', '#8B5CF6', '#EC4899'];"
+    : "";
+
   return `// Mock Data
-${dataSets.join('\n\n')}
+${dataSets.join("\n\n")}
 
 ${pieColors}`;
 };
 
 // Layout generation functions
-const generateRowBasedLayout = (widgets, includeData, styleMode, includeStyles, fileType = 'jsx') => {
+const generateRowBasedLayout = (
+  widgets,
+  includeData,
+  styleMode,
+  includeStyles,
+  fileType = "jsx"
+) => {
   // Group widgets by row
   const widgetsByRow = {};
-  widgets.forEach(widget => {
-    const rowId = widget.position?.rowId || 'default-row';
+  widgets.forEach((widget) => {
+    const rowId = widget.position?.rowId || "default-row";
     if (!widgetsByRow[rowId]) {
       widgetsByRow[rowId] = [];
     }
     widgetsByRow[rowId].push(widget);
   });
-  
-  const rows = Object.entries(widgetsByRow).map(([rowId, rowWidgets], rowIndex) => {
-    const rowWidgetComponents = rowWidgets.map((widget, widgetIndex) => {
-      const dataName = includeData !== 'none' 
-        ? `${widget.type.replace(/-/g, '')}Data${widgets.indexOf(widget)}`
-        : 'data';
-      
-      const widgetsInRow = rowWidgets.length;
-      const widthClass = getWidthClass(widgetsInRow, styleMode);
-      
-      return generateProfessionalWidgetCode(widget, dataName, widgetIndex, styleMode, includeStyles, widthClass, fileType);
-    });
-    
-    if (styleMode === 'tailwind') {
-      return `        {/* Row ${rowIndex + 1} */}
+
+  const rows = Object.entries(widgetsByRow).map(
+    ([rowId, rowWidgets], rowIndex) => {
+      const rowWidgetComponents = rowWidgets.map((widget, widgetIndex) => {
+        const dataName =
+          includeData !== "none"
+            ? `${widget.type.replace(/-/g, "")}Data${widgets.indexOf(widget)}`
+            : "data";
+
+        const widgetsInRow = rowWidgets.length;
+        const widthClass = getWidthClass(widgetsInRow, styleMode);
+
+        return generateProfessionalWidgetCode(
+          widget,
+          dataName,
+          widgetIndex,
+          styleMode,
+          includeStyles,
+          widthClass,
+          fileType
+        );
+      });
+
+      if (styleMode === "tailwind") {
+        return `        {/* Row ${rowIndex + 1} */}
         <div className="flex gap-2 items-stretch mb-6 flex-wrap">
-${rowWidgetComponents.join('\n')}
+${rowWidgetComponents.join("\n")}
         </div>`;
-    } else {
-      return `        {/* Row ${rowIndex + 1} */}
+      } else {
+        return `        {/* Row ${rowIndex + 1} */}
         <div style={styles.dashboardRow}>
-${rowWidgetComponents.join('\n')}
+${rowWidgetComponents.join("\n")}
         </div>`;
+      }
     }
-  });
-  
-  return rows.join('\n\n');
+  );
+
+  return rows.join("\n\n");
 };
 
-const generateGridLayout = (widgets, includeData, styleMode, includeStyles, fileType = 'jsx') => {
-  return widgets.map((widget, index) => {
-    const dataName = includeData !== 'none' 
-      ? `${widget.type.replace(/-/g, '')}Data${index}`
-      : 'data';
-    
-    return generateLegacyWidgetCode(widget, dataName, index, styleMode, includeStyles, fileType);
-  }).join('\n');
+const generateGridLayout = (
+  widgets,
+  includeData,
+  styleMode,
+  includeStyles,
+  fileType = "jsx"
+) => {
+  return widgets
+    .map((widget, index) => {
+      const dataName =
+        includeData !== "none"
+          ? `${widget.type.replace(/-/g, "")}Data${index}`
+          : "data";
+
+      return generateLegacyWidgetCode(
+        widget,
+        dataName,
+        index,
+        styleMode,
+        includeStyles,
+        fileType
+      );
+    })
+    .join("\n");
 };
 
 // Helper function to convert JSX syntax to JavaScript
 const convertJSXToJS = (jsxCode, fileType) => {
-  if (fileType === 'jsx') {
+  if (fileType === "jsx") {
     return jsxCode;
   }
-  
+
   // For JS files, add a comment explaining the limitation
-  return jsxCode + `
+  return (
+    jsxCode +
+    `
   
   // Note: For pure JavaScript (.js) files, you would typically use React.createElement
   // instead of JSX syntax. This generator primarily outputs JSX for better readability.
-  // To convert to pure JS, consider using a build tool like Babel.`;
+  // To convert to pure JS, consider using a build tool like Babel.`
+  );
 };
 
 // Professional widget code generation
-const generateProfessionalWidgetCode = (widget, dataName, index, styleMode, includeStyles, widthClass, fileType = 'jsx') => {
+const generateProfessionalWidgetCode = (
+  widget,
+  dataName,
+  index,
+  styleMode,
+  includeStyles,
+  widthClass,
+  fileType = "jsx"
+) => {
   const { config, type } = widget;
-  
-  switch(type) {
-    case 'revenue-kpi':
-    case 'orders-kpi':
-    case 'customers-kpi':
-    case 'professional-kpi':
-      return generateKPIWidgetCode(widget, styleMode, includeStyles, widthClass);
-    
-    case 'gradient-bar-chart':
-    case 'professional-bar-chart':
-      return generateProfessionalBarChartCode(widget, dataName, styleMode, includeStyles, widthClass);
-    
-    case 'smooth-funnel-chart':
-      return generateSmoothFunnelCode(widget, styleMode, includeStyles, widthClass);
-    
-    case 'professional-table':
-      return generateProfessionalTableCode(widget, styleMode, includeStyles, widthClass);
-    
-    case 'data-table':
-      return generateDataTableCode(widget, styleMode, includeStyles, widthClass);
-    
+
+  switch (type) {
+    case "revenue-kpi":
+    case "orders-kpi":
+    case "customers-kpi":
+    case "professional-kpi":
+      return generateKPIWidgetCode(
+        widget,
+        styleMode,
+        includeStyles,
+        widthClass
+      );
+
+    case "gradient-bar-chart":
+    case "professional-bar-chart":
+      return generateProfessionalBarChartCode(
+        widget,
+        dataName,
+        styleMode,
+        includeStyles,
+        widthClass
+      );
+
+    case "smooth-funnel-chart":
+      return generateSmoothFunnelCode(
+        widget,
+        styleMode,
+        includeStyles,
+        widthClass
+      );
+
+    case "professional-table":
+      return generateProfessionalTableCode(
+        widget,
+        styleMode,
+        includeStyles,
+        widthClass
+      );
+
+    case "data-table":
+      return generateDataTableCode(
+        widget,
+        styleMode,
+        includeStyles,
+        widthClass
+      );
+
     // Basic chart types
-    case 'line-chart':
-    case 'area-chart':
-    case 'pie-chart':
-    case 'bar-chart':
-    case 'funnel-chart':
-      return generateStandardChart(widget, dataName, styleMode, includeStyles, widthClass);
-    
-    case 'advanced-filter-bar':
-      return generateFilterBarCode(widget, styleMode, includeStyles, widthClass);
-    
+    case "line-chart":
+    case "area-chart":
+    case "pie-chart":
+    case "bar-chart":
+    case "funnel-chart":
+      return generateStandardChart(
+        widget,
+        dataName,
+        styleMode,
+        includeStyles,
+        widthClass
+      );
+
+    case "advanced-filter-bar":
+      return generateFilterBarCode(
+        widget,
+        styleMode,
+        includeStyles,
+        widthClass
+      );
+
     default:
-      return generateStandardChart(widget, dataName, styleMode, includeStyles, widthClass);
+      return generateStandardChart(
+        widget,
+        dataName,
+        styleMode,
+        includeStyles,
+        widthClass
+      );
   }
 };
 
 // Standard chart wrapper for basic chart types
-const generateStandardChart = (widget, dataName, styleMode, includeStyles, widthClass) => {
+const generateStandardChart = (
+  widget,
+  dataName,
+  styleMode,
+  includeStyles,
+  widthClass
+) => {
   const { config, type } = widget;
   const title = config?.title || getDefaultChartTitle(type);
   const chartCode = generateChartCode(type, dataName, config, styleMode);
-  
-  if (styleMode === 'tailwind') {
+
+  if (styleMode === "tailwind") {
     return `          <div className="${widthClass}">
             <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200/80 transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 h-full flex flex-col">
               <div className="mb-4">
@@ -309,7 +466,13 @@ const generateStandardChart = (widget, dataName, styleMode, includeStyles, width
             </div>
           </div>`;
   } else {
-    return `          <div style={styles.${widthClass === 'w-full' ? 'widgetFull' : widthClass === 'w-1/2' ? 'widgetHalf' : 'widgetThird'}}>
+    return `          <div style={styles.${
+      widthClass === "w-full"
+        ? "widgetFull"
+        : widthClass === "w-1/2"
+        ? "widgetHalf"
+        : "widgetThird"
+    }}>
             <div style={styles.chartContainer}>
               <div style={styles.chartHeader}>
                 <h3 style={styles.chartTitle}>${title}</h3>
@@ -324,32 +487,55 @@ const generateStandardChart = (widget, dataName, styleMode, includeStyles, width
 
 // Helper function to get default chart titles
 const getDefaultChartTitle = (type) => {
-  switch(type) {
-    case 'line-chart': return 'Line Chart';
-    case 'area-chart': return 'Area Chart';
-    case 'pie-chart': return 'Pie Chart';
-    case 'bar-chart': return 'Bar Chart';
-    case 'funnel-chart': return 'Funnel Chart';
-    default: return 'Chart';
+  switch (type) {
+    case "line-chart":
+      return "Line Chart";
+    case "area-chart":
+      return "Area Chart";
+    case "pie-chart":
+      return "Pie Chart";
+    case "bar-chart":
+      return "Bar Chart";
+    case "funnel-chart":
+      return "Funnel Chart";
+    default:
+      return "Chart";
   }
 };
 
 // Legacy widget code for grid layout
-const generateLegacyWidgetCode = (widget, dataName, index, styleMode, includeStyles, fileType = 'jsx') => {
+const generateLegacyWidgetCode = (
+  widget,
+  dataName,
+  index,
+  styleMode,
+  includeStyles,
+  fileType = "jsx"
+) => {
   const { position, config } = widget;
   const chartCode = generateChartCode(widget.type, dataName, config, styleMode);
-  
-  const containerProps = getWidgetContainerProps(position.w, styleMode, includeStyles);
+
+  const containerProps = getWidgetContainerProps(
+    position.w,
+    styleMode,
+    includeStyles
+  );
   const headerProps = getWidgetHeaderProps(styleMode, includeStyles);
   const chartContainerProps = getChartContainerProps(styleMode, includeStyles);
-  
+
   return `          {/* ${config?.title || `Widget ${index + 1}`} */}
           <div ${containerProps}>
             <div ${headerProps}>
               <h3 ${getTitleProps(styleMode, includeStyles)}>
-                ${config?.title || 'Untitled Widget'}
+                ${config?.title || "Untitled Widget"}
               </h3>
-              ${config?.subtitle ? `<p ${getSubtitleProps(styleMode, includeStyles)}>${config.subtitle}</p>` : ''}
+              ${
+                config?.subtitle
+                  ? `<p ${getSubtitleProps(styleMode, includeStyles)}>${
+                      config.subtitle
+                    }</p>`
+                  : ""
+              }
             </div>
             
             {/* Chart */}
@@ -363,23 +549,31 @@ const generateLegacyWidgetCode = (widget, dataName, index, styleMode, includeSty
 };
 
 // KPI widget generators
-const generateKPIWidgetCode = (widget, styleMode, includeStyles, widthClass) => {
+const generateKPIWidgetCode = (
+  widget,
+  styleMode,
+  includeStyles,
+  widthClass
+) => {
   const { config, type } = widget;
   const value = config?.value || getDefaultKPIValue(type);
   const title = config?.title || getDefaultKPITitle(type);
   const growth = config?.growth || getDefaultKPIGrowth(type);
   const icon = getKPIIcon(type);
-  const prefix = config?.prefix || (type === 'revenue-kpi' ? '$' : '');
-  const growthText = config?.growthText || 'from last week';
-  
+  const prefix = config?.prefix || (type === "revenue-kpi" ? "$" : "");
+  const growthText = config?.growthText || "from last week";
+
   // Get the type for styling
-  const styleType = type.replace('-kpi', '');
-  
-  if (styleMode === 'tailwind') {
-    const gradientClass = type === 'revenue-kpi' ? 'bg-gradient-to-br from-green-500 to-green-600' :
-                          type === 'orders-kpi' ? 'bg-gradient-to-br from-blue-500 to-blue-600' :
-                          'bg-gradient-to-br from-purple-500 to-purple-600';
-    
+  const styleType = type.replace("-kpi", "");
+
+  if (styleMode === "tailwind") {
+    const gradientClass =
+      type === "revenue-kpi"
+        ? "bg-gradient-to-br from-green-500 to-green-600"
+        : type === "orders-kpi"
+        ? "bg-gradient-to-br from-blue-500 to-blue-600"
+        : "bg-gradient-to-br from-purple-500 to-purple-600";
+
     return `          <div className="${widthClass}">
             <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200/80 transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 flex items-start gap-4 h-full">
               <div className="w-12 h-12 rounded-xl ${gradientClass} flex items-center justify-center text-white text-xl shrink-0">
@@ -387,7 +581,10 @@ const generateKPIWidgetCode = (widget, styleMode, includeStyles, widthClass) => 
               </div>
               <div className="flex-1 flex flex-col gap-2">
                 <h3 className="text-sm font-medium text-gray-600 m-0" style={{fontFamily: "'Figtree', sans-serif"}}>${title}</h3>
-                <div className="text-3xl font-bold text-gray-900 m-0 leading-none" style={{fontFamily: "'Figtree', sans-serif"}}>${formatKPIValue(value, type)}</div>
+                <div className="text-3xl font-bold text-gray-900 m-0 leading-none" style={{fontFamily: "'Figtree', sans-serif"}}>${formatKPIValue(
+                  value,
+                  type
+                )}</div>
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-1 text-xs font-semibold text-green-600">
                     <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -401,17 +598,27 @@ const generateKPIWidgetCode = (widget, styleMode, includeStyles, widthClass) => 
             </div>
           </div>`;
   } else {
-    const capitalizedType = styleType.charAt(0).toUpperCase() + styleType.slice(1);
+    const capitalizedType =
+      styleType.charAt(0).toUpperCase() + styleType.slice(1);
     const iconStyleKey = `statIcon${capitalizedType}`;
-    
-    return `          <div style={styles.${widthClass === 'w-full' ? 'widgetFull' : widthClass === 'w-1/2' ? 'widgetHalf' : 'widgetThird'}}>
+
+    return `          <div style={styles.${
+      widthClass === "w-full"
+        ? "widgetFull"
+        : widthClass === "w-1/2"
+        ? "widgetHalf"
+        : "widgetThird"
+    }}>
             <div style={styles.statCard}>
               <div style={{...styles.statIcon, ...styles.${iconStyleKey}}}>
                 ${icon}
               </div>
               <div style={styles.statContent}>
                 <h3 style={styles.statTitle}>${title}</h3>
-                <div style={styles.statValue}>${formatKPIValue(value, type)}</div>
+                <div style={styles.statValue}>${formatKPIValue(
+                  value,
+                  type
+                )}</div>
                 <div style={styles.statChange}>
                   <div style={styles.statChangeInfo}>
                     <svg style={{width: '12px', height: '12px'}} fill="currentColor" viewBox="0 0 20 20">
@@ -428,43 +635,59 @@ const generateKPIWidgetCode = (widget, styleMode, includeStyles, widthClass) => 
 };
 
 const getDefaultKPIValue = (type) => {
-  switch(type) {
-    case 'revenue-kpi': return 847293;
-    case 'orders-kpi': return 2847;
-    case 'customers-kpi': return 12483;
-    default: return 0;
+  switch (type) {
+    case "revenue-kpi":
+      return 847293;
+    case "orders-kpi":
+      return 2847;
+    case "customers-kpi":
+      return 12483;
+    default:
+      return 0;
   }
 };
 
 const getDefaultKPITitle = (type) => {
-  switch(type) {
-    case 'revenue-kpi': return 'Total Revenue';
-    case 'orders-kpi': return 'Orders';
-    case 'customers-kpi': return 'Customers';
-    default: return 'KPI';
+  switch (type) {
+    case "revenue-kpi":
+      return "Total Revenue";
+    case "orders-kpi":
+      return "Orders";
+    case "customers-kpi":
+      return "Customers";
+    default:
+      return "KPI";
   }
 };
 
 const getDefaultKPIGrowth = (type) => {
-  switch(type) {
-    case 'revenue-kpi': return 4.1;
-    case 'orders-kpi': return 2.6;
-    case 'customers-kpi': return 2.8;
-    default: return 0;
+  switch (type) {
+    case "revenue-kpi":
+      return 4.1;
+    case "orders-kpi":
+      return 2.6;
+    case "customers-kpi":
+      return 2.8;
+    default:
+      return 0;
   }
 };
 
 const getKPIIcon = (type) => {
-  switch(type) {
-    case 'revenue-kpi': return '<FiDollarSign />';
-    case 'orders-kpi': return '<FiShoppingCart />';
-    case 'customers-kpi': return '<FiUsers />';
-    default: return '<FiTrendingUp />';
+  switch (type) {
+    case "revenue-kpi":
+      return "<FiDollarSign />";
+    case "orders-kpi":
+      return "<FiShoppingCart />";
+    case "customers-kpi":
+      return "<FiUsers />";
+    default:
+      return "<FiTrendingUp />";
   }
 };
 
 const formatKPIValue = (value, type) => {
-  if (type === 'revenue-kpi') {
+  if (type === "revenue-kpi") {
     return `$${value.toLocaleString()}`;
   }
   return value.toLocaleString();
@@ -472,23 +695,31 @@ const formatKPIValue = (value, type) => {
 
 // Enhanced chart code generation with style mode support
 const generateChartCode = (type, dataName, config, styleMode) => {
-  const color = config?.color || '#27D0FC';
-  const containerStyle = styleMode === 'inline' ? 
-    'style={{width: "100%", height: "250px"}}' : 
-    styleMode === 'css' ? 'className="chart-container"' :
-    'className="w-full h-[250px]"';
-  
-  switch(type) {
-    case 'line-chart':
+  const color = config?.color || "#25CFFD";
+  const containerStyle =
+    styleMode === "inline"
+      ? 'style={{width: "100%", height: "250px"}}'
+      : styleMode === "css"
+      ? 'className="chart-container"'
+      : 'className="w-full h-[250px]"';
+
+  switch (type) {
+    case "line-chart":
       return generateLineChartCode(dataName, color, containerStyle, styleMode);
-    case 'bar-chart':
-    case 'gradient-bar-chart':
-      return generateBarChartCode(dataName, color, containerStyle, styleMode, type.includes('gradient'));
-    case 'area-chart':
+    case "bar-chart":
+    case "gradient-bar-chart":
+      return generateBarChartCode(
+        dataName,
+        color,
+        containerStyle,
+        styleMode,
+        type.includes("gradient")
+      );
+    case "area-chart":
       return generateAreaChartCode(dataName, color, containerStyle, styleMode);
-    case 'pie-chart':
+    case "pie-chart":
       return generatePieChartCode(dataName, containerStyle, styleMode);
-    case 'funnel-chart':
+    case "funnel-chart":
       return generateFunnelChartCode(dataName, containerStyle, styleMode);
     default:
       return `<div ${getErrorContainerProps(styleMode)}>
@@ -502,9 +733,10 @@ const generateLineChartCode = (dataName, color, containerStyle, styleMode) => {
   const gridProps = getGridProps(styleMode);
   const axisProps = getAxisProps(styleMode);
   const tooltipProps = getTooltipProps(styleMode);
-  
-  const enhancedTooltipProps = styleMode === 'inline' ? 
-    `contentStyle={{
+
+  const enhancedTooltipProps =
+    styleMode === "inline"
+      ? `contentStyle={{
       backgroundColor: 'rgba(255, 255, 255, 0.95)',
       border: '1px solid #e5e7eb',
       borderRadius: '0.375rem',
@@ -512,11 +744,14 @@ const generateLineChartCode = (dataName, color, containerStyle, styleMode) => {
       fontFamily: "'Figtree', sans-serif"
     }}
     cursor={{ stroke: '#9CA3AF', strokeWidth: 1, strokeDasharray: '3 3' }}
-    formatter={(value) => [\`\${value.toLocaleString()}\`, '']}` : tooltipProps;
-  
-  const axisStyle = styleMode === 'inline' ? 
-    `tick={{ fontSize: 12, fill: '#6b7280', fontFamily: "'Figtree', sans-serif" }}` : axisProps;
-  
+    formatter={(value) => [\`\${value.toLocaleString()}\`, '']}`
+      : tooltipProps;
+
+  const axisStyle =
+    styleMode === "inline"
+      ? `tick={{ fontSize: 12, fill: '#6b7280', fontFamily: "'Figtree', sans-serif" }}`
+      : axisProps;
+
   return `<ResponsiveContainer ${containerStyle}>
                 <LineChart data={${dataName}} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
                   <CartesianGrid 
@@ -556,20 +791,30 @@ const generateLineChartCode = (dataName, color, containerStyle, styleMode) => {
               </ResponsiveContainer>`;
 };
 
-const generateBarChartCode = (dataName, color, containerStyle, styleMode, isGradient) => {
+const generateBarChartCode = (
+  dataName,
+  color,
+  containerStyle,
+  styleMode,
+  isGradient
+) => {
   const gridProps = getGridProps(styleMode);
   const axisProps = getAxisProps(styleMode);
   const tooltipProps = getTooltipProps(styleMode);
-  
-  const barFill = isGradient ? 'url(#barGradient)' : color;
-  const gradientDef = isGradient ? `
+
+  const barFill = isGradient ? "url(#barGradient)" : color;
+
+  console.log(barFill);
+  const gradientDef = isGradient
+    ? `
                   <defs>
                     <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#00C9FF" stopOpacity={0.85} />
-                      <stop offset="100%" stopColor="#92FE9D" stopOpacity={0.85} />
+                      <stop offset="0%" stopColor="#25CFFD" stopOpacity={0.85} />
+                      <stop offset="100%" stopColor="#A0FCAA" stopOpacity={0.85} />
                     </linearGradient>
-                  </defs>` : '';
-  
+                  </defs>`
+    : "";
+
   return `<ResponsiveContainer ${containerStyle}>
                 <BarChart data={${dataName}} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>${gradientDef}
                   <CartesianGrid strokeDasharray="3 3" ${gridProps} />
@@ -590,18 +835,22 @@ const generateAreaChartCode = (dataName, color, containerStyle, styleMode) => {
   const gridProps = getGridProps(styleMode);
   const axisProps = getAxisProps(styleMode);
   const tooltipProps = getTooltipProps(styleMode);
-  
-  const enhancedTooltipProps = styleMode === 'inline' ? 
-    `contentStyle={{
+
+  const enhancedTooltipProps =
+    styleMode === "inline"
+      ? `contentStyle={{
       backgroundColor: 'rgba(255, 255, 255, 0.95)',
       border: '1px solid #e5e7eb',
       borderRadius: '0.375rem',
       fontFamily: "'Figtree', sans-serif"
-    }}` : tooltipProps;
-  
-  const axisStyle = styleMode === 'inline' ? 
-    `tick={{ fontSize: 12, fill: '#6b7280', fontFamily: "'Figtree', sans-serif" }}` : axisProps;
-  
+    }}`
+      : tooltipProps;
+
+  const axisStyle =
+    styleMode === "inline"
+      ? `tick={{ fontSize: 12, fill: '#6b7280', fontFamily: "'Figtree', sans-serif" }}`
+      : axisProps;
+
   return `<ResponsiveContainer ${containerStyle}>
                 <AreaChart data={${dataName}} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                   <CartesianGrid 
@@ -629,15 +878,17 @@ const generateAreaChartCode = (dataName, color, containerStyle, styleMode) => {
 
 const generatePieChartCode = (dataName, containerStyle, styleMode) => {
   const tooltipProps = getTooltipProps(styleMode);
-  
-  const enhancedTooltipProps = styleMode === 'inline' ? 
-    `contentStyle={{
+
+  const enhancedTooltipProps =
+    styleMode === "inline"
+      ? `contentStyle={{
       backgroundColor: 'rgba(255, 255, 255, 0.95)',
       border: '1px solid #e5e7eb',
       borderRadius: '0.375rem',
       fontFamily: "'Figtree', sans-serif"
-    }}` : tooltipProps;
-  
+    }}`
+      : tooltipProps;
+
   return `<ResponsiveContainer ${containerStyle}>
                 <PieChart>
                   <Pie
@@ -662,7 +913,7 @@ const generatePieChartCode = (dataName, containerStyle, styleMode) => {
 
 const generateFunnelChartCode = (dataName, containerStyle, styleMode) => {
   const tooltipProps = getTooltipProps(styleMode);
-  
+
   return `<ResponsiveContainer ${containerStyle}>
                 <FunnelChart>
                   <Tooltip ${tooltipProps} />
@@ -680,32 +931,33 @@ const generateFunnelChartCode = (dataName, containerStyle, styleMode) => {
 
 // Helper functions for style generation
 const getContainerCode = (styleMode, includeStyles) => {
-  if (!includeStyles) return '<div>';
-  
-  switch(styleMode) {
-    case 'inline':
+  if (!includeStyles) return "<div>";
+
+  switch (styleMode) {
+    case "inline":
       return '<div style={{minHeight: "100vh", backgroundColor: "#f9fafb", padding: "1.5rem"}}>';
-    case 'css':
+    case "css":
       return '<div className="dashboard-container">';
     default: // tailwind
       return '<div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">';
   }
 };
 
-const getContainerCloseCode = (styleMode) => '</div>';
+const getContainerCloseCode = (styleMode) => "</div>";
 
 const getHeaderCode = (componentName, styleMode, includeStyles) => {
-  if (!includeStyles) return `<h1>${componentName.replace(/([A-Z])/g, ' $1').trim()}</h1>`;
-  
-  const title = componentName.replace(/([A-Z])/g, ' $1').trim();
-  
-  switch(styleMode) {
-    case 'inline':
+  if (!includeStyles)
+    return `<h1>${componentName.replace(/([A-Z])/g, " $1").trim()}</h1>`;
+
+  const title = componentName.replace(/([A-Z])/g, " $1").trim();
+
+  switch (styleMode) {
+    case "inline":
       return `<div style={{maxWidth: "80rem", margin: "0 auto"}}>
         <h1 style={{fontSize: "1.875rem", fontWeight: "bold", color: "#111827", marginBottom: "1.5rem"}}>
           ${title}
         </h1>`;
-    case 'css':
+    case "css":
       return `<div className="dashboard-header">
         <h1 className="dashboard-title">
           ${title}
@@ -719,12 +971,12 @@ const getHeaderCode = (componentName, styleMode, includeStyles) => {
 };
 
 const getRowContainerProps = (styleMode, includeStyles) => {
-  if (!includeStyles) return '';
-  
-  switch(styleMode) {
-    case 'inline':
+  if (!includeStyles) return "";
+
+  switch (styleMode) {
+    case "inline":
       return 'style={{display: "flex", gap: "1rem", alignItems: "stretch", marginBottom: "1.5rem"}}';
-    case 'css':
+    case "css":
       return 'className="dashboard-row"';
     default: // tailwind
       return 'className="flex gap-4 items-stretch mb-6"';
@@ -732,18 +984,22 @@ const getRowContainerProps = (styleMode, includeStyles) => {
 };
 
 const getWidthClass = (widgetsInRow, styleMode) => {
-  if (styleMode === 'inline') {
-    const flexBasis = widgetsInRow === 1 ? '100%' : 
-                     widgetsInRow === 2 ? '50%' : '33.333%';
+  if (styleMode === "inline") {
+    const flexBasis =
+      widgetsInRow === 1 ? "100%" : widgetsInRow === 2 ? "50%" : "33.333%";
     return `style={{flex: "1", flexBasis: "${flexBasis}"}}`;
   }
-  
-  if (styleMode === 'css') {
-    return `className="widget-${widgetsInRow === 1 ? 'full' : widgetsInRow === 2 ? 'half' : 'third'}"`;
+
+  if (styleMode === "css") {
+    return `className="widget-${
+      widgetsInRow === 1 ? "full" : widgetsInRow === 2 ? "half" : "third"
+    }"`;
   }
-  
+
   // tailwind
-  return `className="${widgetsInRow === 1 ? 'w-full' : widgetsInRow === 2 ? 'w-1/2' : 'w-1/3'} flex-1"`;
+  return `className="${
+    widgetsInRow === 1 ? "w-full" : widgetsInRow === 2 ? "w-1/2" : "w-1/3"
+  } flex-1"`;
 };
 
 // Generate CSS file content
@@ -1053,8 +1309,8 @@ const formatCode = (code) => {
   // Remove excessive whitespace and clean up formatting
   return code
     .trim()
-    .replace(/^\s{0,2}\n/gm, '') // Remove empty lines with minimal indentation
-    .replace(/\n{3,}/g, '\n\n'); // Replace multiple newlines with max 2
+    .replace(/^\s{0,2}\n/gm, "") // Remove empty lines with minimal indentation
+    .replace(/\n{3,}/g, "\n\n"); // Replace multiple newlines with max 2
 };
 
 // CSS generation for separate CSS file
@@ -1276,14 +1532,14 @@ export const generateCSSFile = () => {
 
 // Additional helper functions for props generation
 const getKPIContainerProps = (styleMode, includeStyles, widthClass) => {
-  if (!includeStyles) return widthClass || '';
-  
-  const baseProps = widthClass || '';
-  
-  switch(styleMode) {
-    case 'inline':
+  if (!includeStyles) return widthClass || "";
+
+  const baseProps = widthClass || "";
+
+  switch (styleMode) {
+    case "inline":
       return `${baseProps} style={{...styles.widgetContainer, ...styles.widgetFull}}`;
-    case 'css':
+    case "css":
       return `${baseProps} className="widget-container kpi-container"`;
     default: // tailwind
       return `${baseProps} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"`;
@@ -1291,12 +1547,12 @@ const getKPIContainerProps = (styleMode, includeStyles, widthClass) => {
 };
 
 const getKPIContentProps = (styleMode, includeStyles) => {
-  if (!includeStyles) return '';
-  
-  switch(styleMode) {
-    case 'inline':
-      return 'style={styles.kpiContainer}';
-    case 'css':
+  if (!includeStyles) return "";
+
+  switch (styleMode) {
+    case "inline":
+      return "style={styles.kpiContainer}";
+    case "css":
       return 'className="kpi-content"';
     default: // tailwind
       return 'className="flex items-start justify-between"';
@@ -1304,12 +1560,12 @@ const getKPIContentProps = (styleMode, includeStyles) => {
 };
 
 const getKPIIconContainerProps = (styleMode, includeStyles) => {
-  if (!includeStyles) return '';
-  
-  switch(styleMode) {
-    case 'inline':
-      return 'style={styles.kpiIconContainer}';
-    case 'css':
+  if (!includeStyles) return "";
+
+  switch (styleMode) {
+    case "inline":
+      return "style={styles.kpiIconContainer}";
+    case "css":
       return 'className="kpi-icon"';
     default: // tailwind
       return 'className="w-8 h-8 bg-teal-100 dark:bg-teal-900 rounded-lg flex items-center justify-center"';
@@ -1317,12 +1573,12 @@ const getKPIIconContainerProps = (styleMode, includeStyles) => {
 };
 
 const getKPIValueProps = (styleMode, includeStyles) => {
-  if (!includeStyles) return '';
-  
-  switch(styleMode) {
-    case 'inline':
-      return 'style={styles.kpiValue}';
-    case 'css':
+  if (!includeStyles) return "";
+
+  switch (styleMode) {
+    case "inline":
+      return "style={styles.kpiValue}";
+    case "css":
       return 'className="kpi-value"';
     default: // tailwind
       return 'className="text-3xl font-bold text-gray-900 dark:text-white"';
@@ -1330,12 +1586,12 @@ const getKPIValueProps = (styleMode, includeStyles) => {
 };
 
 const getKPITitleProps = (styleMode, includeStyles) => {
-  if (!includeStyles) return '';
-  
-  switch(styleMode) {
-    case 'inline':
-      return 'style={styles.kpiTitle}';
-    case 'css':
+  if (!includeStyles) return "";
+
+  switch (styleMode) {
+    case "inline":
+      return "style={styles.kpiTitle}";
+    case "css":
       return 'className="kpi-title"';
     default: // tailwind
       return 'className="text-sm text-gray-500 dark:text-gray-400"';
@@ -1343,26 +1599,34 @@ const getKPITitleProps = (styleMode, includeStyles) => {
 };
 
 const getKPIGrowthProps = (styleMode, includeStyles, isPositive) => {
-  if (!includeStyles) return '';
-  
-  switch(styleMode) {
-    case 'inline':
-      const growthStyle = isPositive ? 'styles.kpiGrowthPositive' : 'styles.kpiGrowthNegative';
+  if (!includeStyles) return "";
+
+  switch (styleMode) {
+    case "inline":
+      const growthStyle = isPositive
+        ? "styles.kpiGrowthPositive"
+        : "styles.kpiGrowthNegative";
       return `style={{...styles.kpiGrowth, ...${growthStyle}}}`;
-    case 'css':
-      return `className="kpi-growth ${isPositive ? 'positive' : 'negative'}"`;
+    case "css":
+      return `className="kpi-growth ${isPositive ? "positive" : "negative"}"`;
     default: // tailwind
-      const colorClass = isPositive ? 'text-green-600' : 'text-red-600';
+      const colorClass = isPositive ? "text-green-600" : "text-red-600";
       return `className="flex items-center gap-1 text-sm font-medium ${colorClass}"`;
   }
 };
 
-const generateProfessionalBarChartCode = (widget, dataName, styleMode, includeStyles, widthClass) => {
+const generateProfessionalBarChartCode = (
+  widget,
+  dataName,
+  styleMode,
+  includeStyles,
+  widthClass
+) => {
   const config = widget.config || {};
-  const title = config.title || 'Bar Chart';
-  const totalValue = config.totalValue || '$242,673';
-  
-  if (styleMode === 'tailwind') {
+  const title = config.title || "Bar Chart";
+  const totalValue = config.totalValue || "$242,673";
+
+  if (styleMode === "tailwind") {
     return `          <div className="${widthClass}">
             <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200/80 transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 flex flex-col h-full">
               <div className="flex justify-between items-center mb-6">
@@ -1413,7 +1677,13 @@ const generateProfessionalBarChartCode = (widget, dataName, styleMode, includeSt
             </div>
           </div>`;
   } else {
-    return `          <div style={styles.${widthClass === 'w-full' ? 'widgetFull' : widthClass === 'w-1/2' ? 'widgetHalf' : 'widgetThird'}}>
+    return `          <div style={styles.${
+      widthClass === "w-full"
+        ? "widgetFull"
+        : widthClass === "w-1/2"
+        ? "widgetHalf"
+        : "widgetThird"
+    }}>
             <div style={styles.chartContainer}>
               <div style={styles.chartHeader}>
                 <div>
@@ -1465,11 +1735,16 @@ const generateProfessionalBarChartCode = (widget, dataName, styleMode, includeSt
   }
 };
 
-const generateSmoothFunnelCode = (widget, styleMode, includeStyles, widthClass) => {
+const generateSmoothFunnelCode = (
+  widget,
+  styleMode,
+  includeStyles,
+  widthClass
+) => {
   const config = widget.config || {};
-  const title = config.title || 'Funnel Chart';
-  
-  if (styleMode === 'tailwind') {
+  const title = config.title || "Funnel Chart";
+
+  if (styleMode === "tailwind") {
     return `          <div className="${widthClass}">
             <div className="bg-gray-800 rounded-2xl p-6 text-white transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 flex flex-col h-full">
               <div className="flex justify-between items-center mb-6">
@@ -1528,7 +1803,13 @@ const generateSmoothFunnelCode = (widget, styleMode, includeStyles, widthClass) 
             </div>
           </div>`;
   } else {
-    return `          <div style={styles.${widthClass === 'w-full' ? 'widgetFull' : widthClass === 'w-1/2' ? 'widgetHalf' : 'widgetThird'}}>
+    return `          <div style={styles.${
+      widthClass === "w-full"
+        ? "widgetFull"
+        : widthClass === "w-1/2"
+        ? "widgetHalf"
+        : "widgetThird"
+    }}>
             <div style={styles.funnelChart}>
               <div style={styles.funnelHeader}>
                 <h3 style={styles.funnelTitle}>${title}</h3>
@@ -1588,11 +1869,16 @@ const generateSmoothFunnelCode = (widget, styleMode, includeStyles, widthClass) 
   }
 };
 
-const generateProfessionalTableCode = (widget, styleMode, includeStyles, widthClass) => {
+const generateProfessionalTableCode = (
+  widget,
+  styleMode,
+  includeStyles,
+  widthClass
+) => {
   const config = widget.config || {};
-  const title = config.title || 'Customers Data';
-  
-  if (styleMode === 'tailwind') {
+  const title = config.title || "Customers Data";
+
+  if (styleMode === "tailwind") {
     return `          <div className="${widthClass}">
             <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200/80 transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 h-full">
               <h3 className="text-lg font-semibold text-gray-900 mb-6 m-0" style={{fontFamily: "'Figtree', sans-serif"}}>${title}</h3>
@@ -1637,7 +1923,13 @@ const generateProfessionalTableCode = (widget, styleMode, includeStyles, widthCl
             </div>
           </div>`;
   } else {
-    return `          <div style={styles.${widthClass === 'w-full' ? 'widgetFull' : widthClass === 'w-1/2' ? 'widgetHalf' : 'widgetThird'}}>
+    return `          <div style={styles.${
+      widthClass === "w-full"
+        ? "widgetFull"
+        : widthClass === "w-1/2"
+        ? "widgetHalf"
+        : "widgetThird"
+    }}>
             <div style={styles.chartContainer}>
               <h3 style={styles.chartTitle}>${title}</h3>
               <div style={{overflowX: 'auto'}}>
@@ -1683,11 +1975,16 @@ const generateProfessionalTableCode = (widget, styleMode, includeStyles, widthCl
   }
 };
 
-const generateFilterBarCode = (widget, styleMode, includeStyles, widthClass) => {
+const generateFilterBarCode = (
+  widget,
+  styleMode,
+  includeStyles,
+  widthClass
+) => {
   const config = widget.config || {};
-  const title = config.title || 'Advanced Filters';
-  
-  if (styleMode === 'tailwind') {
+  const title = config.title || "Advanced Filters";
+
+  if (styleMode === "tailwind") {
     return `          <div className="${widthClass}">
             <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200/80 transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5">
               <div className="flex flex-wrap gap-4 items-center" style={{fontFamily: "'Figtree', sans-serif"}}>
@@ -1728,7 +2025,13 @@ const generateFilterBarCode = (widget, styleMode, includeStyles, widthClass) => 
             </div>
           </div>`;
   } else {
-    return `          <div style={styles.${widthClass === 'w-full' ? 'widgetFull' : widthClass === 'w-1/2' ? 'widgetHalf' : 'widgetThird'}}>
+    return `          <div style={styles.${
+      widthClass === "w-full"
+        ? "widgetFull"
+        : widthClass === "w-1/2"
+        ? "widgetHalf"
+        : "widgetThird"
+    }}>
             <div style={styles.filterBar}>
               <div>
                 <label style={styles.filterLabel}>Date Range</label>
@@ -1768,14 +2071,24 @@ const generateFilterBarCode = (widget, styleMode, includeStyles, widthClass) => 
   }
 };
 
-const generateStandardChartCode = (widget, dataName, styleMode, includeStyles, widthClass) => {
+const generateStandardChartCode = (
+  widget,
+  dataName,
+  styleMode,
+  includeStyles,
+  widthClass
+) => {
   const { config } = widget;
   const chartCode = generateChartCode(widget.type, dataName, config, styleMode);
-  const containerProps = getKPIContainerProps(styleMode, includeStyles, widthClass);
-  
+  const containerProps = getKPIContainerProps(
+    styleMode,
+    includeStyles,
+    widthClass
+  );
+
   return `          <div ${containerProps}>
             <div className="mb-4">
-              <h3>${config?.title || 'Chart'}</h3>
+              <h3>${config?.title || "Chart"}</h3>
             </div>
             <div>
               ${chartCode}
@@ -1785,12 +2098,12 @@ const generateStandardChartCode = (widget, dataName, styleMode, includeStyles, w
 
 // Additional helper functions
 const getWidgetContainerProps = (colSpan, styleMode, includeStyles) => {
-  if (!includeStyles) return '';
-  
-  switch(styleMode) {
-    case 'inline':
-      return 'style={styles.widgetContainer}';
-    case 'css':
+  if (!includeStyles) return "";
+
+  switch (styleMode) {
+    case "inline":
+      return "style={styles.widgetContainer}";
+    case "css":
       return 'className="widget-container"';
     default: // tailwind
       return `className="col-span-${colSpan} bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4"`;
@@ -1798,12 +2111,12 @@ const getWidgetContainerProps = (colSpan, styleMode, includeStyles) => {
 };
 
 const getWidgetHeaderProps = (styleMode, includeStyles) => {
-  if (!includeStyles) return '';
-  
-  switch(styleMode) {
-    case 'inline':
+  if (!includeStyles) return "";
+
+  switch (styleMode) {
+    case "inline":
       return 'style={{marginBottom: "1rem"}}';
-    case 'css':
+    case "css":
       return 'className="widget-header"';
     default: // tailwind
       return 'className="mb-4"';
@@ -1811,12 +2124,12 @@ const getWidgetHeaderProps = (styleMode, includeStyles) => {
 };
 
 const getTitleProps = (styleMode, includeStyles) => {
-  if (!includeStyles) return '';
-  
-  switch(styleMode) {
-    case 'inline':
+  if (!includeStyles) return "";
+
+  switch (styleMode) {
+    case "inline":
       return 'style={{fontSize: "1.125rem", fontWeight: "600", color: "#111827"}}';
-    case 'css':
+    case "css":
       return 'className="widget-title"';
     default: // tailwind
       return 'className="text-lg font-semibold text-gray-900 dark:text-white"';
@@ -1824,12 +2137,12 @@ const getTitleProps = (styleMode, includeStyles) => {
 };
 
 const getSubtitleProps = (styleMode, includeStyles) => {
-  if (!includeStyles) return '';
-  
-  switch(styleMode) {
-    case 'inline':
+  if (!includeStyles) return "";
+
+  switch (styleMode) {
+    case "inline":
       return 'style={{fontSize: "0.875rem", color: "#6b7280"}}';
-    case 'css':
+    case "css":
       return 'className="widget-subtitle"';
     default: // tailwind
       return 'className="text-sm text-gray-500 dark:text-gray-400"';
@@ -1837,12 +2150,12 @@ const getSubtitleProps = (styleMode, includeStyles) => {
 };
 
 const getChartContainerProps = (styleMode, includeStyles) => {
-  if (!includeStyles) return '';
-  
-  switch(styleMode) {
-    case 'inline':
+  if (!includeStyles) return "";
+
+  switch (styleMode) {
+    case "inline":
       return 'style={{margin: "1rem 0"}}';
-    case 'css':
+    case "css":
       return 'className="chart-wrapper"';
     default: // tailwind
       return 'className="my-4"';
@@ -1850,43 +2163,58 @@ const getChartContainerProps = (styleMode, includeStyles) => {
 };
 
 const generateTimeFilters = (styleMode, includeStyles) => {
-  if (!includeStyles) return '';
-  
-  const containerProps = styleMode === 'inline' ? 
-    'style={{display: "flex", gap: "0.5rem", marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid #e5e7eb"}}' :
-    styleMode === 'css' ? 'className="time-filters"' :
-    'className="flex gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700"';
-  
+  if (!includeStyles) return "";
+
+  const containerProps =
+    styleMode === "inline"
+      ? 'style={{display: "flex", gap: "0.5rem", marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid #e5e7eb"}}'
+      : styleMode === "css"
+      ? 'className="time-filters"'
+      : 'className="flex gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700"';
+
   const buttonProps = (timeRange) => {
-    if (styleMode === 'inline') {
+    if (styleMode === "inline") {
       return `style={{padding: "0.25rem 0.75rem", fontSize: "0.875rem", borderRadius: "0.375rem", transition: "all 0.2s", backgroundColor: timeRange === '${timeRange.toLowerCase()}' ? '#3b82f6' : 'transparent', color: timeRange === '${timeRange.toLowerCase()}' ? 'white' : '#374151', border: timeRange === '${timeRange.toLowerCase()}' ? 'none' : '1px solid #d1d5db'}}`;
     }
-    
-    if (styleMode === 'css') {
+
+    if (styleMode === "css") {
       return `className="time-filter-btn \${timeRange === '${timeRange.toLowerCase()}' ? 'active' : ''}"`;
     }
-    
+
     return `className={\`px-3 py-1 text-sm rounded-md transition-colors \${
                   timeRange === '${timeRange.toLowerCase()}' 
                     ? 'bg-blue-500 text-white' 
                     : 'border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                 }\`}`;
   };
-  
+
   return `<div ${containerProps}>
-              <button onClick={() => setTimeRange('daily')} ${buttonProps('Daily')}>Daily</button>
-              <button onClick={() => setTimeRange('weekly')} ${buttonProps('Weekly')}>Weekly</button>
-              <button onClick={() => setTimeRange('monthly')} ${buttonProps('Monthly')}>Monthly</button>
-              <button onClick={() => setTimeRange('yearly')} ${buttonProps('Yearly')}>Yearly</button>
+              <button onClick={() => setTimeRange('daily')} ${buttonProps(
+                "Daily"
+              )}>Daily</button>
+              <button onClick={() => setTimeRange('weekly')} ${buttonProps(
+                "Weekly"
+              )}>Weekly</button>
+              <button onClick={() => setTimeRange('monthly')} ${buttonProps(
+                "Monthly"
+              )}>Monthly</button>
+              <button onClick={() => setTimeRange('yearly')} ${buttonProps(
+                "Yearly"
+              )}>Yearly</button>
             </div>`;
 };
 
 // Data Table Generation
-const generateDataTableCode = (widget, styleMode, includeStyles, widthClass) => {
+const generateDataTableCode = (
+  widget,
+  styleMode,
+  includeStyles,
+  widthClass
+) => {
   const { config } = widget;
-  const title = config?.title || 'Data Table';
-  
-  if (styleMode === 'tailwind') {
+  const title = config?.title || "Data Table";
+
+  if (styleMode === "tailwind") {
     return `          <div className="${widthClass}">
             <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200/80 transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 h-full flex flex-col">
               <div className="mb-4">
@@ -1964,7 +2292,13 @@ const generateDataTableCode = (widget, styleMode, includeStyles, widthClass) => 
             </div>
           </div>`;
   } else {
-    return `          <div style={styles.${widthClass === 'w-full' ? 'widgetFull' : widthClass === 'w-1/2' ? 'widgetHalf' : 'widgetThird'}}>
+    return `          <div style={styles.${
+      widthClass === "w-full"
+        ? "widgetFull"
+        : widthClass === "w-1/2"
+        ? "widgetHalf"
+        : "widgetThird"
+    }}>
             <div style={styles.chartContainer}>
               <div style={styles.chartHeader}>
                 <h3 style={styles.chartTitle}>${title}</h3>
@@ -2034,10 +2368,10 @@ const generateDataTableCode = (widget, styleMode, includeStyles, widthClass) => 
 };
 
 const getGridProps = (styleMode) => {
-  switch(styleMode) {
-    case 'inline':
+  switch (styleMode) {
+    case "inline":
       return 'stroke="#e5e7eb"';
-    case 'css':
+    case "css":
       return 'className="chart-grid"';
     default: // tailwind
       return 'className="stroke-gray-200 dark:stroke-gray-700"';
@@ -2045,10 +2379,10 @@ const getGridProps = (styleMode) => {
 };
 
 const getAxisProps = (styleMode) => {
-  switch(styleMode) {
-    case 'inline':
+  switch (styleMode) {
+    case "inline":
       return 'tick={{fontSize: 12, fill: "#6b7280"}}';
-    case 'css':
+    case "css":
       return 'className="chart-axis"';
     default: // tailwind
       return 'className="text-gray-600 dark:text-gray-400" tick={{fontSize: 12}}';
@@ -2056,10 +2390,10 @@ const getAxisProps = (styleMode) => {
 };
 
 const getTooltipProps = (styleMode) => {
-  switch(styleMode) {
-    case 'inline':
+  switch (styleMode) {
+    case "inline":
       return 'contentStyle={{backgroundColor: "rgba(255, 255, 255, 0.95)", border: "1px solid #e5e7eb", borderRadius: "0.375rem"}}';
-    case 'css':
+    case "css":
       return 'className="chart-tooltip"';
     default: // tailwind
       return 'contentStyle={{backgroundColor: "rgba(255, 255, 255, 0.95)", border: "1px solid #e5e7eb", borderRadius: "0.375rem"}}';
@@ -2067,10 +2401,10 @@ const getTooltipProps = (styleMode) => {
 };
 
 const getErrorContainerProps = (styleMode) => {
-  switch(styleMode) {
-    case 'inline':
+  switch (styleMode) {
+    case "inline":
       return 'style={{display: "flex", alignItems: "center", justifyContent: "center", height: "250px", color: "#6b7280"}}';
-    case 'css':
+    case "css":
       return 'className="chart-error"';
     default: // tailwind
       return 'className="flex items-center justify-center h-[250px] text-gray-500"';

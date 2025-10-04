@@ -8,52 +8,52 @@ import { useTheme } from "../context/ThemeContext";
 const COLOR_PALETTES = {
   default: {
     name: "Default",
-    primary: "#27D0FC",
-    secondary: "#10B981",
-    accent: "#F59E0B",
+    primary: "#25CFFD",
+    secondary: "#A0FCAA",
+    accent: "#63E6D4",
   },
-  ocean: {
-    name: "Ocean",
-    primary: "#0EA5E9",
-    secondary: "#06B6D4",
-    accent: "#8B5CF6",
-  },
-  forest: {
-    name: "Forest",
-    primary: "#059669",
-    secondary: "#10B981",
-    accent: "#F59E0B",
-  },
-  sunset: {
-    name: "Sunset",
-    primary: "#F97316",
-    secondary: "#EF4444",
-    accent: "#F59E0B",
-  },
-  midnight: {
-    name: "Midnight",
-    primary: "#6366F1",
-    secondary: "#8B5CF6",
-    accent: "#EC4899",
-  },
-  earth: {
-    name: "Earth",
-    primary: "#A3A3A3",
-    secondary: "#6B7280",
-    accent: "#F59E0B",
-  },
-  vibrant: {
-    name: "Vibrant",
-    primary: "#EC4899",
-    secondary: "#8B5CF6",
-    accent: "#F59E0B",
-  },
-  corporate: {
-    name: "Corporate",
-    primary: "#1E40AF",
-    secondary: "#059669",
-    accent: "#DC2626",
-  },
+  // ocean: {
+  //   name: "Ocean",
+  //   primary: "#0EA5E9",
+  //   secondary: "#06B6D4",
+  //   accent: "#8B5CF6",
+  // },
+  // forest: {
+  //   name: "Forest",
+  //   primary: "#059669",
+  //   secondary: "#A0FCAA",
+  //   accent: "#63E6D4",
+  // },
+  // sunset: {
+  //   name: "Sunset",
+  //   primary: "#F97316",
+  //   secondary: "#EF4444",
+  //   accent: "#63E6D4",
+  // },
+  // midnight: {
+  //   name: "Midnight",
+  //   primary: "#6366F1",
+  //   secondary: "#8B5CF6",
+  //   accent: "#EC4899",
+  // },
+  // earth: {
+  //   name: "Earth",
+  //   primary: "#A3A3A3",
+  //   secondary: "#6B7280",
+  //   accent: "#63E6D4",
+  // },
+  // vibrant: {
+  //   name: "Vibrant",
+  //   primary: "#EC4899",
+  //   secondary: "#8B5CF6",
+  //   accent: "#63E6D4",
+  // },
+  // corporate: {
+  //   name: "Corporate",
+  //   primary: "#1E40AF",
+  //   secondary: "#059669",
+  //   accent: "#DC2626",
+  // },
 };
 
 const ColorPalette = memo(() => {
@@ -126,9 +126,9 @@ const ColorPalette = memo(() => {
 
             {/* Predefined Palettes */}
             <div className="mb-4">
-              <h4 className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
+              {/* <h4 className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
                 Preset Palettes
-              </h4>
+              </h4> */}
               <div className="grid grid-cols-2 gap-2">
                 {Object.entries(COLOR_PALETTES).map(([key, palette]) => (
                   <button
@@ -136,7 +136,7 @@ const ColorPalette = memo(() => {
                     onClick={() => handlePaletteSelect(key, palette)}
                     className={`flex items-center justify-between p-2 rounded-lg border transition-colors ${
                       selectedPalette === key
-                        ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                        ? "border-blue-500 aaaaaa dark:bg-blue-900/20"
                         : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
                     }`}
                   >
@@ -181,14 +181,14 @@ const ColorPalette = memo(() => {
                   <div className="flex items-center gap-2">
                     <input
                       type="color"
-                      value={globalColors?.primary || "#27D0FC"}
+                      value={globalColors?.primary || "#25CFFD"}
                       onChange={(e) =>
                         handleCustomColorChange("primary", e.target.value)
                       }
                       className="w-8 h-8 rounded border border-gray-300 cursor-pointer"
                     />
                     <span className="text-xs text-gray-500 font-mono">
-                      {globalColors?.primary || "#27D0FC"}
+                      {globalColors?.primary || "#25CFFD"}
                     </span>
                   </div>
                 </div>
@@ -200,14 +200,14 @@ const ColorPalette = memo(() => {
                   <div className="flex items-center gap-2">
                     <input
                       type="color"
-                      value={globalColors?.secondary || "#10B981"}
+                      value={globalColors?.secondary || "#A0FCAA"}
                       onChange={(e) =>
                         handleCustomColorChange("secondary", e.target.value)
                       }
                       className="w-8 h-8 rounded border border-gray-300 cursor-pointer"
                     />
                     <span className="text-xs text-gray-500 font-mono">
-                      {globalColors?.secondary || "#10B981"}
+                      {globalColors?.secondary || "#A0FCAA"}
                     </span>
                   </div>
                 </div>
@@ -219,14 +219,14 @@ const ColorPalette = memo(() => {
                   <div className="flex items-center gap-2">
                     <input
                       type="color"
-                      value={globalColors?.accent || "#F59E0B"}
+                      value={globalColors?.accent || "#63E6D4"}
                       onChange={(e) =>
                         handleCustomColorChange("accent", e.target.value)
                       }
                       className="w-8 h-8 rounded border border-gray-300 cursor-pointer"
                     />
                     <span className="text-xs text-gray-500 font-mono">
-                      {globalColors?.accent || "#F59E0B"}
+                      {globalColors?.accent || "#63E6D4"}
                     </span>
                   </div>
                 </div>

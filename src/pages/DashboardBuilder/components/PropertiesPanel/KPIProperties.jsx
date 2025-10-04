@@ -119,13 +119,13 @@ const KPIProperties = ({ widget }) => {
           <input
             type="color"
             className="w-10 h-10 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm cursor-pointer"
-            value={widget.config?.iconColor || '#27D0FC'}
+            value={widget.config?.iconColor || '#25CFFD'}
             onChange={(e) => handleChange('iconColor', e.target.value)}
           />
           <input
             type="text"
             className="flex-1 ml-2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-            value={widget.config?.iconColor || '#27D0FC'}
+            value={widget.config?.iconColor || '#25CFFD'}
             onChange={(e) => handleChange('iconColor', e.target.value)}
           />
         </div>
