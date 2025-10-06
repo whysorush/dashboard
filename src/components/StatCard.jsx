@@ -14,10 +14,11 @@ const styles = {
     marginTop: 18,
   },
   card: {
-    display: "grid",
+    // display: "grid",
     gridTemplateColumns: "54px 1fr",
     gap: 14,
-    background: "linear-gradient(180deg, color-mix(in oklab, var(--panel) 92%, transparent), color-mix(in oklab, var(--panel) 100%, transparent))",
+    background:
+      "linear-gradient(180deg, color-mix(in oklab, var(--panel) 92%, transparent), color-mix(in oklab, var(--panel) 100%, transparent))",
     border: "1px solid var(--border)",
     borderRadius: 14,
     padding: 16,
@@ -32,54 +33,101 @@ const styles = {
     color: "var(--icon-stat-font)",
     marginBottom: 8,
   },
-  title: { margin: 0, fontSize: 14, color: "var(--text)" },
-  value: { fontSize: 28, fontWeight: 800, color: "var(--text)", width: "50%" },
-  change: { display: "flex", alignItems: "center", gap: 6, color: "#22c55e", fontSize: 12, marginTop: 24 },
+  title: { margin: 0, fontSize: 16, fontWeight: 700, color: "var(--text)" },
+  value: {
+    // fontSize: 28,
+    // fontWeight: 800,
+    // color: "var(--text)",
+    // width: "50%",
+    display: "flex",
+    marginTop: 24,
+
+    // justifyContent: "right",
+  },
+  change: {
+    // display: "flex",
+    // alignItems: "center",
+    gap: 6,
+    // color: "#22c55e",
+    fontSize: 12,
+    // marginTop: 24,
+    width: "50%",
+    textAlign: "right",
+  },
 };
 
-function StatCard({ icon: Icon, title, value, changeText }) { // eslint-disable-line no-unused-vars
+function StatCard({ icon, title, value, percentage, changeText }) {
   return (
     <div style={styles.card}>
-      <div style={styles.icon}>
-        <Icon />
-      </div>
+      <div style={styles.icon}>{icon}</div>
       <div>
         <h3 style={styles.title}>{title}</h3>
-        <div style={styles.value}>{value}</div>
+      </div>
+      <div style={styles.value} className="below_div">
+        <div style={{ width: "50%", fontWeight: "700", fontSize: "22px" }}>
+          {value}
+        </div>
+
         <div style={styles.change}>
-          <FaArrowUp />
-          <span>{changeText}</span>
+          <p
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              justifyContent: "right",
+              color: "#22c55e",
+            }}
+          >
+            <FaArrowUp /> {percentage}
+          </p>
+          <p>{changeText}</p>
         </div>
       </div>
     </div>
   );
 }
 
-
+// Array of JSON data for stat cards
+const statCardsData = [
+  {
+    id: 1,
+    icon: "💰",
+    title: "Total Revenue",
+    value: "$847,293",
+    percentage: "5.1%",
+    changeText: "from last week",
+  },
+  {
+    id: 2,
+    icon: "📦",
+    title: "Orders",
+    value: "$2,847",
+    percentage: "8.2%",
+    changeText: "from last week",
+  },
+  {
+    id: 3,
+    icon: "👥",
+    title: "Customers",
+    value: "12,483",
+    percentage: "7.3%",
+    changeText: "from last week",
+  },
+];
 
 export default function StatCards() {
   return (
     <section style={styles.list}>
-      <StatCard
-        icon={FaDollarSign}
-        title="Total Revenue"
-        value="$847,293"
-        changeText="5.1% from last week"
-      />
-      <StatCard
-        icon={FaShoppingCart}
-        title="Orders"
-        value="$2,847"
-        changeText="8.2% from last week"
-      />
-      <StatCard
-        icon={FaUsers}
-        title="Customers"
-        value="12,483"
-        changeText="7.3% from last week"
-      />
+      {statCardsData.map((card) => (
+        <StatCard
+          key={card.id}
+          icon={card.icon}
+          title={card.title}
+          value={card.value}
+          percentage={card.percentage}
+          changeText={card.changeText}
+        />
+      ))}
     </section>
   );
 }
-
-

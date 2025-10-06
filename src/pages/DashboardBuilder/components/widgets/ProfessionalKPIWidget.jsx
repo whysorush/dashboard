@@ -1,7 +1,14 @@
 // src/pages/DashboardBuilder/components/widgets/ProfessionalKPIWidget.jsx
 import React from "react";
 import { PROFESSIONAL_WIDGET_CONFIGS } from "../../constants";
-import { FaArrowDown, FaArrowUp, FaPercent, FaDollarSign, FaShoppingCart, FaUsers } from "react-icons/fa";
+import {
+  FaArrowDown,
+  FaArrowUp,
+  FaPercent,
+  FaDollarSign,
+  FaShoppingCart,
+  FaUsers,
+} from "react-icons/fa";
 
 /**
  * Professional KPI Widget with exact design standards
@@ -24,7 +31,7 @@ const iconMap = {
 
 // Helper function to render icon
 const renderIcon = (icon) => {
-  if (typeof icon === 'string' && iconMap[icon]) {
+  if (typeof icon === "string" && iconMap[icon]) {
     const IconComponent = iconMap[icon];
     return <IconComponent />;
   }
@@ -32,7 +39,7 @@ const renderIcon = (icon) => {
   return icon;
 };
 const ProfessionalKPIWidget = ({ widget, isSelected, onClick }) => {
-  const config = widget.config || {};
+  const config = widget?.config || {};
 
   // Use default config or merge with widget config
   const title = config.title || PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.title;
@@ -57,19 +64,33 @@ const ProfessionalKPIWidget = ({ widget, isSelected, onClick }) => {
       <div className={`stat-icon ${title.toLowerCase().split(" ")[0]}`}>
         {renderIcon(icon)}
       </div>
-      <div className="stat-content">
-        <h3>{title}</h3>
-
+      <div>
+        <h3 style={{ fontSize: "16px", fontWeight: "700" }}>{title}</h3>
         <div className="stat-change positive">
           <div className="stat-value">
             {prefix}
             {value?.toLocaleString()}
           </div>
-          <div className="stat-change-info">
-            {growthDirection === "up" ? <FaArrowUp /> : <FaArrowDown />} +{" "}
-            {growth} <FaPercent />
-            {/* <span>{changeText}</span> */}
-            <p> {growthText}</p>
+          <div
+            style={{ width: "50%", display: "flex", justifyContent: "right" }}
+            // className="stat-change-info"
+          >
+            {/* {growthDirection === "up" ? <FaArrowUp /> : <FaArrowDown />} + */}
+            {/* {growth} <FaPercent /> */}
+            <div className="direction-info">
+              <p
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  justifyContent: "right",
+                }}
+              >
+                {growthDirection === "up" ? <FaArrowUp /> : <FaArrowDown />}
+                {growth} <FaPercent />
+              </p>
+              <div> {growthText} </div>
+            </div>
           </div>
         </div>
       </div>
