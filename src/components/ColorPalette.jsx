@@ -126,9 +126,6 @@ const ColorPalette = memo(() => {
 
             {/* Predefined Palettes */}
             <div className="mb-4">
-              {/* <h4 className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
-                Preset Palettes
-              </h4> */}
               <div className="grid grid-cols-2 gap-2">
                 {Object.entries(COLOR_PALETTES).map(([key, palette]) => (
                   <button
