@@ -119,7 +119,16 @@ const AdvancedFilterBarWidget = ({
 }) => {
   const config = widget?.config || {};
 
-  const { updateWidgetProperty } = useBuilder();
+  // Safely get builder context - it might not be available in all contexts
+  let updateWidgetProperty = null;
+  try {
+    const builderContext = useBuilder();
+    updateWidgetProperty = builderContext.updateWidgetProperty;
+  } catch (error) {
+    // useBuilder is not available (outside BuilderProvider)
+    // This is expected when used in the main dashboard
+    console.log('AdvancedFilterBarWidget: Builder context not available, running in preview mode');
+  }
 
   // Don't persist changes in preview mode
   const shouldPersist = !isPreview;
@@ -162,7 +171,7 @@ const AdvancedFilterBarWidget = ({
   // Helper function to persist sections to widget config
   const persistSections = useCallback(
     (newSections) => {
-      if (shouldPersist && widget?.id) {
+      if (shouldPersist && widget?.id && updateWidgetProperty) {
         updateWidgetProperty(widget.id, "config.sections", newSections);
       }
     },
