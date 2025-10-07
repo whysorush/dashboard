@@ -109,19 +109,22 @@ const AdvancedFilterBarWidget = ({
 
   // Safely get builder context - it might not be available in all contexts
   let updateWidgetProperty = null;
+  let isInBuilderMode = false;
   try {
     const builderContext = useBuilder();
     updateWidgetProperty = builderContext.updateWidgetProperty;
+    isInBuilderMode = true;
   } catch (error) {
     // useBuilder is not available (outside BuilderProvider)
     // This is expected when used in the main dashboard
     console.log(
-      "AdvancedFilterBarWidget: Builder context not available, running in preview mode"
+      "AdvancedFilterBarWidget: Builder context not available, running in overview mode"
     );
   }
 
-  // Don't persist changes in preview mode
-  const shouldPersist = !isPreview;
+  // Determine if we should persist changes
+  // Only allow customization in builder mode, not in overview mode
+  const shouldPersist = isInBuilderMode && !isPreview;
 
   // State for filter values
   const [dateRange, setDateRange] = useState({ from: "", to: "" });
@@ -164,6 +167,8 @@ const AdvancedFilterBarWidget = ({
       if (shouldPersist && widget?.id && updateWidgetProperty) {
         updateWidgetProperty(widget.id, "config.sections", newSections);
       }
+      // In overview mode, we still update local state even if we can't persist to builder
+      // This allows customization to work in overview mode
     },
     [shouldPersist, widget?.id, updateWidgetProperty]
   );
@@ -185,6 +190,7 @@ const AdvancedFilterBarWidget = ({
         const newSections = prev.map((section) =>
           section.id === sectionId ? { ...section, visible: false } : section
         );
+        // Always persist sections (works in both builder and overview mode)
         persistSections(newSections);
         return newSections;
       });
@@ -238,7 +244,8 @@ const AdvancedFilterBarWidget = ({
 
     const isSelected = selectedSection === section.id;
     const isHovered = hoveredSection === section.id;
-    const showControls = !isPreview && (isSelected || isHovered);
+    // Show controls only in builder mode, not in overview mode
+    const showControls = isInBuilderMode && !isPreview && (isSelected || isHovered);
 
     const sectionStyle = isPreview
       ? styles.groupPreview
@@ -254,21 +261,21 @@ const AdvancedFilterBarWidget = ({
         key={section.id}
         style={sectionStyle}
         onClick={
-          !isPreview ? (e) => handleSectionClick(section.id, e) : undefined
+          isInBuilderMode && !isPreview ? (e) => handleSectionClick(section.id, e) : undefined
         }
         onMouseEnter={
-          !isPreview ? () => setHoveredSection(section.id) : undefined
+          isInBuilderMode && !isPreview ? () => setHoveredSection(section.id) : undefined
         }
-        onMouseLeave={!isPreview ? () => setHoveredSection(null) : undefined}
-        draggable={!isPreview}
+        onMouseLeave={isInBuilderMode && !isPreview ? () => setHoveredSection(null) : undefined}
+        draggable={isInBuilderMode && !isPreview}
         onDragStart={
-          !isPreview ? (e) => handleDragStart(section.id, e) : undefined
+          isInBuilderMode && !isPreview ? (e) => handleDragStart(section.id, e) : undefined
         }
-        onDragOver={!isPreview ? handleDragOver : undefined}
-        onDrop={!isPreview ? (e) => handleDrop(section.id, e) : undefined}
+        onDragOver={isInBuilderMode && !isPreview ? handleDragOver : undefined}
+        onDrop={isInBuilderMode && !isPreview ? (e) => handleDrop(section.id, e) : undefined}
       >
         {/* Section Controls - Only show in builder mode */}
-        {!isPreview && (
+        {isInBuilderMode && !isPreview && (
           <div style={controlsStyle}>
             <button
               style={styles.controlButton}
@@ -381,6 +388,12 @@ const AdvancedFilterBarWidget = ({
       </div>
     );
   };
+
+  // In overview mode (no BuilderProvider), render directly without BaseWidget
+  // In builder mode, use BaseWidget wrapper
+  if (!isInBuilderMode) {
+    return <section style={styles.section}>{sections.map(renderSection)}</section>;
+  }
 
   return isPreview ? (
     <section style={styles.section}>{sections.map(renderSection)}</section>
