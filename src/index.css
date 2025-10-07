@@ -257,7 +257,7 @@ textarea {
 .chart-container,
 .widget-container {
   border-radius: var(--style-borderRadius);
-  box-shadow: var(--style-shadow);
+  /* box-shadow: var(--style-shadow); */
   font-family: var(--style-fontFamily);
 }
 
