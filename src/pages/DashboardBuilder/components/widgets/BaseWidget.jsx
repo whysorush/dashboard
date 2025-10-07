@@ -32,12 +32,12 @@ const BaseWidget = memo(
 
     return (
       <div
-        className={`widget-wrapper group relative h-full bg-white dark:bg-gray-800 rounded-lg 
-                shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer
-                ${borderStyle} border-gray-200 dark:border-gray-700
-                ${isSelected ? "ring-2 ring-blue-500 shadow-lg" : ""}
-                ${widget?.locked ? "cursor-not-allowed" : ""}
-               `}
+        // className={`widget-wrapper group relative h-full bg-white dark:bg-gray-800 rounded-lg 
+        //         shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer
+        //         ${borderStyle} border-gray-200 dark:border-gray-700
+        //         ${isSelected ? "ring-2 ring-blue-500 shadow-lg" : ""}
+        //         ${widget?.locked ? "cursor-not-allowed" : ""}
+        //        `}
         //  hover:transform hover:scale-[1.02]
         onClick={onClick}
         style={{
@@ -76,7 +76,9 @@ const BaseWidget = memo(
         )}
 
         {/* Widget Content */}
-        <div className="widget-content p-4 h-full overflow-auto">
+        <div 
+        className="widget-content p-4 h-full overflow-auto"
+        >
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">

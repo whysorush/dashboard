@@ -64,9 +64,7 @@ const styles = {
     transition:
       "transform 0.25s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease",
   },
-  mainContent: {
-    padding: "0px 10px",
-  },
+  mainContent: {},
   chartsSection: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
@@ -157,7 +155,7 @@ function App() {
           <Route
             path="/dashboard"
             element={
-              <main style={{ flex: 1, overflow: "auto",}}>
+              <main style={{ flex: 1, overflow: "auto" }}>
                 <DashboardLayout />
               </main>
             }
