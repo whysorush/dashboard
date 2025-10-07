@@ -26,6 +26,12 @@ const styles = {
     marginBottom: 8,
   },
   title: { margin: 0, fontSize: 16, color: "var(--text)" },
+  total: {
+    fontSize: 22,
+    fontWeight: 700,
+    margin: "6px 0 10px",
+    color: "var(--text)",
+  },
   select: {
     background: "var(--bg)",
     color: "var(--text)",
@@ -118,8 +124,10 @@ const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
       className="chart-container"
     >
       <div style={styles.header}>
-        <h3 style={styles.title}>Funnel Chart</h3>
-        <div style={styles.total}>{total}</div>
+        <div>
+          <h3 style={styles.title}>Funnel Chart</h3>
+          <div style={styles.total}>{total}</div>
+        </div>
 
         <select style={styles.select}>
           <option>Week</option>
