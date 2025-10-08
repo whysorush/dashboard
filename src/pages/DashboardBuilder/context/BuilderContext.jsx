@@ -570,6 +570,8 @@ export const BuilderProvider = ({ children }) => {
 
   const reorderRows = useCallback(
     (sourceIndex, destinationIndex) => {
+      if (sourceIndex === destinationIndex) return;
+      
       const newRows = Array.from(rows);
       const [removed] = newRows.splice(sourceIndex, 1);
       newRows.splice(destinationIndex, 0, removed);
@@ -584,6 +586,42 @@ export const BuilderProvider = ({ children }) => {
       saveToHistory(next);
     },
     [rows, widgets, saveToHistory]
+  );
+
+  const moveRowUp = useCallback(
+    (rowId) => {
+      const currentIndex = rows.findIndex((r) => r.id === rowId);
+      if (currentIndex > 0) {
+        reorderRows(currentIndex, currentIndex - 1);
+      }
+    },
+    [rows, reorderRows]
+  );
+
+  const moveRowDown = useCallback(
+    (rowId) => {
+      const currentIndex = rows.findIndex((r) => r.id === rowId);
+      if (currentIndex < rows.length - 1) {
+        reorderRows(currentIndex, currentIndex + 1);
+      }
+    },
+    [rows, reorderRows]
+  );
+
+  const canMoveRowUp = useCallback(
+    (rowId) => {
+      const currentIndex = rows.findIndex((r) => r.id === rowId);
+      return currentIndex > 0;
+    },
+    [rows]
+  );
+
+  const canMoveRowDown = useCallback(
+    (rowId) => {
+      const currentIndex = rows.findIndex((r) => r.id === rowId);
+      return currentIndex < rows.length - 1;
+    },
+    [rows]
   );
 
   const recalculateRowWidgetSizes = useCallback(
@@ -667,6 +705,10 @@ export const BuilderProvider = ({ children }) => {
     clearCanvas,
     updateRow,
     reorderRows,
+    moveRowUp,
+    moveRowDown,
+    canMoveRowUp,
+    canMoveRowDown,
     recalculateRowWidgetSizes,
     loadTemplate,
     selectAll,
@@ -688,6 +730,10 @@ export const BuilderProvider = ({ children }) => {
     clearCanvas,
     updateRow,
     reorderRows,
+    moveRowUp,
+    moveRowDown,
+    canMoveRowUp,
+    canMoveRowDown,
     recalculateRowWidgetSizes,
     loadTemplate,
     selectAll,

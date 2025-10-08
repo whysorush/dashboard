@@ -4,6 +4,7 @@ import { useDrop } from "react-dnd";
 import { useBuilder } from "../context/BuilderContext";
 import useRowBasedLayout from "../hooks/useRowBasedLayout";
 import RowContainer from "./RowContainer";
+import DraggableRowContainer from "./DraggableRowContainer";
 import RowManager from "./RowManager";
 import { WIDGET_TYPES, KPI_WIDGET_TYPES } from "../constants";
 
@@ -36,6 +37,10 @@ const Canvas = () => {
     addWidget,
     addRow,
     setSelectedWidget,
+    moveRowUp,
+    moveRowDown,
+    canMoveRowUp,
+    canMoveRowDown,
   } = useBuilder();
 
   const { widgetsByRow, calculateWidgetSizes, getMaxWidgetsPerRow, getMaxKPIWidgetsPerRow } =
@@ -281,12 +286,16 @@ const Canvas = () => {
                 : "flex-1 w-1/4";
 
             return (
-              <RowContainer
+              <DraggableRowContainer
                 key={row.id}
                 row={row}
                 isSelected={selectedRow === row.id}
-                onAddWidget={(rowId) => handleAddWidgetToRow(rowId)}
                 canAddMore={getMaxWidgetsPerRow(row.id) > 0}
+                index={rows.findIndex(r => r.id === row.id)}
+                onMoveUp={() => moveRowUp(row.id)}
+                onMoveDown={() => moveRowDown(row.id)}
+                canMoveUp={canMoveRowUp(row.id)}
+                canMoveDown={canMoveRowDown(row.id)}
               >
                 {rowWidgets.map((widget) => (
                   <div
@@ -309,7 +318,7 @@ const Canvas = () => {
                     {renderWidget(widget)}
                   </div>
                 ))}
-              </RowContainer>
+              </DraggableRowContainer>
             );
           })}
 

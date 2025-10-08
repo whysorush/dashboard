@@ -170,7 +170,6 @@ const S = {
     }`,
     borderRadius: 12,
     padding: "10px",
-    cursor: "grab",
     transition:
       "background 120ms ease, transform 120ms ease, border 120ms ease, opacity 120ms ease",
     transform: hovered ? "translateY(-1px)" : "none",

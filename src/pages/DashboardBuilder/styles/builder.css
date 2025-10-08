@@ -622,3 +622,160 @@
     gap: 8px;
   }
 }
+
+/* Drag and Drop Visual Feedback */
+.draggable-row {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.draggable-row.dragging {
+  opacity: 0.5;
+  transform: rotate(2deg) scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}
+
+.draggable-row.drag-over {
+  border-color: #10b981 !important;
+  background-color: rgba(16, 185, 129, 0.1) !important;
+  transform: scale(1.02);
+}
+
+.draggable-row.drag-over::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #10b981, #059669);
+  border-radius: 10px;
+  z-index: -1;
+  animation: dragGlow 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes dragGlow {
+  0% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0.8;
+  }
+}
+
+/* Row Manager Drag Feedback */
+.row-manager .row-item {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.row-manager .row-item:hover {
+  background-color: rgba(59, 130, 246, 0.05);
+  transform: translateX(4px);
+}
+
+.row-manager .row-item.dragging {
+  opacity: 0.6;
+  transform: scale(0.98);
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.row-manager .row-item.drag-over {
+  background-color: rgba(16, 185, 129, 0.1);
+  border-color: #10b981;
+  transform: translateX(8px);
+}
+
+/* Drag Handle Styling */
+.drag-handle {
+  transition: all 0.2s ease;
+  padding: 4px;
+  border-radius: 4px;
+  opacity: 0.6;
+}
+
+.drag-handle:hover {
+  opacity: 1;
+  background-color: rgba(59, 130, 246, 0.1);
+  transform: scale(1.1);
+}
+
+.drag-handle:active {
+  transform: scale(0.95);
+}
+
+/* Row Controls Styling */
+.row-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.draggable-row:hover .row-controls {
+  opacity: 1;
+}
+
+.row-control-button {
+  padding: 4px;
+  border-radius: 4px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.row-control-button:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  transform: scale(1.1);
+}
+
+.row-control-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.row-control-button:disabled:hover {
+  background: transparent;
+  color: #6b7280;
+  transform: none;
+}
+
+/* Dark mode drag and drop styles */
+@media (prefers-color-scheme: dark) {
+  .draggable-row.drag-over {
+    border-color: #10b981 !important;
+    background-color: rgba(16, 185, 129, 0.15) !important;
+  }
+
+  .draggable-row.drag-over::before {
+    background: linear-gradient(45deg, #10b981, #059669);
+  }
+
+  .row-manager .row-item:hover {
+    background-color: rgba(59, 130, 246, 0.1);
+  }
+
+  .row-manager .row-item.dragging {
+    background-color: rgba(59, 130, 246, 0.15);
+  }
+
+  .row-manager .row-item.drag-over {
+    background-color: rgba(16, 185, 129, 0.15);
+  }
+
+  .drag-handle:hover {
+    background-color: rgba(59, 130, 246, 0.15);
+  }
+
+  .row-control-button:hover {
+    background-color: rgba(59, 130, 246, 0.15);
+  }
+}
