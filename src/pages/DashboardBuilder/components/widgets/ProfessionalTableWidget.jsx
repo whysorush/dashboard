@@ -105,6 +105,7 @@ const ProfessionalTableWidget = () => {
   const [sortDirection, setSortDirection] = useState("asc");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
+  const [selectedRows, setSelectedRows] = useState(new Set());
   const pageSize = 10; // default page size
   const { isDark } = useTheme();
 
@@ -389,6 +390,29 @@ const ProfessionalTableWidget = () => {
     }
   };
 
+  const handleRowClick = (itemId) => {
+    setSelectedRows(prev => {
+      const newSelected = new Set(prev);
+      if (newSelected.has(itemId)) {
+        newSelected.delete(itemId);
+      } else {
+        newSelected.add(itemId);
+      }
+      return newSelected;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedRows.size === pagedData.length) {
+      setSelectedRows(new Set());
+    } else {
+      setSelectedRows(new Set(pagedData.map(item => item.id)));
+    }
+  };
+
+  const isRowSelected = (itemId) => selectedRows.has(itemId);
+  const isAllSelected = selectedRows.size === pagedData.length && pagedData.length > 0;
+
   return (
     <section style={styles.section} aria-label="Orders table">
       <div style={styles.toolbar}>
@@ -420,6 +444,14 @@ const ProfessionalTableWidget = () => {
       <table style={styles.table}>
         <thead style={styles.thead}>
           <tr>
+            <th style={styles.th}>
+              <input
+                type="checkbox"
+                checked={isAllSelected}
+                onChange={handleSelectAll}
+                style={{ cursor: 'pointer' }}
+              />
+            </th>
             <th style={styles.th} onClick={() => handleSort("id")}>
               Sr No.
               {sortField === "id" &&
@@ -461,7 +493,44 @@ const ProfessionalTableWidget = () => {
         <tbody>
           {pagedData.length ? (
             pagedData.map((item) => (
-              <tr key={item.id}>
+              <tr 
+                key={item.id}
+                style={{
+                  ...styles.td,
+                  cursor: 'pointer',
+                  backgroundColor: isRowSelected(item.id) ? 'var(--primary)' : 'transparent',
+                  color: isRowSelected(item.id) ? '#ffffff' : 'var(--table-td-font)',
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                  userSelect: 'none',
+                  transform: 'scale(1)'
+                }}
+                onClick={() => handleRowClick(item.id)}
+                onMouseEnter={(e) => {
+                  if (!isRowSelected(item.id)) {
+                    e.currentTarget.style.backgroundColor = 'var(--hover-bg, rgba(0, 0, 0, 0.05))';
+                    e.currentTarget.style.transform = 'scale(1.01)';
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
+                    e.currentTarget.style.borderLeft = '3px solid var(--primary)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isRowSelected(item.id)) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = 'none';
+                    e.currentTarget.style.borderLeft = 'none';
+                  }
+                }}
+              >
+                <td style={styles.td}>
+                  <input
+                    type="checkbox"
+                    checked={isRowSelected(item.id)}
+                    onChange={() => handleRowClick(item.id)}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{ cursor: 'pointer' }}
+                  />
+                </td>
                 <td style={styles.td}>{item.id}</td>
                 <td style={styles.td}>{item.customer}</td>
                 <td style={styles.td}>{item.orderId}</td>
@@ -475,7 +544,7 @@ const ProfessionalTableWidget = () => {
             ))
           ) : (
             <tr>
-              <td style={styles.td} colSpan="7">
+              <td style={styles.td} colSpan="8">
                 No matching records found
               </td>
             </tr>

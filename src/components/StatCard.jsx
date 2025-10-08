@@ -22,6 +22,9 @@ const styles = {
     border: "1px solid var(--border)",
     borderRadius: 14,
     padding: 16,
+    transition: 
+      "transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s ease",
+    cursor: "pointer",
   },
   icon: {
     width: 54,

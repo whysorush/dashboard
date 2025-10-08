@@ -18,6 +18,7 @@ const DataTableWidget = ({ widget, isSelected, onClick }) => {
   const [sortDirection, setSortDirection] = useState("asc");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedRows, setSelectedRows] = useState(new Set());
   const itemsPerPage = 5;
 
   // Mock data
@@ -137,6 +138,29 @@ const DataTableWidget = ({ widget, isSelected, onClick }) => {
     console.log("Filter changed:", key, value);
   };
 
+  const handleRowClick = (rowId) => {
+    setSelectedRows(prev => {
+      const newSelected = new Set(prev);
+      if (newSelected.has(rowId)) {
+        newSelected.delete(rowId);
+      } else {
+        newSelected.add(rowId);
+      }
+      return newSelected;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedRows.size === paginatedData.length) {
+      setSelectedRows(new Set());
+    } else {
+      setSelectedRows(new Set(paginatedData.map(r => r.id)));
+    }
+  };
+
+  const isRowSelected = (rowId) => selectedRows.has(rowId);
+  const isAllSelected = selectedRows.size === paginatedData.length && paginatedData.length > 0;
+
   const columns = [
     { key: "name", label: "Name", sortable: true },
     { key: "category", label: "Category", sortable: true },
@@ -198,6 +222,20 @@ const DataTableWidget = ({ widget, isSelected, onClick }) => {
         >
           <thead style={{ backgroundColor: colors.primary }}>
             <tr>
+              <th
+                className="text-left py-3 px-4 font-semibold"
+                style={{
+                  color: "#ffffff",
+                  borderRadius: styleProps.borderRadius,
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={isAllSelected}
+                  onChange={handleSelectAll}
+                  style={{ cursor: 'pointer' }}
+                />
+              </th>
               {columns.map((column) => (
                 <th
                   key={column.key}
@@ -230,12 +268,43 @@ const DataTableWidget = ({ widget, isSelected, onClick }) => {
             {paginatedData.map((row, index) => (
               <tr
                 key={row.id}
-                className="border-b transition-colors duration-200 hover:opacity-80"
+                className="border-b transition-all duration-200 cursor-pointer select-none"
                 style={{
                   borderBottomColor: colors.border,
                   transitionDuration: styleProps.animationDuration,
+                  backgroundColor: isRowSelected(row.id) ? colors.primary : 'transparent',
+                  color: isRowSelected(row.id) ? '#ffffff' : colors.text,
+                  transform: 'scale(1)',
+                  userSelect: 'none',
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+                onClick={() => handleRowClick(row.id)}
+                onMouseEnter={(e) => {
+                  if (!isRowSelected(row.id)) {
+                    e.currentTarget.style.backgroundColor = colors.hover || 'rgba(0, 0, 0, 0.05)';
+                    e.currentTarget.style.transform = 'scale(1.01)';
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
+                    e.currentTarget.style.borderLeft = `3px solid ${colors.primary}`;
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isRowSelected(row.id)) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = 'none';
+                    e.currentTarget.style.borderLeft = 'none';
+                  }
                 }}
               >
+                <td className="py-3 px-4">
+                  <input
+                    type="checkbox"
+                    checked={isRowSelected(row.id)}
+                    onChange={() => handleRowClick(row.id)}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{ cursor: 'pointer' }}
+                  />
+                </td>
                 {columns.map((column) => (
                   <td
                     key={column.key}

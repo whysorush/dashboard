@@ -62,8 +62,8 @@ const BaseWidget = memo(
                 )}
               </div>
               <button
-                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 
-                       hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                className="opacity-0 group-hover:opacity-100 transition-all duration-200 p-1 
+                       hover:bg-gray-100 dark:hover:bg-gray-700 rounded hover:scale-110"
                 onClick={(e) => {
                   e.stopPropagation();
                   // Widget menu logic here

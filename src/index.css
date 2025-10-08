@@ -1,5 +1,6 @@
 /* Import global colors at the top */
 @import "./styles/global-colors.css";
+@import "./styles/smooth-transitions.css";
 
 :root {
   /* Legacy variables for backward compatibility */
@@ -235,6 +236,140 @@ body {
   transition: all var(--style-animationDuration) ease;
 }
 
+/* Enhanced transition system for smooth interactions */
+* {
+  transition: 
+    background-color var(--style-animationDuration) ease,
+    color var(--style-animationDuration) ease,
+    border-color var(--style-animationDuration) ease,
+    box-shadow var(--style-animationDuration) ease,
+    transform var(--style-animationDuration) ease,
+    opacity var(--style-animationDuration) ease,
+    scale var(--style-animationDuration) ease;
+}
+
+/* Smooth hover transitions for all interactive elements */
+button, 
+.btn, 
+[role="button"], 
+.cursor-pointer,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+select,
+a {
+  transition: 
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    opacity 0.2s ease,
+    scale 0.2s ease;
+}
+
+/* Enhanced button hover effects */
+button:hover,
+.btn:hover,
+[role="button"]:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+button:active,
+.btn:active,
+[role="button"]:active {
+  transform: translateY(0);
+  transition: transform 0.1s ease;
+}
+
+/* Smooth form input transitions */
+input, 
+select, 
+textarea {
+  transition: 
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    color 0.2s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  transform: scale(1.02);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Smooth table row transitions */
+tr, 
+.table-row {
+  transition: 
+    background-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-left 0.2s ease;
+}
+
+/* Smooth card transitions */
+.card,
+.panel,
+.widget {
+  transition: 
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.card:hover,
+.panel:hover,
+.widget:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Smooth navigation transitions */
+.nav-item,
+.nav-link {
+  transition: 
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.nav-item:hover,
+.nav-link:hover {
+  transform: translateX(4px);
+}
+
+/* Smooth icon transitions */
+svg,
+.icon {
+  transition: 
+    color 0.2s ease,
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.icon:hover {
+  transform: scale(1.1);
+}
+
+/* Smooth status badge transitions */
+.status,
+.badge {
+  transition: 
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.status:hover,
+.badge:hover {
+  transform: scale(1.05);
+}
+
 /* Apply style mode variables to common elements */
 button,
 input,
@@ -318,10 +453,16 @@ textarea {
   border-radius: 10px;
   color: var(--text);
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: 
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 .nav-menu li:hover {
   background: color-mix(in oklab, var(--text) 8%, transparent);
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 .nav-menu li.active {
   background: color-mix(in oklab, var(--primary) 22%, transparent);
@@ -424,10 +565,19 @@ textarea {
   color: var(--text);
   border: 1px solid var(--border);
   cursor: pointer;
-  transition: transform 0.08s ease;
+  transition: 
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.theme-toggle:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 .theme-toggle:active {
-  transform: scale(0.96);
+  transform: scale(0.95);
+  transition: transform 0.1s ease;
 }
 
 /* ================= FILTERS ================= */
@@ -457,6 +607,24 @@ textarea {
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 8px 10px;
+  transition: 
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+.filter-group select:hover,
+.filter-group input[type="date"]:hover {
+  border-color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.filter-group select:focus,
+.filter-group input[type="date"]:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  transform: scale(1.02);
 }
 .date-inputs {
   display: grid;
@@ -483,6 +651,16 @@ textarea {
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 16px;
+  transition: 
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+  cursor: pointer;
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border-color: var(--primary);
 }
 
 .stat-icon {
@@ -864,11 +1042,18 @@ textarea {
   border: 1px solid var(--border);
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  transition: 
+    background 0.2s ease, 
+    border-color 0.2s ease, 
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .table-pagination .btn:hover:not(:disabled) {
   background: color-mix(in oklab, var(--text) 8%, transparent);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .table-pagination .btn:disabled {

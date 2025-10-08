@@ -1,5 +1,5 @@
 // components/OrdersTable.jsx
-import React from "react";
+import React, { useState } from "react";
 import { useTheme } from "../context/ThemeContext";
 
 const orders = [
@@ -88,6 +88,30 @@ const getStatusStyle = (status, isDark) => {
 
 const OrdersTable = () => {
   const { isDark } = useTheme();
+  const [selectedRows, setSelectedRows] = useState(new Set());
+  
+  const handleRowClick = (orderId) => {
+    setSelectedRows(prev => {
+      const newSelected = new Set(prev);
+      if (newSelected.has(orderId)) {
+        newSelected.delete(orderId);
+      } else {
+        newSelected.add(orderId);
+      }
+      return newSelected;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedRows.size === orders.length) {
+      setSelectedRows(new Set());
+    } else {
+      setSelectedRows(new Set(orders.map(o => o.id)));
+    }
+  };
+
+  const isRowSelected = (orderId) => selectedRows.has(orderId);
+  const isAllSelected = selectedRows.size === orders.length && orders.length > 0;
   
   return (
     <div className="bg-[#1e293b] p-6 rounded-lg overflow-x-auto">
@@ -95,6 +119,14 @@ const OrdersTable = () => {
       <table className="min-w-full text-left text-sm text-white">
         <thead>
           <tr className="text-gray-400 border-b border-gray-600">
+            <th className="py-2 px-4">
+              <input
+                type="checkbox"
+                checked={isAllSelected}
+                onChange={handleSelectAll}
+                className="cursor-pointer"
+              />
+            </th>
             <th className="py-2 px-4">Sr No.</th>
             <th className="py-2 px-4">Customer</th>
             <th className="py-2 px-4">Order ID</th>
@@ -106,7 +138,40 @@ const OrdersTable = () => {
         </thead>
         <tbody>
           {orders.map((o) => (
-            <tr key={o.id} className="border-b border-gray-700">
+            <tr 
+              key={o.id} 
+              className={`border-b border-gray-700 cursor-pointer transition-all duration-200 select-none ${
+                isRowSelected(o.id) ? 'bg-blue-600 hover:bg-blue-700' : 'hover:bg-gray-700 hover:shadow-md'
+              }`}
+              onClick={() => handleRowClick(o.id)}
+              style={{
+                transform: 'scale(1)',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}
+              onMouseEnter={(e) => {
+                if (!isRowSelected(o.id)) {
+                  e.currentTarget.style.transform = 'scale(1.01)';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
+                  e.currentTarget.style.borderLeft = '3px solid #3b82f6';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isRowSelected(o.id)) {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.borderLeft = 'none';
+                }
+              }}
+            >
+              <td className="py-2 px-4">
+                <input
+                  type="checkbox"
+                  checked={isRowSelected(o.id)}
+                  onChange={() => handleRowClick(o.id)}
+                  onClick={(e) => e.stopPropagation()}
+                  className="cursor-pointer"
+                />
+              </td>
               <td className="py-2 px-4">{o.id}</td>
               <td className="py-2 px-4">{o.customer}</td>
               <td className="py-2 px-4">{o.orderId}</td>

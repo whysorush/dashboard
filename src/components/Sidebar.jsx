@@ -34,7 +34,8 @@ const styles = {
     borderRadius: 10,
     color: "var(--text)",
     cursor: "pointer",
-    transition: "background 0.15s ease",
+    transition: 
+      "background 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
   },
   liActive: {
     background: "color-mix(in oklab, var(--primary) 22%, transparent)",

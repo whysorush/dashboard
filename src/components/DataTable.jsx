@@ -1,5 +1,5 @@
 // src/components/DataTable.jsx
-import React from "react";
+import React, { useState } from "react";
 import { useTheme } from "../context/ThemeContext";
 
 const rows = [
@@ -36,6 +36,13 @@ const styles = {
     padding: 12,
     borderBottom: "1px solid var(--border)",
     color: "var(--table-td-font)",
+    transition: 
+      "all 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s ease, box-shadow 0.2s ease",
+  },
+  rowHover: {
+    backgroundColor: "var(--hover-bg, rgba(0, 0, 0, 0.05))",
+    transform: "scale(1.01)",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
   },
 };
 
@@ -91,12 +98,44 @@ const getStatusStyle = (status, isDark) => {
 
 export default function DataTable() {
   const { isDark } = useTheme();
+  const [selectedRows, setSelectedRows] = useState(new Set());
+  
+  const handleRowClick = (rowId) => {
+    setSelectedRows(prev => {
+      const newSelected = new Set(prev);
+      if (newSelected.has(rowId)) {
+        newSelected.delete(rowId);
+      } else {
+        newSelected.add(rowId);
+      }
+      return newSelected;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedRows.size === rows.length) {
+      setSelectedRows(new Set());
+    } else {
+      setSelectedRows(new Set(rows.map(r => r.id)));
+    }
+  };
+
+  const isRowSelected = (rowId) => selectedRows.has(rowId);
+  const isAllSelected = selectedRows.size === rows.length && rows.length > 0;
   
   return (
     <section style={styles.wrapper}>
       <table style={styles.table}>
         <thead style={styles.thead}>
           <tr>
+            <th style={styles.th}>
+              <input
+                type="checkbox"
+                checked={isAllSelected}
+                onChange={handleSelectAll}
+                style={{ cursor: 'pointer' }}
+              />
+            </th>
             <th style={styles.th}>Sr No.</th>
             <th style={styles.th}>Customer</th>
             <th style={styles.th}>Order ID</th>
@@ -108,7 +147,43 @@ export default function DataTable() {
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.id}>
+            <tr 
+              key={r.id}
+              onClick={() => handleRowClick(r.id)}
+              style={{
+                ...styles.td,
+                cursor: 'pointer',
+                backgroundColor: isRowSelected(r.id) ? 'var(--primary)' : 'transparent',
+                color: isRowSelected(r.id) ? '#ffffff' : 'var(--table-td-font)',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                userSelect: 'none'
+              }}
+              onMouseEnter={(e) => {
+                if (!isRowSelected(r.id)) {
+                  e.target.style.backgroundColor = 'var(--hover-bg, rgba(0, 0, 0, 0.05))';
+                  e.target.style.transform = 'scale(1.01)';
+                  e.target.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
+                  e.target.style.borderLeft = '3px solid var(--primary)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isRowSelected(r.id)) {
+                  e.target.style.backgroundColor = 'transparent';
+                  e.target.style.transform = 'scale(1)';
+                  e.target.style.boxShadow = 'none';
+                  e.target.style.borderLeft = 'none';
+                }
+              }}
+            >
+              <td style={styles.td}>
+                <input
+                  type="checkbox"
+                  checked={isRowSelected(r.id)}
+                  onChange={() => handleRowClick(r.id)}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{ cursor: 'pointer' }}
+                />
+              </td>
               <td style={styles.td}>{r.id}</td>
               <td style={styles.td}>{r.customer}</td>
               <td style={styles.td}>{r.orderId}</td>
