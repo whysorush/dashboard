@@ -113,13 +113,13 @@
 } */
 
 .widget-container:hover {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
 }
 
 /* Widget sizing classes */
 .widget-container.flex-1.w-full {
-  flex: 1 1 100%;
-  max-width: calc(100% - 8px); /* Account for margins */
+  /* flex: 1 1 100%;
+  max-width: calc(100% - 8px);  */
 }
 
 .widget-container.flex-1.w-1\/2 {

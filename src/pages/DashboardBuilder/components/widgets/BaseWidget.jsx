@@ -32,7 +32,7 @@ const BaseWidget = memo(
 
     return (
       <div
-        // className={`widget-wrapper group relative h-full bg-white dark:bg-gray-800 rounded-lg 
+        // className={`widget-wrapper group relative h-full bg-white dark:bg-gray-800 rounded-lg
         //         shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer
         //         ${borderStyle} border-gray-200 dark:border-gray-700
         //         ${isSelected ? "ring-2 ring-blue-500 shadow-lg" : ""}
@@ -46,34 +46,32 @@ const BaseWidget = memo(
         }}
       >
         {/* Widget Header */}
-        {(widget?.config?.title || widget?.config?.subtitle) && (
-          <div className="widget-header px-4 pt-4 pb-2 border-b border-gray-100 dark:border-gray-700">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                {widget?.config?.title && (
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                    {widget?.config.title}
-                  </h3>
-                )}
-                {widget?.config?.subtitle && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    {widget?.config.subtitle}
-                  </p>
-                )}
-              </div>
-              <button
-                className="opacity-0 group-hover:opacity-100 transition-all duration-200 p-1 
-                       hover:bg-gray-100 dark:hover:bg-gray-700 rounded hover:scale-110"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  // Widget menu logic here
-                }}
-              >
-                <FiMoreVertical className="w-4 h-4 text-gray-400" />
-              </button>
+        {/* {(widget?.config?.title || widget?.config?.subtitle) && (
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              {widget?.config?.title && (
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                  {widget?.config.title}
+                </h3>
+              )}
+              {widget?.config?.subtitle && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  {widget?.config.subtitle}
+                </p>
+              )}
             </div>
+            <button
+              className="opacity-0 group-hover:opacity-100 transition-all duration-200 p-1 
+                       hover:bg-gray-100 dark:hover:bg-gray-700 rounded hover:scale-110"
+              onClick={(e) => {
+                e.stopPropagation();
+                // Widget menu logic here
+              }}
+            >
+              <FiMoreVertical className="w-4 h-4 text-gray-400" />
+            </button>
           </div>
-        )}
+        )} */}
 
         {/* Widget Content */}
         <div 

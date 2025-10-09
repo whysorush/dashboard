@@ -48,7 +48,7 @@ const DraggableRowContainer = ({
       if (!monitor.didDrop()) {
         const sourceIndex = item.index;
         const targetIndex = index;
-        
+
         if (sourceIndex !== targetIndex) {
           reorderRows(sourceIndex, targetIndex);
         }
@@ -92,7 +92,7 @@ const DraggableRowContainer = ({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: "8px",
-    padding: "0 8px",
+    padding: "0 5px",
   };
 
   const dragHandleStyles = {
@@ -111,11 +111,12 @@ const DraggableRowContainer = ({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: themeConfig?.surface || (isDark ? "#374151" : "#e5e7eb"),
+    // backgroundColor: themeConfig?.surface || (isDark ? "#374151" : "#e5e7eb"),
     borderRadius: "50%",
     fontSize: "12px",
     fontWeight: "500",
-    marginRight: "8px",
+    gap: "5px",
+    // marginRight: "8px",
     color: themeConfig?.textSecondary || (isDark ? "#9ca3af" : "#6b7280"),
   };
 
@@ -217,10 +218,10 @@ const DraggableRowContainer = ({
   const handleRowClick = (e) => {
     // Don't handle click if we're dragging
     if (isDragging) return;
-    
+
     // Don't handle click if clicking on the drag handle
     if (e.target.closest('[title="Drag to reorder row"]')) return;
-    
+
     // Only select row if clicking directly on the row container (not on widgets or buttons)
     if (
       e.target === e.currentTarget ||
@@ -296,7 +297,7 @@ const DraggableRowContainer = ({
     >
       {/* Row header */}
       <div className="row-header" style={headerStyles}>
-        <div style={{ display: "flex", alignItems: "center" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
           {/* Drag handle */}
           <div
             ref={(node) => {
@@ -315,7 +316,9 @@ const DraggableRowContainer = ({
               transition: "background-color 0.2s ease",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = isDark ? "#374151" : "#f3f4f6";
+              e.currentTarget.style.backgroundColor = isDark
+                ? "#374151"
+                : "#f3f4f6";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = "transparent";
