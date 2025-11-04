@@ -301,7 +301,7 @@ const Canvas = () => {
                   <div
                     key={widget.id}
                     className={`widget-container ${sizeClass} ${
-                      selectedWidget === widget.id ? "ring-2 ring-blue-500" : ""
+                      selectedWidget === widget.id ? "ring-3 ring-blue-500" : ""
                     }`}
                     style={{
                       flexBasis:

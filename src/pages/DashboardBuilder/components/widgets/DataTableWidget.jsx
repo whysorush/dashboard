@@ -194,7 +194,7 @@ const DataTableWidget = ({ widget, isSelected, onClick }) => {
             placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-3 focus:ring-blue-500 focus:border-transparent"
             style={{
               borderColor: colors.border,
               backgroundColor: colors.background,

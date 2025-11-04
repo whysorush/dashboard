@@ -15,7 +15,7 @@ const DataProperties = ({ widget, onChange }) => {
           onChange={(e) => onChange('config.refreshInterval', parseInt(e.target.value))}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
                    bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                   focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                   focus:ring-3 focus:ring-blue-500 focus:border-transparent"
         >
           {REFRESH_INTERVALS.map(interval => (
             <option key={interval.value} value={interval.value}>
@@ -35,7 +35,7 @@ const DataProperties = ({ widget, onChange }) => {
           onChange={(e) => onChange('config.timeRange', e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
                    bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                   focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                   focus:ring-3 focus:ring-blue-500 focus:border-transparent"
         >
           {TIME_RANGES.map(range => (
             <option key={range.value} value={range.value}>
@@ -78,7 +78,7 @@ const DataProperties = ({ widget, onChange }) => {
           onChange={(e) => onChange('config.aggregation', e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
                    bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                   focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                   focus:ring-3 focus:ring-blue-500 focus:border-transparent"
         >
           {AGGREGATION_TYPES.map(type => (
             <option key={type.value} value={type.value}>
@@ -99,7 +99,7 @@ const DataProperties = ({ widget, onChange }) => {
             onChange={(e) => onChange('config.groupBy', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
                      bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                     focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                     focus:ring-3 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="category">Category</option>
             <option value="product">Product</option>
@@ -120,7 +120,7 @@ const DataProperties = ({ widget, onChange }) => {
           onChange={(e) => onChange('config.dataSource', e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
                    bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                   focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                   focus:ring-3 focus:ring-blue-500 focus:border-transparent"
         >
           <option value="mock">Mock Data</option>
           <option value="api" disabled>API (Coming Soon)</option>

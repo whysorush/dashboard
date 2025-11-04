@@ -38,7 +38,7 @@ const GeneralProperties = ({ widget, onChange }) => {
           onChange={(e) => onChange('config.title', e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
                    bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                   focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                   focus:ring-3 focus:ring-blue-500 focus:border-transparent"
           placeholder="Widget title"
         />
       </div>
@@ -54,7 +54,7 @@ const GeneralProperties = ({ widget, onChange }) => {
           onChange={(e) => onChange('config.subtitle', e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
                    bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                   focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                   focus:ring-3 focus:ring-blue-500 focus:border-transparent"
           placeholder="Optional subtitle"
         />
       </div>
@@ -69,7 +69,7 @@ const GeneralProperties = ({ widget, onChange }) => {
           onChange={(e) => handleSizePresetChange(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
                    bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                   focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                   focus:ring-3 focus:ring-blue-500 focus:border-transparent"
         >
           {sizePresets.map(preset => (
             <option key={preset.value} value={preset.value}>
@@ -94,7 +94,7 @@ const GeneralProperties = ({ widget, onChange }) => {
               onChange={(e) => onChange('position.w', parseInt(e.target.value))}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
                        bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                       focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                       focus:ring-3 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
           <div>
@@ -109,7 +109,7 @@ const GeneralProperties = ({ widget, onChange }) => {
               onChange={(e) => onChange('position.h', parseInt(e.target.value))}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
                        bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                       focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                       focus:ring-3 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
         </div>
@@ -129,7 +129,7 @@ const GeneralProperties = ({ widget, onChange }) => {
             onChange={(e) => onChange('position.x', parseInt(e.target.value))}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
                      bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                     focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                     focus:ring-3 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
         <div>
@@ -143,7 +143,7 @@ const GeneralProperties = ({ widget, onChange }) => {
             onChange={(e) => onChange('position.y', parseInt(e.target.value))}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
                      bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                     focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                     focus:ring-3 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
       </div>

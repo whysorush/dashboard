@@ -113,19 +113,44 @@ const DashboardLayout = memo(() => {
         </Suspense>
 
         <Suspense fallback={<FilterFallback />}>
-          <AdvancedFilterBarWidget 
+          <AdvancedFilterBarWidget
             widget={{
               id: "overview-filter",
               type: "advanced-filter-bar",
               config: {
                 sections: [
-                  { id: "date", label: "Date Filter", type: "date", visible: true },
-                  { id: "transaction", label: "Transaction Amount", type: "select", visible: true },
-                  { id: "product", label: "Product", type: "select", visible: true },
-                  { id: "status", label: "Status", type: "select", visible: true },
-                  { id: "quantity", label: "Order Quantity", type: "select", visible: true },
-                ]
-              }
+                  {
+                    id: "date",
+                    label: "Date Filter",
+                    type: "date",
+                    visible: true,
+                  },
+                  {
+                    id: "transaction",
+                    label: "Transaction Amount",
+                    type: "select",
+                    visible: true,
+                  },
+                  {
+                    id: "product",
+                    label: "Product",
+                    type: "select",
+                    visible: true,
+                  },
+                  {
+                    id: "status",
+                    label: "Status",
+                    type: "select",
+                    visible: true,
+                  },
+                  {
+                    id: "quantity",
+                    label: "Order Quantity",
+                    type: "select",
+                    visible: true,
+                  },
+                ],
+              },
             }}
             isSelected={false}
             onClick={() => {}}

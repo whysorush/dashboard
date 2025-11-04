@@ -1991,18 +1991,18 @@ const generateFilterBarCode = (
                 <div className="flex flex-col">
                   <label className="text-xs font-medium text-gray-600 mb-1">Date Range</label>
                   <div className="flex items-center gap-2">
-                    <input type="date" className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    <input type="date" className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-3 focus:ring-blue-500 focus:border-transparent" />
                     <span className="text-sm text-gray-500">to</span>
-                    <input type="date" className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    <input type="date" className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-3 focus:ring-blue-500 focus:border-transparent" />
                   </div>
                 </div>
                 <div className="flex flex-col">
                   <label className="text-xs font-medium text-gray-600 mb-1">Transaction Amount</label>
-                  <input type="number" placeholder="0.00" className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 w-32 focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                  <input type="number" placeholder="0.00" className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 w-32 focus:ring-3 focus:ring-blue-500 focus:border-transparent" />
                 </div>
                 <div className="flex flex-col">
                   <label className="text-xs font-medium text-gray-600 mb-1">Product</label>
-                  <select className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 w-40 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                  <select className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 w-40 focus:ring-3 focus:ring-blue-500 focus:border-transparent">
                     <option>All Products</option>
                     <option>Product A</option>
                     <option>Product B</option>
@@ -2010,7 +2010,7 @@ const generateFilterBarCode = (
                 </div>
                 <div className="flex flex-col">
                   <label className="text-xs font-medium text-gray-600 mb-1">Status</label>
-                  <select className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 w-32 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                  <select className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 w-32 focus:ring-3 focus:ring-blue-500 focus:border-transparent">
                     <option>All Status</option>
                     <option>Pending</option>
                     <option>Approved</option>
@@ -2019,7 +2019,7 @@ const generateFilterBarCode = (
                 </div>
                 <div className="flex flex-col">
                   <label className="text-xs font-medium text-gray-600 mb-1">Order Quantity</label>
-                  <input type="number" placeholder="100" className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 w-24 focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                  <input type="number" placeholder="100" className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 w-24 focus:ring-3 focus:ring-blue-500 focus:border-transparent" />
                 </div>
               </div>
             </div>
@@ -2228,7 +2228,7 @@ const generateDataTableCode = (
                   <input
                     type="text"
                     placeholder="Search..."
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-3 focus:ring-blue-500 focus:border-transparent"
                     style={{fontFamily: "'Figtree', sans-serif"}}
                   />
                 </div>

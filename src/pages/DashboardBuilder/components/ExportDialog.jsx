@@ -123,7 +123,7 @@ const ExportDialog = ({ widgets, isOpen, onClose }) => {
                 value={componentName}
                 onChange={handleComponentNameChange}
                 className={`w-full px-3 py-2 border ${isDark ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-900'} rounded-lg 
-                         focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                         focus:ring-3 focus:ring-blue-500 focus:border-transparent`}
                 placeholder="MyDashboard"
               />
             </div>
@@ -136,7 +136,7 @@ const ExportDialog = ({ widgets, isOpen, onClose }) => {
                 value={includeData}
                 onChange={(e) => setIncludeData(e.target.value)}
                 className={`w-full px-3 py-2 border ${isDark ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-900'} rounded-lg 
-                         focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                         focus:ring-3 focus:ring-blue-500 focus:border-transparent`}
               >
                 <option value="inline">Include inline</option>
                 <option value="separate">Separate file</option>
@@ -157,7 +157,7 @@ const ExportDialog = ({ widgets, isOpen, onClose }) => {
                 value={styleMode}
                 onChange={(e) => setStyleMode(e.target.value)}
                 className={`w-full px-3 py-2 border ${isDark ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-900'} rounded-lg 
-                         focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                         focus:ring-3 focus:ring-blue-500 focus:border-transparent`}
               >
                 <option value="tailwind">Tailwind CSS (requires Tailwind)</option>
                 <option value="inline">Inline styles (no dependencies)</option>
@@ -178,7 +178,7 @@ const ExportDialog = ({ widgets, isOpen, onClose }) => {
                 value={fileType}
                 onChange={(e) => setFileType(e.target.value)}
                 className={`w-full px-3 py-2 border ${isDark ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-900'} rounded-lg 
-                         focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                         focus:ring-3 focus:ring-blue-500 focus:border-transparent`}
               >
                 <option value="jsx">JSX (.jsx)</option>
                 <option value="js">JavaScript (.js)</option>
@@ -196,7 +196,7 @@ const ExportDialog = ({ widgets, isOpen, onClose }) => {
                 value={exportMode}
                 onChange={(e) => setExportMode(e.target.value)}
                 className={`w-full px-3 py-2 border ${isDark ? 'border-gray-600 bg-gray-700 text-white' : 'border-gray-300 bg-white text-gray-900'} rounded-lg 
-                         focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                         focus:ring-3 focus:ring-blue-500 focus:border-transparent`}
               >
                 <option value="single">Single file</option>
                 <option value="multiple">Multiple files (complete package)</option>
@@ -212,7 +212,7 @@ const ExportDialog = ({ widgets, isOpen, onClose }) => {
                   checked={includeStyles}
                   onChange={(e) => setIncludeStyles(e.target.checked)}
                   className={`rounded ${isDark ? 'border-gray-600' : 'border-gray-300'} text-blue-500 
-                           focus:ring-blue-500 focus:ring-2`}
+                           focus:ring-blue-500 focus:ring-3`}
                 />
                 <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                   Include styling
@@ -227,7 +227,7 @@ const ExportDialog = ({ widgets, isOpen, onClose }) => {
                   checked={includeRowLayout}
                   onChange={(e) => setIncludeRowLayout(e.target.checked)}
                   className={`rounded ${isDark ? 'border-gray-600' : 'border-gray-300'} text-blue-500 
-                           focus:ring-blue-500 focus:ring-2`}
+                           focus:ring-blue-500 focus:ring-3`}
                 />
                 <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                   Use row-based layout

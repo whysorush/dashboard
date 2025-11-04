@@ -12,6 +12,7 @@ import { useBuilder } from "../../context/BuilderContext";
 const styles = {
   section: {
     display: "grid",
+    // padding: 12,
     gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
     gap: 12,
     marginTop: 18,

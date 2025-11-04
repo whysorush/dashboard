@@ -112,7 +112,7 @@ const FilterBarWidget = ({ widget, isSelected, onClick }) => {
   const { config } = widget;
   
   return (
-    <div className={`filter-bar-widget p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border ${isSelected ? 'ring-2 ring-blue-500' : ''}`} onClick={onClick}>
+    <div className={`filter-bar-widget p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border ${isSelected ? 'ring-3 ring-blue-500' : ''}`} onClick={onClick}>
       <div className="flex flex-wrap gap-4 items-center">
         {/* Date Filter */}
         <div className="flex items-center gap-2">
@@ -168,7 +168,7 @@ const RevenueKPIWidget = ({ widget, isSelected, onClick }) => {
   const { config } = widget;
   
   return (
-    <div className={`kpi-widget p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border ${isSelected ? 'ring-2 ring-blue-500' : ''}`} onClick={onClick}>
+    <div className={`kpi-widget p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border ${isSelected ? 'ring-3 ring-blue-500' : ''}`} onClick={onClick}>
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-2">
