@@ -245,7 +245,8 @@ const AdvancedFilterBarWidget = ({
     const isSelected = selectedSection === section.id;
     const isHovered = hoveredSection === section.id;
     // Show controls only in builder mode, not in overview mode
-    const showControls = isInBuilderMode && !isPreview && (isSelected || isHovered);
+    const showControls =
+      isInBuilderMode && !isPreview && (isSelected || isHovered);
 
     const sectionStyle = isPreview
       ? styles.groupPreview
@@ -261,18 +262,32 @@ const AdvancedFilterBarWidget = ({
         key={section.id}
         style={sectionStyle}
         onClick={
-          isInBuilderMode && !isPreview ? (e) => handleSectionClick(section.id, e) : undefined
+          isInBuilderMode && !isPreview
+            ? (e) => handleSectionClick(section.id, e)
+            : undefined
         }
         onMouseEnter={
-          isInBuilderMode && !isPreview ? () => setHoveredSection(section.id) : undefined
+          isInBuilderMode && !isPreview
+            ? () => setHoveredSection(section.id)
+            : undefined
         }
-        onMouseLeave={isInBuilderMode && !isPreview ? () => setHoveredSection(null) : undefined}
+        onMouseLeave={
+          isInBuilderMode && !isPreview
+            ? () => setHoveredSection(null)
+            : undefined
+        }
         draggable={isInBuilderMode && !isPreview}
         onDragStart={
-          isInBuilderMode && !isPreview ? (e) => handleDragStart(section.id, e) : undefined
+          isInBuilderMode && !isPreview
+            ? (e) => handleDragStart(section.id, e)
+            : undefined
         }
         onDragOver={isInBuilderMode && !isPreview ? handleDragOver : undefined}
-        onDrop={isInBuilderMode && !isPreview ? (e) => handleDrop(section.id, e) : undefined}
+        onDrop={
+          isInBuilderMode && !isPreview
+            ? (e) => handleDrop(section.id, e)
+            : undefined
+        }
       >
         {/* Section Controls - Only show in builder mode */}
         {isInBuilderMode && !isPreview && (
@@ -313,7 +328,7 @@ const AdvancedFilterBarWidget = ({
         <label style={styles.label}>{section.label}</label>
 
         {section.id === "date" && (
-          <div style={styles.dateInputs}>
+          <div  style={styles.dateInputs}>
             <input
               type="date"
               placeholder="From"
@@ -392,7 +407,9 @@ const AdvancedFilterBarWidget = ({
   // In overview mode (no BuilderProvider), render directly without BaseWidget
   // In builder mode, use BaseWidget wrapper
   if (!isInBuilderMode) {
-    return <section style={styles.section}>{sections.map(renderSection)}</section>;
+    return (
+      <section style={styles.section}>{sections.map(renderSection)}</section>
+    );
   }
 
   return isPreview ? (

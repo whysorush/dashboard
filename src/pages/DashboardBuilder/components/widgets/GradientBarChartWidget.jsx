@@ -82,11 +82,8 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
 
   return (
     <div
-      // className={`gradient-bar-chart-widget style-mode-${styleMode}`}
       style={{
-        // fontFamily: "var(--font-family)",
-        // color: colors.text,
-        // backgroundColor: colors.background,
+       
         ...cssVariables,
       }}
       className="chart-container"

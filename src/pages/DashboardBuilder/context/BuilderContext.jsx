@@ -61,7 +61,7 @@ export const BuilderProvider = ({ children }) => {
   );
 
   const titleFromType = (type) =>
-    `New ${type.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}`;
+    `${type.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}`;
 
   const getRowIndex = (rowId) => rows.findIndex((r) => r.id === rowId);
 
@@ -69,7 +69,14 @@ export const BuilderProvider = ({ children }) => {
     const rowWidgets = widgetsDraft.filter((w) => w.position.rowId === rowId);
     const count = rowWidgets.length;
     if (count === 0) return widgetsDraft;
-    const size = count === 1 ? "large" : count === 2 ? "medium" : count === 3 ? "small" : "extra-small";
+    const size =
+      count === 1
+        ? "large"
+        : count === 2
+        ? "medium"
+        : count === 3
+        ? "small"
+        : "extra-small";
     return widgetsDraft.map((w) =>
       w.position.rowId === rowId
         ? { ...w, position: { ...w.position, size } }
@@ -93,42 +100,47 @@ export const BuilderProvider = ({ children }) => {
         const existingFilterWidgets = widgets.filter(
           (w) => w.type === WIDGET_TYPES.ADVANCED_FILTER_BAR
         );
-        
+
         if (existingFilterWidgets.length > 0) {
           // Find the first existing filter widget and its row
           const existingWidget = existingFilterWidgets[0];
-          const existingRow = rows.find(r => r.id === existingWidget.position.rowId);
-          
+          const existingRow = rows.find(
+            (r) => r.id === existingWidget.position.rowId
+          );
+
           // Show warning notification
           showNotification({
             title: "Filter section already exists",
-            message: "Please remove the existing one or add it in a new row.",
-            type: "warning"
+            message: "Please remove the existing filter section.",
+            type: "warning",
           });
-          
+
           // Highlight and scroll to existing filter widget
           setTimeout(() => {
-            const existingRowElement = document.querySelector(`[data-row-id="${existingWidget.position.rowId}"]`);
+            const existingRowElement = document.querySelector(
+              `[data-row-id="${existingWidget.position.rowId}"]`
+            );
             if (existingRowElement) {
               // Scroll to the row
-              existingRowElement.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'center' 
+              existingRowElement.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
               });
-              
+
               // Highlight the row temporarily
-              existingRowElement.style.transition = 'all 0.3s ease';
-              existingRowElement.style.border = '2px solid #f59e0b';
-              existingRowElement.style.backgroundColor = 'rgba(245, 158, 11, 0.1)';
-              
+              existingRowElement.style.transition = "all 0.3s ease";
+              existingRowElement.style.border = "2px solid #f59e0b";
+              existingRowElement.style.backgroundColor =
+                "rgba(245, 158, 11, 0.1)";
+
               // Remove highlight after 3 seconds
               setTimeout(() => {
-                existingRowElement.style.border = '';
-                existingRowElement.style.backgroundColor = '';
+                existingRowElement.style.border = "";
+                existingRowElement.style.backgroundColor = "";
               }, 3000);
             }
           }, 100);
-          
+
           return null; // Prevent adding the duplicate widget
         }
       }
@@ -151,33 +163,50 @@ export const BuilderProvider = ({ children }) => {
 
       // Enforce max widgets per row based on widget type
       const isKpi = KPI_WIDGET_TYPES.includes(type);
-      const hasAnyKpi = rowWidgets.some(w => KPI_WIDGET_TYPES.includes(w.type));
-      
+      const hasAnyKpi = rowWidgets.some((w) =>
+        KPI_WIDGET_TYPES.includes(w.type)
+      );
+
       if (isKpi || hasAnyKpi) {
         // KPI rows can have up to 4 widgets
         if (rowWidgets.length >= 4) {
-          if (typeof window !== "undefined") window.alert("This row already has the maximum of 4 KPI widgets.");
+          showNotification({
+            title: "Maximum widgets reached",
+            message: "This row already has the maximum of 4 KPI widgets.",
+            type: "warning",
+          });
           return null;
         }
       } else {
         // Non-KPI rows can have up to 2 widgets
         if (rowWidgets.length >= 2) {
-          if (typeof window !== "undefined") window.alert("This row already has the maximum of 2 widgets.");
+          showNotification({
+            title: "Maximum widgets reached",
+            message: "This row already has the maximum of 2 widgets.",
+            type: "warning",
+          });
           return null;
         }
       }
 
       const isFilter = type === WIDGET_TYPES.ADVANCED_FILTER_BAR;
-      const hasAnyFilter = rowWidgets.some(w => w.type === WIDGET_TYPES.ADVANCED_FILTER_BAR);
+      const hasAnyFilter = rowWidgets.some(
+        (w) => w.type === WIDGET_TYPES.ADVANCED_FILTER_BAR
+      );
       const hasAnyNonKpiNonFilter = rowWidgets.some(
-        w => !KPI_WIDGET_TYPES.includes(w.type) && w.type !== WIDGET_TYPES.ADVANCED_FILTER_BAR
+        (w) =>
+          !KPI_WIDGET_TYPES.includes(w.type) &&
+          w.type !== WIDGET_TYPES.ADVANCED_FILTER_BAR
       );
 
       // Enforce KPI limit: Max 4 KPI widgets per row
       if (isKpi) {
-        const existingKpis = rowWidgets.filter(w => KPI_WIDGET_TYPES.includes(w.type)).length;
+        const existingKpis = rowWidgets.filter((w) =>
+          KPI_WIDGET_TYPES.includes(w.type)
+        ).length;
         if (existingKpis >= 4) {
-          if (typeof window !== "undefined") window.alert("You can add up to 4 KPI widgets in a KPI row.");
+          if (typeof window !== "undefined")
+            window.alert("You can add up to 4 KPI widgets in a KPI row.");
           return null;
         }
       }
@@ -186,29 +215,41 @@ export const BuilderProvider = ({ children }) => {
       // If the row already has a filter, only allow adding filters or KPIs
       if (hasAnyFilter) {
         if (!(isKpi || isFilter)) {
-          if (typeof window !== "undefined") window.alert("Rows with filters only allow KPI or filter widgets.");
+          showNotification({
+            title: "Invalid widget combination",
+            message: "Rows with filters only allow KPI or filter widgets.",
+            type: "warning",
+          });
           return null;
         }
       } else if (isFilter) {
         // If adding a filter into a row, ensure the row doesn't contain non-KPI/non-filter widgets
         if (hasAnyNonKpiNonFilter) {
-          if (typeof window !== "undefined") window.alert("You cannot place a filter in a row that contains non-KPI/non-filter widgets.");
+          showNotification({
+            title: "Invalid widget combination",
+            message:
+              "You cannot place a filter in a row that contains non-KPI/non-filter widgets.",
+            type: "warning",
+          });
           return null;
         }
         // KPI + Filter mix is allowed, so skip generic KPI/non-KPI exclusivity in this branch
       } else {
         // Generic exclusivity when no filters are involved: KPI rows contain only KPIs; non-KPI rows contain no KPIs
-        const hasAnyNonKpi = rowWidgets.some(w => !KPI_WIDGET_TYPES.includes(w.type));
+        const hasAnyNonKpi = rowWidgets.some(
+          (w) => !KPI_WIDGET_TYPES.includes(w.type)
+        );
         if ((isKpi && hasAnyNonKpi) || (!isKpi && hasAnyKpi)) {
-          if (typeof window !== "undefined") window.alert(
-            isKpi
+          showNotification({
+            title: "Invalid widget combination",
+            message: isKpi
               ? "KPI widgets cannot be mixed with non-KPI widgets in the same row."
-              : "Non-KPI widgets cannot be mixed with KPI widgets in the same row."
-          );
+              : "Non-KPI widgets cannot be mixed with KPI widgets in the same row.",
+            type: "warning",
+          });
           return null;
         }
       }
-
       const nextIndex =
         position?.index ?? Math.max(0, Math.min(rowWidgets.length, 4));
       const nextRowSize =
@@ -245,6 +286,8 @@ export const BuilderProvider = ({ children }) => {
         },
         locked: false,
       };
+
+      console.log("ssssssssssssssssssss", newWidget.config.title);
 
       let next = [...widgets, newWidget];
       next = normalizeRowIndexing(next, targetRowId);
@@ -290,11 +333,11 @@ export const BuilderProvider = ({ children }) => {
     (widgetId, path, value) => {
       const next = widgets.map((w) => {
         if (w.id !== widgetId) return w;
-        
+
         const updated = { ...w };
-        const pathParts = path.split('.');
+        const pathParts = path.split(".");
         let current = updated;
-        
+
         // Navigate to the parent of the target property
         for (let i = 0; i < pathParts.length - 1; i++) {
           const part = pathParts[i];
@@ -302,12 +345,12 @@ export const BuilderProvider = ({ children }) => {
           current[part] = { ...current[part] };
           current = current[part];
         }
-        
+
         // Set the final property
         current[pathParts[pathParts.length - 1]] = value;
         return updated;
       });
-      
+
       setWidgets(next);
       saveToHistory(next);
     },
@@ -316,38 +359,51 @@ export const BuilderProvider = ({ children }) => {
 
   const updateWidgetRowPosition = useCallback(
     (widgetId, newRowId, newIndex) => {
-      const moving = widgets.find(w => w.id === widgetId);
+      const moving = widgets.find((w) => w.id === widgetId);
       if (!moving) return;
 
       const isKpi = KPI_WIDGET_TYPES.includes(moving.type);
       const isFilter = moving.type === WIDGET_TYPES.ADVANCED_FILTER_BAR;
-      const destinationWidgets = widgets.filter(w => w.position.rowId === newRowId && w.id !== widgetId);
-      const hasAnyKpi = destinationWidgets.some(w => KPI_WIDGET_TYPES.includes(w.type));
-      const hasAnyFilter = destinationWidgets.some(w => w.type === WIDGET_TYPES.ADVANCED_FILTER_BAR);
+      const destinationWidgets = widgets.filter(
+        (w) => w.position.rowId === newRowId && w.id !== widgetId
+      );
+      const hasAnyKpi = destinationWidgets.some((w) =>
+        KPI_WIDGET_TYPES.includes(w.type)
+      );
+      const hasAnyFilter = destinationWidgets.some(
+        (w) => w.type === WIDGET_TYPES.ADVANCED_FILTER_BAR
+      );
       const hasAnyNonKpiNonFilter = destinationWidgets.some(
-        w => !KPI_WIDGET_TYPES.includes(w.type) && w.type !== WIDGET_TYPES.ADVANCED_FILTER_BAR
+        (w) =>
+          !KPI_WIDGET_TYPES.includes(w.type) &&
+          w.type !== WIDGET_TYPES.ADVANCED_FILTER_BAR
       );
 
       // Enforce max widgets per row on destination based on widget type
       if (isKpi || hasAnyKpi) {
         // KPI rows can have up to 4 widgets
         if (destinationWidgets.length >= 4) {
-          if (typeof window !== "undefined") window.alert("This row already has the maximum of 4 KPI widgets.");
+          if (typeof window !== "undefined")
+            window.alert("This row already has the maximum of 4 KPI widgets.");
           return; // disallow move
         }
       } else {
         // Non-KPI rows can have up to 2 widgets
         if (destinationWidgets.length >= 2) {
-          if (typeof window !== "undefined") window.alert("This row already has the maximum of 2 widgets.");
+          if (typeof window !== "undefined")
+            window.alert("This row already has the maximum of 2 widgets.");
           return; // disallow move
         }
       }
 
       // Enforce KPI limit when moving into a row
       if (isKpi) {
-        const kpiCount = destinationWidgets.filter(w => KPI_WIDGET_TYPES.includes(w.type)).length;
+        const kpiCount = destinationWidgets.filter((w) =>
+          KPI_WIDGET_TYPES.includes(w.type)
+        ).length;
         if (kpiCount >= 4) {
-          if (typeof window !== "undefined") window.alert("You can add up to 4 KPI widgets in a KPI row.");
+          if (typeof window !== "undefined")
+            window.alert("You can add up to 4 KPI widgets in a KPI row.");
           return; // disallow move
         }
       }
@@ -356,25 +412,32 @@ export const BuilderProvider = ({ children }) => {
       if (hasAnyFilter) {
         // Row already has a filter: only filters or KPIs may enter
         if (!(isKpi || isFilter)) {
-          if (typeof window !== "undefined") window.alert("Rows with filters only allow KPI or filter widgets.");
+          if (typeof window !== "undefined")
+            window.alert("Rows with filters only allow KPI or filter widgets.");
           return;
         }
       } else if (isFilter) {
         // Moving a filter into a row that has non-KPI/non-filter widgets is disallowed
         if (hasAnyNonKpiNonFilter) {
-          if (typeof window !== "undefined") window.alert("You cannot place a filter in a row that contains non-KPI/non-filter widgets.");
+          if (typeof window !== "undefined")
+            window.alert(
+              "You cannot place a filter in a row that contains non-KPI/non-filter widgets."
+            );
           return;
         }
         // KPI + Filter mix is allowed
       } else {
         // Generic exclusivity when no filters are involved
-        const hasAnyNonKpi = destinationWidgets.some(w => !KPI_WIDGET_TYPES.includes(w.type));
+        const hasAnyNonKpi = destinationWidgets.some(
+          (w) => !KPI_WIDGET_TYPES.includes(w.type)
+        );
         if ((isKpi && hasAnyNonKpi) || (!isKpi && hasAnyKpi)) {
-          if (typeof window !== "undefined") window.alert(
-            isKpi
-              ? "KPI widgets cannot be mixed with non-KPI widgets in the same row."
-              : "Non-KPI widgets cannot be mixed with KPI widgets in the same row."
-          );
+          if (typeof window !== "undefined")
+            window.alert(
+              isKpi
+                ? "KPI widgets cannot be mixed with non-KPI widgets in the same row."
+                : "Non-KPI widgets cannot be mixed with KPI widgets in the same row."
+            );
           return; // disallow move
         }
       }
@@ -417,33 +480,44 @@ export const BuilderProvider = ({ children }) => {
 
       // Enforce max widgets per row on duplicate based on widget type
       const isKpi = KPI_WIDGET_TYPES.includes(base.type);
-      const hasAnyKpi = rowWidgets.some(w => KPI_WIDGET_TYPES.includes(w.type));
-      
+      const hasAnyKpi = rowWidgets.some((w) =>
+        KPI_WIDGET_TYPES.includes(w.type)
+      );
+
       if (isKpi || hasAnyKpi) {
         // KPI rows can have up to 4 widgets
         if (rowWidgets.length >= 4) {
-          if (typeof window !== "undefined") window.alert("This row already has the maximum of 4 KPI widgets.");
+          if (typeof window !== "undefined")
+            window.alert("This row already has the maximum of 4 KPI widgets.");
           return null;
         }
       } else {
         // Non-KPI rows can have up to 2 widgets
         if (rowWidgets.length >= 2) {
-          if (typeof window !== "undefined") window.alert("This row already has the maximum of 2 widgets.");
+          if (typeof window !== "undefined")
+            window.alert("This row already has the maximum of 2 widgets.");
           return null;
         }
       }
 
       const isFilter = base.type === WIDGET_TYPES.ADVANCED_FILTER_BAR;
-      const hasAnyFilter = rowWidgets.some(w => w.type === WIDGET_TYPES.ADVANCED_FILTER_BAR);
+      const hasAnyFilter = rowWidgets.some(
+        (w) => w.type === WIDGET_TYPES.ADVANCED_FILTER_BAR
+      );
       const hasAnyNonKpiNonFilter = rowWidgets.some(
-        w => !KPI_WIDGET_TYPES.includes(w.type) && w.type !== WIDGET_TYPES.ADVANCED_FILTER_BAR
+        (w) =>
+          !KPI_WIDGET_TYPES.includes(w.type) &&
+          w.type !== WIDGET_TYPES.ADVANCED_FILTER_BAR
       );
 
       // Enforce KPI limit on duplicate
       if (isKpi) {
-        const existingKpis = rowWidgets.filter(w => KPI_WIDGET_TYPES.includes(w.type)).length;
+        const existingKpis = rowWidgets.filter((w) =>
+          KPI_WIDGET_TYPES.includes(w.type)
+        ).length;
         if (existingKpis >= 4) {
-          if (typeof window !== "undefined") window.alert("You can add up to 4 KPI widgets in a KPI row.");
+          if (typeof window !== "undefined")
+            window.alert("You can add up to 4 KPI widgets in a KPI row.");
           return null;
         }
       }
@@ -451,23 +525,30 @@ export const BuilderProvider = ({ children }) => {
       // Row constraints with filters
       if (hasAnyFilter) {
         if (!(isKpi || isFilter)) {
-          if (typeof window !== "undefined") window.alert("Rows with filters only allow KPI or filter widgets.");
+          if (typeof window !== "undefined")
+            window.alert("Rows with filters only allow KPI or filter widgets.");
           return null;
         }
       } else if (isFilter) {
         if (hasAnyNonKpiNonFilter) {
-          if (typeof window !== "undefined") window.alert("You cannot place a filter in a row that contains non-KPI/non-filter widgets.");
+          if (typeof window !== "undefined")
+            window.alert(
+              "You cannot place a filter in a row that contains non-KPI/non-filter widgets."
+            );
           return null;
         }
       } else {
         // Generic exclusivity when no filters are involved
-        const hasAnyNonKpi = rowWidgets.some(w => !KPI_WIDGET_TYPES.includes(w.type));
+        const hasAnyNonKpi = rowWidgets.some(
+          (w) => !KPI_WIDGET_TYPES.includes(w.type)
+        );
         if ((isKpi && hasAnyNonKpi) || (!isKpi && hasAnyKpi)) {
-          if (typeof window !== "undefined") window.alert(
-            isKpi
-              ? "KPI widgets cannot be mixed with non-KPI widgets in the same row."
-              : "Non-KPI widgets cannot be mixed with KPI widgets in the same row."
-          );
+          if (typeof window !== "undefined")
+            window.alert(
+              isKpi
+                ? "KPI widgets cannot be mixed with non-KPI widgets in the same row."
+                : "Non-KPI widgets cannot be mixed with KPI widgets in the same row."
+            );
           return null;
         }
       }
@@ -571,7 +652,7 @@ export const BuilderProvider = ({ children }) => {
   const reorderRows = useCallback(
     (sourceIndex, destinationIndex) => {
       if (sourceIndex === destinationIndex) return;
-      
+
       const newRows = Array.from(rows);
       const [removed] = newRows.splice(sourceIndex, 1);
       newRows.splice(destinationIndex, 0, removed);
@@ -675,80 +756,100 @@ export const BuilderProvider = ({ children }) => {
   }, [selectedWidget, undo, redo, selectAll, duplicateWidget, removeWidget]);
 
   // Split context value to reduce re-renders
-  const coreValue = useMemo(() => ({
-    widgets,
-    rows,
-    selectedWidget,
-    selectedRow,
-    isDragging,
-    gridConfig,
-    notification,
-  }), [widgets, rows, selectedWidget, selectedRow, isDragging, gridConfig, notification]);
+  const coreValue = useMemo(
+    () => ({
+      widgets,
+      rows,
+      selectedWidget,
+      selectedRow,
+      isDragging,
+      gridConfig,
+      notification,
+    }),
+    [
+      widgets,
+      rows,
+      selectedWidget,
+      selectedRow,
+      isDragging,
+      gridConfig,
+      notification,
+    ]
+  );
 
-  const historyValue = useMemo(() => ({
-    history,
-    historyIndex,
-    undo,
-    redo,
-  }), [history, historyIndex, undo, redo]);
+  const historyValue = useMemo(
+    () => ({
+      history,
+      historyIndex,
+      undo,
+      redo,
+    }),
+    [history, historyIndex, undo, redo]
+  );
 
-  const actionsValue = useMemo(() => ({
-    addWidget,
-    removeWidget,
-    updateWidget,
-    updateWidgetProperty,
-    updateWidgetRowPosition,
-    duplicateWidget,
-    toggleLockWidget,
-    addRow,
-    removeRow,
-    clearCanvas,
-    updateRow,
-    reorderRows,
-    moveRowUp,
-    moveRowDown,
-    canMoveRowUp,
-    canMoveRowDown,
-    recalculateRowWidgetSizes,
-    loadTemplate,
-    selectAll,
-    setSelectedWidget,
-    setSelectedRow,
-    setIsDragging,
-    showNotification,
-    hideNotification,
-  }), [
-    addWidget,
-    removeWidget,
-    updateWidget,
-    updateWidgetProperty,
-    updateWidgetRowPosition,
-    duplicateWidget,
-    toggleLockWidget,
-    addRow,
-    removeRow,
-    clearCanvas,
-    updateRow,
-    reorderRows,
-    moveRowUp,
-    moveRowDown,
-    canMoveRowUp,
-    canMoveRowDown,
-    recalculateRowWidgetSizes,
-    loadTemplate,
-    selectAll,
-    setSelectedWidget,
-    setSelectedRow,
-    setIsDragging,
-    showNotification,
-    hideNotification,
-  ]);
+  const actionsValue = useMemo(
+    () => ({
+      addWidget,
+      removeWidget,
+      updateWidget,
+      updateWidgetProperty,
+      updateWidgetRowPosition,
+      duplicateWidget,
+      toggleLockWidget,
+      addRow,
+      removeRow,
+      clearCanvas,
+      updateRow,
+      reorderRows,
+      moveRowUp,
+      moveRowDown,
+      canMoveRowUp,
+      canMoveRowDown,
+      recalculateRowWidgetSizes,
+      loadTemplate,
+      selectAll,
+      setSelectedWidget,
+      setSelectedRow,
+      setIsDragging,
+      showNotification,
+      hideNotification,
+    }),
+    [
+      addWidget,
+      removeWidget,
+      updateWidget,
+      updateWidgetProperty,
+      updateWidgetRowPosition,
+      duplicateWidget,
+      toggleLockWidget,
+      addRow,
+      removeRow,
+      clearCanvas,
+      updateRow,
+      reorderRows,
+      moveRowUp,
+      moveRowDown,
+      canMoveRowUp,
+      canMoveRowDown,
+      recalculateRowWidgetSizes,
+      loadTemplate,
+      selectAll,
+      setSelectedWidget,
+      setSelectedRow,
+      setIsDragging,
+      showNotification,
+      hideNotification,
+    ]
+  );
 
-  const value = useMemo(() => ({
-    ...coreValue,
-    ...historyValue,
-    ...actionsValue,
-  }), [coreValue, historyValue, actionsValue]);
+  const value = useMemo(
+    () => ({
+      ...coreValue,
+      ...historyValue,
+      ...actionsValue,
+    }),
+    [coreValue, historyValue, actionsValue]
+  );
 
   return (
     <BuilderContext.Provider value={value}>{children}</BuilderContext.Provider>
