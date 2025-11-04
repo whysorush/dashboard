@@ -500,7 +500,7 @@ const ProfessionalTableWidget = () => {
                   cursor: 'pointer',
                   backgroundColor: isRowSelected(item.id) ? 'var(--primary)' : 'transparent',
                   color: isRowSelected(item.id) ? '#ffffff' : 'var(--table-td-font)',
-                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transition:  'none',
                   userSelect: 'none',
                   transform: 'scale(1)'
                 }}

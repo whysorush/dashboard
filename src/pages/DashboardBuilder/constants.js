@@ -37,19 +37,19 @@ export const KPI_WIDGET_TYPES = [
 
 export const WIDGET_CATEGORIES = {
   // Professional widgets first
-  EXACT_DESIGN_WIDGETS: {
-    label: "Exact Design Widgets",
-    icon: "✨",
-    widgets: [
-      {
-        type: WIDGET_TYPES.PROFESSIONAL_KPI_CARD,
-        label: "Professional KPI Card",
-        icon: "💰",
-        description: "KPI card with exact design standards",
-        defaultSize: { w: 4, h: 4 },
-      },
-    ],
-  },
+  // EXACT_DESIGN_WIDGETS: {
+  //   label: "Exact Design Widgets",
+  //   icon: "✨",
+  //   widgets: [
+  //     {
+  //       type: WIDGET_TYPES.PROFESSIONAL_KPI_CARD,
+  //       label: "Professional KPI Card",
+  //       icon: "💰",
+  //       description: "KPI card with exact design standards",
+  //       defaultSize: { w: 4, h: 4 },
+  //     },
+  //   ],
+  // },
   PROFESSIONAL_KPIS: {
     label: "Professional KPIs",
     icon: "💰",
@@ -135,13 +135,13 @@ export const WIDGET_CATEGORIES = {
         description: "Show trends over time",
         defaultSize: { w: 6, h: 4 },
       },
-      {
-        type: WIDGET_TYPES.MULTI_LINE_CHART,
-        label: "Multi-Line Chart",
-        icon: "📈",
-        description: "Compare multiple data series over time",
-        defaultSize: { w: 6, h: 4 },
-      },
+      // {
+      //   type: WIDGET_TYPES.MULTI_LINE_CHART,
+      //   label: "Multi-Line Chart",
+      //   icon: "📈",
+      //   description: "Compare multiple data series over time",
+      //   defaultSize: { w: 6, h: 4 },
+      // },
       {
         type: WIDGET_TYPES.BAR_CHART,
         label: "Bar Chart",
