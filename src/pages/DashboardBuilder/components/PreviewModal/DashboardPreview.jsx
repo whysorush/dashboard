@@ -168,7 +168,7 @@ const DashboardPreview = ({
               <div
                 style={{
                   display: "flex",
-                  flexWrap: "wrap",
+                  // flexWrap: "wrap",
                   alignItems: "stretch",
                   margin: "24px 0px",
                   gap: `${GAP_PX}px`, // ✅ use gap instead of per-item margins

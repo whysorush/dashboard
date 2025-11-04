@@ -172,19 +172,19 @@ export const WIDGET_CATEGORIES = {
       },
     ],
   },
-  METRICS: {
-    label: "Basic Metrics",
-    icon: "🎯",
-    widgets: [
-      {
-        type: WIDGET_TYPES.KPI_CARD,
-        label: "KPI Card",
-        icon: "🎯",
-        description: "Display key metrics",
-        defaultSize: { w: 3, h: 2 },
-      },
-    ],
-  },
+  // METRICS: {
+  //   label: "Basic Metrics",
+  //   icon: "🎯",
+  //   widgets: [
+  //     {
+  //       type: WIDGET_TYPES.KPI_CARD,
+  //       label: "KPI Card",
+  //       icon: "🎯",
+  //       description: "Display key metrics",
+  //       defaultSize: { w: 3, h: 2 },
+  //     },
+  //   ],
+  // },
   TABLES: {
     label: "Basic Tables",
     icon: "📋",
