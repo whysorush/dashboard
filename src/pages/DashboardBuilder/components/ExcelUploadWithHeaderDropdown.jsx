@@ -87,128 +87,254 @@ export default function ExcelUploadWithHeaderDropdown({ onApply }) {
         });
         return obj;
       });
-      onApply({ headers, selectedHeaders: chosen, rows, data: dataObjects, sheet: selectedSheet });
+      onApply({
+        headers,
+        selectedHeaders: chosen,
+        rows,
+        data: dataObjects,
+        sheet: selectedSheet,
+      });
     }
   };
 
   return (
-    <div style={{ padding: 16, maxWidth: 960, margin: "0 auto" }}>
-       {/* Upload Excel */}
-      <input type="file" accept=".xlsx,.xls" onChange={handleFileUpload} />
+    <div
+      style={{
+        padding: 10,
+        maxWidth: 960,
+        margin: "0 auto",
+      }}
+    >
+      <div
+        style={{
+          background: "var(--theme-surface)",
+          color: "var(--theme-text)",
+          border: "1px solid var(--theme-border)",
+          borderRadius: "var(--style-borderRadius)",
+          boxShadow: "var(--style-shadow)",
+          padding: 10,
+          transition:
+            "background var(--style-animationDuration) ease, color var(--style-animationDuration) ease, border-color var(--style-animationDuration) ease",
+        }}
+      >
+        {/* Upload Excel */}
+        <div
 
-      {/* Sheet Selection */}
-      {sheetNames.length > 0 && (
-        <div style={{ marginTop: 12 }}>
-          <label style={{ marginRight: 8 }}>Sheet:</label>
-          <select
-            value={selectedSheet}
-            onChange={(e) => handleSheetSelect(e.target.value)}
-          >
-            <option value="">-- Choose Sheet --</option>
-            {sheetNames.map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      {/* Dropdown for Select Columns */}
-      {headers.length > 0 && (
-        <div style={{ marginTop: 16 }}>
-          <label>
-            <strong>Select Columns:</strong>
-          </label>
-          <div
-            ref={dropdownRef}
-            style={{
-              position: "relative",
-              display: "inline-block",
-              width: "100%",
-              maxWidth: 350,
-              marginTop: 8,
-            }}
-          >
-            <div
-              onClick={() => setDropdownOpen(!dropdownOpen)}
+        // style={{ display: "flex", gap: 12, alignItems: "center" }}
+        >
+          <div>
+            <label
+              htmlFor="excel-file-input"
               style={{
-                border: "1px solid #999",
-                padding: "8px",
-                borderRadius: 4,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                background: "var(--theme-primary)",
+                color: "#fff",
+                border: "1px solid var(--theme-primary)",
+                borderRadius: "calc(var(--style-borderRadius))",
+                padding: "8px 12px",
                 cursor: "pointer",
-                background: "#f2f2f2",
+                fontWeight: 600,
+                transition: "filter var(--style-animationDuration) ease",
+              }}
+              title="Upload Excel file"
+            >
+              Upload Excel
+            </label>
+          </div>
+          <input
+            id="excel-file-input"
+            type="file"
+            accept=".xlsx,.xls"
+            onChange={handleFileUpload}
+            style={{ display: "none" }}
+          />
+          <small style={{ color: "var(--theme-textSecondary)" }}>
+            Supported: .xlsx, .xls
+          </small>
+        </div>
+
+        {/* Sheet Selection */}
+        {sheetNames.length > 0 && (
+          <div style={{ marginTop: 16 }}>
+            <label style={{ marginRight: 8, color: "var(--theme-text)" }}>
+              Select Sheet:
+            </label>
+            <select
+              value={selectedSheet}
+              onChange={(e) => handleSheetSelect(e.target.value)}
+              style={{
+                background: "var(--theme-surface)",
+                color: "var(--theme-text)",
+                border: "1px solid var(--theme-border)",
+                borderRadius: "var(--style-borderRadius)",
+                padding: "8px 10px",
+                outline: "none",
+                transition:
+                  "border-color var(--style-animationDuration) ease, background var(--style-animationDuration) ease",
               }}
             >
-              {selectedHeaders.length > 0
-                ? selectedHeaders.join(", ")
-                : "Select columns..."}
-            </div>
+              <option value="">-- Choose Sheet --</option>
+              {sheetNames.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
-            {dropdownOpen && (
+        {/* Dropdown for Select Columns */}
+        {headers.length > 0 && (
+          <div style={{ marginTop: 20 }}>
+            <label style={{ color: "var(--theme-text)", fontWeight: 600 }}>
+              Select Columns
+            </label>
+            <div
+              ref={dropdownRef}
+              style={{
+                position: "relative",
+                display: "inline-block",
+                width: "100%",
+                maxWidth: 420,
+                marginTop: 8,
+              }}
+            >
               <div
+                onClick={() => setDropdownOpen(!dropdownOpen)}
                 style={{
-                  position: "absolute",
-                  top: "100%",
-                  left: 0,
-                  zIndex: 10,
-                  width: "100%",
-                  background: "#f2f2f2",
-                  border: "1px solid #ccc",
-                  borderRadius: 4,
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
-                  marginTop: 4,
-                  maxHeight: 220,
-                  overflowY: "auto",
+                  border: "1px solid var(--theme-border)",
+                  padding: "10px 12px",
+                  borderRadius: "var(--style-borderRadius)",
+                  cursor: "pointer",
+                  background: "var(--theme-surface)",
+                  color: "var(--theme-text)",
+                  transition:
+                    "border-color var(--style-animationDuration) ease, background var(--style-animationDuration) ease",
                 }}
+                title="Select which columns to include"
               >
+                {selectedHeaders.length > 0
+                  ? selectedHeaders.join(", ")
+                  : "Select columns..."}
+              </div>
+
+              {dropdownOpen && (
                 <div
                   style={{
-                    padding: 8,
-                    borderBottom: "1px solid #eee",
-                    display: "flex",
-                    justifyContent: "space-between",
+                    position: "absolute",
+                    top: "100%",
+                    left: 0,
+                    zIndex: 20,
+                    width: "100%",
+                    background: "var(--theme-surface)",
+                    border: "1px solid var(--theme-border)",
+                    borderRadius: "var(--style-borderRadius)",
+                    boxShadow: "var(--style-shadow)",
+                    marginTop: 6,
+                    maxHeight: 260,
+                    overflowY: "auto",
                   }}
                 >
-                  <button onClick={() => toggleAll(true)}>Select All</button>
-                  <button onClick={() => toggleAll(false)}>Clear</button>
-                  <button onClick={applySelection}>Done</button>
-                </div>
-
-                <div style={{ padding: 8 }}>
-                  {headers.map((h) => (
-                    <label
-                      key={h}
+                  <div
+                    style={{
+                      padding: 8,
+                      borderBottom: "1px solid var(--theme-border)",
+                      display: "flex",
+                      gap: 8,
+                      justifyContent: "center",
+                      background: "var(--theme-surface)",
+                    }}
+                  >
+                    <button
+                      onClick={() => toggleAll(true)}
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                        padding: "4px 0",
+                        background: "transparent",
+                        color: "var(--theme-text)",
+                        border: "1px solid var(--theme-border)",
+                        borderRadius: "calc(var(--style-borderRadius) - 2px)",
+                        padding: "5px",
+                        cursor: "pointer",
+                        fontWeight: 600,
+                        fontSize: "13px",
+
+
                       }}
                     >
-                      <input
-                        type="checkbox"
-                        checked={!!checks[h]}
-                        onChange={() => toggleHeader(h)}
-                      />
-                      <span
-                        title={h}
+                      Select All
+                    </button>
+                    <button
+                      onClick={() => toggleAll(false)}
+                      style={{
+                        background: "transparent",
+                        color: "var(--theme-text)",
+                        border: "1px solid var(--theme-border)",
+                        borderRadius: "calc(var(--style-borderRadius) - 2px)",
+                        padding: "5px",
+                        cursor: "pointer",
+                        fontWeight: 600,
+                        fontSize: "13px",
+
+
+                      }}
+                    >
+                      Clear
+                    </button>
+                    <button
+                      onClick={applySelection}
+                      style={{
+                        background: "var(--theme-primary)",
+                        color: "#fff",
+                        border: "1px solid var(--theme-primary)",
+                        borderRadius: "calc(var(--style-borderRadius) - 2px)",
+                        padding: "5px",
+                        cursor: "pointer",
+                        fontWeight: 600,
+                        fontSize: "13px",
+                      }}
+                    >
+                      Done
+                    </button>
+                  </div>
+
+                  <div style={{ padding: 8 }}>
+                    {headers.map((h) => (
+                      <label
+                        key={h}
                         style={{
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 10,
+                          padding: "6px 4px",
+                          color: "var(--theme-text)",
                         }}
                       >
-                        {h || "(blank header)"}
-                      </span>
-                    </label>
-                  ))}
+                        <input
+                          type="checkbox"
+                          checked={!!checks[h]}
+                          onChange={() => toggleHeader(h)}
+                        />
+                        <span
+                          title={h}
+                          style={{
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            color: "var(--theme-text)",
+                          }}
+                        >
+                          {h || "(blank header)"}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Preview Table */}
       {/* {selectedHeaders.length > 0 && (
