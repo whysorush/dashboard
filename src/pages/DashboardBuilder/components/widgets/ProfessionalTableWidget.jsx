@@ -6,6 +6,7 @@ import {
   FiChevronRight,
 } from "react-icons/fi";
 import { useTheme } from "../../../../context/ThemeContext";
+import { useExcelData } from "../ExcelDataContext";
 
 const styles = {
   section: {
@@ -100,14 +101,18 @@ const styles = {
   },
 };
 
-const ProfessionalTableWidget = () => {
+const ProfessionalTableWidget = ({ apiUrl }) => {
   const [sortField, setSortField] = useState("");
   const [sortDirection, setSortDirection] = useState("asc");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedRows, setSelectedRows] = useState(new Set());
+  const [apiData, setApiData] = useState([]);
+  const [apiLoaded, setApiLoaded] = useState(false);
+  const [apiError, setApiError] = useState(null);
   const pageSize = 10; // default page size
   const { isDark } = useTheme();
+  const { excelData, excelHeaders } = useExcelData();
 
   const getStatusStyle = (status) => {
     const baseStyle = styles.statusBadge;
@@ -136,7 +141,7 @@ const ProfessionalTableWidget = () => {
       },
     };
 
-    const statusKey = status.toLowerCase();
+    const statusKey = String(status ?? "").toLowerCase();
     const colorConfig = statusColors[statusKey];
 
     if (colorConfig) {
@@ -213,7 +218,6 @@ const ProfessionalTableWidget = () => {
         orderAmount: "₹ 120",
         status: "Delivered",
       },
-      // add more rows to see multiple pages
       {
         id: 8,
         customer: "Jane Cooper",
@@ -335,38 +339,188 @@ const ProfessionalTableWidget = () => {
     []
   );
 
+  // Is the table driven by Excel data?
+  const isExcelDriven =
+    Array.isArray(excelData) &&
+    excelData.length > 0 &&
+    Array.isArray(excelHeaders) &&
+    excelHeaders.length > 0;
+
+  // Decide the base dataset depending on apiUrl and fetch status
+  const { baseData, showBlankState, isLoading, activeHeaders } = useMemo(() => {
+    if (!apiUrl) {
+      if (isExcelDriven) {
+        const withIds = excelData.map((r, idx) => ({ __rowIndex: idx, ...r }));
+        return {
+          baseData: withIds,
+          showBlankState: false,
+          isLoading: false,
+          activeHeaders: excelHeaders,
+        };
+      }
+      return {
+        baseData: mockData,
+        showBlankState: false,
+        isLoading: false,
+        activeHeaders: [
+          "id",
+          "customer",
+          "orderId",
+          "productName",
+          "quantity",
+          "orderAmount",
+          "status",
+        ],
+      };
+    }
+    if (!apiLoaded) {
+      return {
+        baseData: [],
+        showBlankState: false,
+        isLoading: true,
+        activeHeaders: [],
+      };
+    }
+    if (apiError || (Array.isArray(apiData) && apiData.length === 0)) {
+      return {
+        baseData: [],
+        showBlankState: true,
+        isLoading: false,
+        activeHeaders: [],
+      };
+    }
+    return {
+      baseData: Array.isArray(apiData) ? apiData : [],
+      showBlankState: false,
+      isLoading: false,
+      activeHeaders: [],
+    };
+  }, [
+    apiUrl,
+    apiLoaded,
+    apiError,
+    apiData,
+    mockData,
+    excelData,
+    excelHeaders,
+    isExcelDriven,
+  ]);
+
   const processedData = useMemo(() => {
-    let result = [...mockData];
+    let result = [...baseData];
 
     if (searchTerm) {
       const q = searchTerm.toLowerCase();
-      result = result.filter(
-        (item) =>
-          item.customer.toLowerCase().includes(q) ||
-          item.orderId.toLowerCase().includes(q) ||
-          item.productName.toLowerCase().includes(q) ||
-          item.status.toLowerCase().includes(q)
-      );
+      if (isExcelDriven) {
+        result = result.filter((row) =>
+          activeHeaders.some((h) =>
+            String(row[h] ?? "")
+              .toLowerCase()
+              .includes(q)
+          )
+        );
+      } else {
+        result = result.filter(
+          (item) =>
+            String(item.customer ?? "")
+              .toLowerCase()
+              .includes(q) ||
+            String(item.orderId ?? "")
+              .toLowerCase()
+              .includes(q) ||
+            String(item.productName ?? "")
+              .toLowerCase()
+              .includes(q) ||
+            String(item.status ?? "")
+              .toLowerCase()
+              .includes(q)
+        );
+      }
     }
 
     if (sortField) {
       result.sort((a, b) => {
         let A = a[sortField];
         let B = b[sortField];
-        if (sortField === "quantity") {
-          A = Number(A);
-          B = Number(B);
+        const toNum = (v) =>
+          v === null || v === undefined || v === "" || isNaN(Number(v))
+            ? null
+            : Number(v);
+        const numA = toNum(A);
+        const numB = toNum(B);
+        if (numA !== null && numB !== null) {
+          if (numA < numB) return sortDirection === "asc" ? -1 : 1;
+          if (numA > numB) return sortDirection === "asc" ? 1 : -1;
+          return 0;
         }
+        A = String(A ?? "").toLowerCase();
+        B = String(B ?? "").toLowerCase();
         if (A < B) return sortDirection === "asc" ? -1 : 1;
         if (A > B) return sortDirection === "asc" ? 1 : -1;
         return 0;
       });
     }
     return result;
-  }, [mockData, searchTerm, sortField, sortDirection]);
+  }, [
+    baseData,
+    searchTerm,
+    sortField,
+    sortDirection,
+    isExcelDriven,
+    activeHeaders,
+  ]);
+
+  // Fetch data from API if apiUrl is provided
+  useEffect(() => {
+    if (!apiUrl) {
+      setApiLoaded(false);
+      setApiError(null);
+      setApiData([]);
+      return;
+    }
+
+    let isCancelled = false;
+    async function fetchData() {
+      try {
+        setApiLoaded(false);
+        setApiError(null);
+        setApiData([]);
+        console.log("Fetching data from API:", apiUrl);
+        console.log("api is hitted");
+        const response = await fetch(apiUrl, {
+          headers: { Accept: "application/json" },
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const data = await response.json();
+        if (isCancelled) return;
+        const list = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.data)
+          ? data.data
+          : [];
+        setApiData(list);
+        console.log("API response:", data);
+      } catch (err) {
+        if (isCancelled) return;
+        setApiError(err);
+        console.error("API error:", err);
+      } finally {
+        if (!isCancelled) setApiLoaded(true);
+      }
+    }
+
+    fetchData();
+    return () => {
+      isCancelled = true;
+    };
+  }, [apiUrl]);
 
   // Reset to page 0 whenever filters or sort change
   useEffect(() => setCurrentPage(0), [searchTerm, sortField, sortDirection]);
+  // Clear selections when the underlying dataset changes
+  useEffect(() => setSelectedRows(new Set()), [baseData]);
 
   const totalItems = processedData.length;
   const totalPages = Math.max(Math.ceil(totalItems / pageSize), 1);
@@ -390,13 +544,13 @@ const ProfessionalTableWidget = () => {
     }
   };
 
-  const handleRowClick = (itemId) => {
-    setSelectedRows(prev => {
+  const handleRowClick = (rowKey) => {
+    setSelectedRows((prev) => {
       const newSelected = new Set(prev);
-      if (newSelected.has(itemId)) {
-        newSelected.delete(itemId);
+      if (newSelected.has(rowKey)) {
+        newSelected.delete(rowKey);
       } else {
-        newSelected.add(itemId);
+        newSelected.add(rowKey);
       }
       return newSelected;
     });
@@ -406,12 +560,16 @@ const ProfessionalTableWidget = () => {
     if (selectedRows.size === pagedData.length) {
       setSelectedRows(new Set());
     } else {
-      setSelectedRows(new Set(pagedData.map(item => item.id)));
+      const keys = pagedData.map((item) =>
+        isExcelDriven ? item.__rowIndex : item.id
+      );
+      setSelectedRows(new Set(keys));
     }
   };
 
-  const isRowSelected = (itemId) => selectedRows.has(itemId);
-  const isAllSelected = selectedRows.size === pagedData.length && pagedData.length > 0;
+  const isRowSelected = (rowKey) => selectedRows.has(rowKey);
+  const isAllSelected =
+    selectedRows.size === pagedData.length && pagedData.length > 0;
 
   return (
     <section style={styles.section} aria-label="Orders table">
@@ -434,118 +592,217 @@ const ProfessionalTableWidget = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search..."
-            aria-label="Search by customer, order id, product or status"
+            aria-label={
+              isExcelDriven
+                ? "Search in table"
+                : "Search by customer, order id, product or status"
+            }
             style={styles.searchInput}
           />
         </div>
-        <div />
+        {/* Excel file input removed in favor of global uploader */}
       </div>
 
       <table style={styles.table}>
         <thead style={styles.thead}>
-          <tr>
-            <th style={styles.th}>
-              <input
-                type="checkbox"
-                checked={isAllSelected}
-                onChange={handleSelectAll}
-                style={{ cursor: 'pointer' }}
-              />
-            </th>
-            <th style={styles.th} onClick={() => handleSort("id")}>
-              Sr No.
-              {sortField === "id" &&
-                (sortDirection === "asc" ? <FiChevronUp /> : <FiChevronDown />)}
-            </th>
-            <th style={styles.th} onClick={() => handleSort("customer")}>
-              Customer
-              {sortField === "customer" &&
-                (sortDirection === "asc" ? <FiChevronUp /> : <FiChevronDown />)}
-            </th>
-            <th style={styles.th} onClick={() => handleSort("orderId")}>
-              Order ID
-              {sortField === "orderId" &&
-                (sortDirection === "asc" ? <FiChevronUp /> : <FiChevronDown />)}
-            </th>
-            <th style={styles.th} onClick={() => handleSort("productName")}>
-              Product Name
-              {sortField === "productName" &&
-                (sortDirection === "asc" ? <FiChevronUp /> : <FiChevronDown />)}
-            </th>
-            <th style={styles.th} onClick={() => handleSort("quantity")}>
-              Order Qty
-              {sortField === "quantity" &&
-                (sortDirection === "asc" ? <FiChevronUp /> : <FiChevronDown />)}
-            </th>
-            <th style={styles.th} onClick={() => handleSort("orderAmount")}>
-              Order Amount
-              {sortField === "orderAmount" &&
-                (sortDirection === "asc" ? <FiChevronUp /> : <FiChevronDown />)}
-            </th>
-            <th style={styles.th} onClick={() => handleSort("status")}>
-              Status
-              {sortField === "status" &&
-                (sortDirection === "asc" ? <FiChevronUp /> : <FiChevronDown />)}
-            </th>
-          </tr>
+          {isExcelDriven ? (
+            <tr>
+              <th style={styles.th}>
+                <input
+                  type="checkbox"
+                  checked={isAllSelected}
+                  onChange={handleSelectAll}
+                  style={{ cursor: "pointer" }}
+                />
+              </th>
+              {excelHeaders.map((h) => (
+                <th key={h} style={styles.th} onClick={() => handleSort(h)}>
+                  {h}
+                  {sortField === h &&
+                    (sortDirection === "asc" ? (
+                      <FiChevronUp />
+                    ) : (
+                      <FiChevronDown />
+                    ))}
+                </th>
+              ))}
+            </tr>
+          ) : (
+            <tr>
+              <th style={styles.th}>
+                <input
+                  type="checkbox"
+                  checked={isAllSelected}
+                  onChange={handleSelectAll}
+                  style={{ cursor: "pointer" }}
+                />
+              </th>
+              <th style={styles.th} onClick={() => handleSort("id")}>
+                Sr No.
+                {sortField === "id" &&
+                  (sortDirection === "asc" ? (
+                    <FiChevronUp />
+                  ) : (
+                    <FiChevronDown />
+                  ))}
+              </th>
+              <th style={styles.th} onClick={() => handleSort("customer")}>
+                Customer
+                {sortField === "customer" &&
+                  (sortDirection === "asc" ? (
+                    <FiChevronUp />
+                  ) : (
+                    <FiChevronDown />
+                  ))}
+              </th>
+              <th style={styles.th} onClick={() => handleSort("orderId")}>
+                Order ID
+                {sortField === "orderId" &&
+                  (sortDirection === "asc" ? (
+                    <FiChevronUp />
+                  ) : (
+                    <FiChevronDown />
+                  ))}
+              </th>
+              <th style={styles.th} onClick={() => handleSort("productName")}>
+                Product Name
+                {sortField === "productName" &&
+                  (sortDirection === "asc" ? (
+                    <FiChevronUp />
+                  ) : (
+                    <FiChevronDown />
+                  ))}
+              </th>
+              <th style={styles.th} onClick={() => handleSort("quantity")}>
+                Order Qty
+                {sortField === "quantity" &&
+                  (sortDirection === "asc" ? (
+                    <FiChevronUp />
+                  ) : (
+                    <FiChevronDown />
+                  ))}
+              </th>
+              <th style={styles.th} onClick={() => handleSort("orderAmount")}>
+                Order Amount
+                {sortField === "orderAmount" &&
+                  (sortDirection === "asc" ? (
+                    <FiChevronUp />
+                  ) : (
+                    <FiChevronDown />
+                  ))}
+              </th>
+              <th style={styles.th} onClick={() => handleSort("status")}>
+                Status
+                {sortField === "status" &&
+                  (sortDirection === "asc" ? (
+                    <FiChevronUp />
+                  ) : (
+                    <FiChevronDown />
+                  ))}
+              </th>
+            </tr>
+          )}
         </thead>
 
         <tbody>
-          {pagedData.length ? (
-            pagedData.map((item) => (
-              <tr 
-                key={item.id}
-                style={{
-                  ...styles.td,
-                  cursor: 'pointer',
-                  backgroundColor: isRowSelected(item.id) ? 'var(--primary)' : 'transparent',
-                  color: isRowSelected(item.id) ? '#ffffff' : 'var(--table-td-font)',
-                  transition:  'none',
-                  userSelect: 'none',
-                  transform: 'scale(1)'
-                }}
-                onClick={() => handleRowClick(item.id)}
-                onMouseEnter={(e) => {
-                  if (!isRowSelected(item.id)) {
-                    e.currentTarget.style.backgroundColor = 'var(--hover-bg, rgba(0, 0, 0, 0.05))';
-                    e.currentTarget.style.transform = 'scale(1.01)';
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
-                    e.currentTarget.style.borderLeft = '3px solid var(--primary)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isRowSelected(item.id)) {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                    e.currentTarget.style.transform = 'scale(1)';
-                    e.currentTarget.style.boxShadow = 'none';
-                    e.currentTarget.style.borderLeft = 'none';
-                  }
-                }}
+          {isLoading ? (
+            <tr>
+              <td
+                style={styles.td}
+                colSpan={isExcelDriven ? excelHeaders.length + 1 : 8}
               >
-                <td style={styles.td}>
-                  <input
-                    type="checkbox"
-                    checked={isRowSelected(item.id)}
-                    onChange={() => handleRowClick(item.id)}
-                    onClick={(e) => e.stopPropagation()}
-                    style={{ cursor: 'pointer' }}
-                  />
-                </td>
-                <td style={styles.td}>{item.id}</td>
-                <td style={styles.td}>{item.customer}</td>
-                <td style={styles.td}>{item.orderId}</td>
-                <td style={styles.td}>{item.productName}</td>
-                <td style={styles.td}>{item.quantity}</td>
-                <td style={styles.td}>{item.orderAmount}</td>
-                <td style={styles.td}>
-                  <span style={getStatusStyle(item.status)}>{item.status}</span>
-                </td>
-              </tr>
-            ))
+                Loading…
+              </td>
+            </tr>
+          ) : pagedData.length ? (
+            pagedData.map((item) => {
+              const rowKey = isExcelDriven ? item.__rowIndex : item.id;
+              return (
+                <tr
+                  key={rowKey}
+                  style={{
+                    ...styles.td,
+                    cursor: "pointer",
+                    backgroundColor: isRowSelected(rowKey)
+                      ? "var(--primary)"
+                      : "transparent",
+                    color: isRowSelected(rowKey)
+                      ? "#ffffff"
+                      : "var(--table-td-font)",
+                    transition: "none",
+                    userSelect: "none",
+                    transform: "scale(1)",
+                  }}
+                  onClick={() => handleRowClick(rowKey)}
+                  onMouseEnter={(e) => {
+                    if (!isRowSelected(rowKey)) {
+                      e.currentTarget.style.backgroundColor =
+                        "var(--hover-bg, rgba(0, 0, 0, 0.05))";
+                      e.currentTarget.style.transform = "scale(1.01)";
+                      e.currentTarget.style.boxShadow =
+                        "0 2px 8px rgba(0, 0, 0, 0.1)";
+                      e.currentTarget.style.borderLeft =
+                        "3px solid var(--primary)";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isRowSelected(rowKey)) {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                      e.currentTarget.style.transform = "scale(1)";
+                      e.currentTarget.style.boxShadow = "none";
+                      e.currentTarget.style.borderLeft = "none";
+                    }
+                  }}
+                >
+                  <td style={styles.td}>
+                    <input
+                      type="checkbox"
+                      checked={isRowSelected(rowKey)}
+                      onChange={() => handleRowClick(rowKey)}
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ cursor: "pointer" }}
+                    />
+                  </td>
+
+                  {isExcelDriven ? (
+                    excelHeaders.map((h) => (
+                      <td key={h} style={styles.td}>
+                       
+                          {String(item[h] ?? "")}
+                        {console.log("first", String(item[h]))}
+
+                        {console.log("second", item[h])}
+                      </td>
+                    ))
+                  ) : (
+                    <>
+                      <td style={styles.td}>{item.id}</td>
+                      <td style={styles.td}>{item.customer}</td>
+                      <td style={styles.td}>{item.orderId}</td>
+                      <td style={styles.td}>{item.productName}</td>
+                      <td style={styles.td}>{item.quantity}</td>
+                      <td style={styles.td}>{item.orderAmount}</td>
+                      <td
+                      // style={styles.td}
+                      >
+                        <span style={getStatusStyle(item.status)}>
+                          {item.status}
+                        </span>
+                      </td>
+                    </>
+                  )}
+                </tr>
+              );
+            })
           ) : (
             <tr>
-              <td style={styles.td} colSpan="8">
-                No matching records found
+              <td
+                style={styles.td}
+                colSpan={isExcelDriven ? excelHeaders.length + 1 : 8}
+              >
+                {showBlankState
+                  ? "No data available"
+                  : "No matching records found"}
               </td>
             </tr>
           )}

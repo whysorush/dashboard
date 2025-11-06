@@ -22,6 +22,11 @@ import WarningNotification from "./components/WarningNotification";
 import ThemeToggle from "../../components/ThemeToggle";
 import StyleModeSelector from "../../components/StyleModeSelector";
 import ColorPalette from "../../components/ColorPalette";
+import UploadExcel from "./components/UploadExcel";
+import ExcelUploadWithHeaderDropdown from "./components/ExcelUploadWithHeaderDropdown";
+import InitialDataTable from "./components/InitialDataTable";
+import * as XLSX from "xlsx";
+import { ExcelDataProvider, useExcelData } from "./components/ExcelDataContext";
 
 const styles = {
   container: {
@@ -92,17 +97,37 @@ const styles = {
   icon: { marginRight: 8 },
 };
 
-const DashboardBuilderContent = () => {
-  const { widgets, rows, clearCanvas, loadTemplate, addRow, addWidget, notification, hideNotification } =
-    useBuilder();
+const DashboardBuilderContentInner = () => {
+  const {
+    widgets,
+    rows,
+    clearCanvas,
+    loadTemplate,
+    addRow,
+    addWidget,
+    notification,
+    hideNotification,
+  } = useBuilder();
   const [showPreview, setShowPreview] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [workbook, setWorkbook] = useState(null);
+  const [uploadedSheetNames, setUploadedSheetNames] = useState([]);
+  const [selectedSheet, setSelectedSheet] = useState("");
+  const [showFinalTable, setShowFinalTable] = useState(false);
+  const [showColumnSelector, setShowColumnSelector] = useState(false);
+  const { setExcelData, setExcelHeaders } = useExcelData();
 
   const loadReferenceTemplate = () => {
     clearCanvas();
     const { rows: templateRows, widgets: templateWidgets } =
       createReferenceDashboard();
     loadTemplate(templateRows, templateWidgets);
+  };
+
+  const handleExcelApply = (payload) => {
+    // payload: { headers, selectedHeaders, rows, data, sheet }
+    setExcelData(Array.isArray(payload?.data) ? payload.data : []);
+    setExcelHeaders(Array.isArray(payload?.selectedHeaders) ? payload.selectedHeaders : []);
   };
 
   return (
@@ -119,6 +144,7 @@ const DashboardBuilderContent = () => {
 
           {/* Header Actions */}
           <div style={styles.actions}>
+            {/* <UploadExcel onUpload={handleUpload} /> */}
             <ColorPalette />
             <ThemeToggle />
             <button
@@ -127,6 +153,7 @@ const DashboardBuilderContent = () => {
               title="Preview Dashboard"
             >
               <FiEye style={styles.icon} />
+
               <span style={{ display: "inline" }}>Preview</span>
             </button>
 
@@ -147,30 +174,6 @@ const DashboardBuilderContent = () => {
               <FiImage style={styles.icon} />
               <span style={{ display: "inline" }}>Template</span>
             </button>
-{/* 
-            <button
-              onClick={() => {
-                clearCanvas();
-                const row1 = addRow();
-                const row2 = addRow();
-                const row3 = addRow();
-                const row4 = addRow();
-                const row5 = addRow();
-                addWidget(WIDGET_TYPES.ADVANCED_FILTER_BAR, null, row1);
-                addWidget(WIDGET_TYPES.REVENUE_KPI, null, row2);
-                addWidget(WIDGET_TYPES.ORDERS_KPI, null, row2);
-                addWidget(WIDGET_TYPES.CUSTOMERS_KPI, null, row2);
-                addWidget(WIDGET_TYPES.LINE_CHART, null, row3);
-                addWidget(WIDGET_TYPES.MULTI_LINE_CHART, null, row3);
-                addWidget(WIDGET_TYPES.GRADIENT_BAR_CHART, null, row4);
-                addWidget(WIDGET_TYPES.SMOOTH_FUNNEL_CHART, null, row4);
-              }}
-              style={styles.button("#f59e0b")}
-              title="Quick Start with Sample Dashboard"
-            >
-              <FiZap style={styles.icon} />
-              <span style={{ display: "inline" }}>Quick Start</span>
-            </button> */}
 
             <button
               onClick={clearCanvas}
@@ -194,6 +197,10 @@ const DashboardBuilderContent = () => {
         {/* Canvas */}
         <div style={styles.canvas}>
           <Canvas />
+        </div>
+        <div style={styles.sidebarLeft}>
+          <ExcelUploadWithHeaderDropdown onApply={handleExcelApply} />
+          
         </div>
       </div>
 
@@ -223,6 +230,12 @@ const DashboardBuilderContent = () => {
     </div>
   );
 };
+
+const DashboardBuilderContent = () => (
+  <ExcelDataProvider>
+    <DashboardBuilderContentInner />
+  </ExcelDataProvider>
+);
 
 const DashboardBuilder = () => (
   <DndProvider backend={HTML5Backend}>

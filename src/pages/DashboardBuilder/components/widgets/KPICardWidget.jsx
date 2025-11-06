@@ -1,5 +1,5 @@
 // src/pages/DashboardBuilder/components/widgets/KPICardWidget.jsx
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FiTrendingUp, FiTrendingDown, FiActivity } from "react-icons/fi";
 import BaseWidget from "./BaseWidget";
 import { useThemeStyles } from "../../../../utils/themeUtils";
@@ -13,14 +13,62 @@ const KPICardWidget = ({ widget, isSelected, onClick }) => {
   const styleProps = getStyleProperties();
   const cssVariables = getCSSVariables();
 
-  // Mock KPI data
-  const kpiData = {
+  // Static fallback KPI data (used when no API URL is configured)
+  const fallbackData = useMemo(() => ({
     value: 42567,
     previousValue: 38234,
     label: widget.config?.title || "Total Revenue",
     change: (((42567 - 38234) / 38234) * 100).toFixed(1),
-    trend: [65, 72, 68, 75, 82, 79, 88, 92, 85, 95, 98, 102], // Sparkline data
-  };
+    trend: [65, 72, 68, 75, 82, 79, 88, 92, 85, 95, 98, 102],
+  }), [widget.config?.title]);
+
+  const [apiData, setApiData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const apiUrl = widget?.config?.apiUrl;
+
+  useEffect(() => {
+    if (!apiUrl) {
+      // No API configured → use fallback
+      setApiData(null);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
+    const controller = new AbortController();
+    const { signal } = controller;
+    let isMounted = true;
+
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await fetch(apiUrl, { signal });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+
+        // Normalize and basic validation: accept object or array[0]
+        const normalized = Array.isArray(json) ? json[0] : json;
+        const hasData = normalized && Object.keys(normalized || {}).length > 0;
+        if (isMounted) setApiData(hasData ? normalized : null);
+      } catch (e) {
+        if (isMounted && e.name !== "AbortError") {
+          setError(e.message || "Failed to load");
+          setApiData(null);
+        }
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchData();
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, [apiUrl]);
 
   const formatValue = (value) => {
     const format = widget.config?.numberFormat || "number";
@@ -47,17 +95,28 @@ const KPICardWidget = ({ widget, isSelected, onClick }) => {
     }
   };
 
-  const isPositive = parseFloat(kpiData.change) > 0;
+  // Decide which data to render
+  const effectiveData = apiUrl ? apiData : fallbackData;
+  const isBlank = apiUrl && !loading && (!effectiveData || error);
+  const isPositive = !isBlank && parseFloat((effectiveData?.change ?? 0)) > 0;
 
   return (
     <div 
-    // className="flex flex-col h-full justify-center" 
-    style={cssVariables} 
-    className="chart-container"
-    
-    
+      style={cssVariables} 
+      className="chart-container"
+      onClick={onClick}
+      data-selected={Boolean(isSelected)}
     >
-      {/* Icon */}
+      {/* Blank state when API configured but no data or error */}
+      {isBlank && (
+        <div className="flex items-center justify-center h-24 text-sm text-gray-400">
+          No data available
+        </div>
+      )}
+
+      {!isBlank && (
+        <>
+        {/* Icon */}
       <div className="mb-3">
         <div
           className="w-12 h-12 rounded-lg flex items-center justify-center"
@@ -82,7 +141,7 @@ const KPICardWidget = ({ widget, isSelected, onClick }) => {
             fontFamily: styleProps.fontFamily,
           }}
         >
-          {formatValue(kpiData.value)}
+          {formatValue(effectiveData?.value ?? 0)}
         </div>
       </div>
 
@@ -101,7 +160,7 @@ const KPICardWidget = ({ widget, isSelected, onClick }) => {
           )}
           <span>
             {isPositive ? "+" : ""}
-            {kpiData.change}%
+            {(effectiveData?.change ?? 0)}%
           </span>
         </div>
         <span className="text-xs" style={{ color: colors.textSecondary }}>
@@ -117,18 +176,24 @@ const KPICardWidget = ({ widget, isSelected, onClick }) => {
               fill="none"
               stroke={colors.primary}
               strokeWidth="2"
-              points={kpiData.trend
+              points={(() => {
+                const trendArray = (effectiveData?.trend || fallbackData.trend);
+                const denom = Math.max(trendArray.length - 1, 1);
+                return trendArray
                 .map(
                   (value, index) =>
-                    `${index * (100 / (kpiData.trend.length - 1))},${
+                    `${index * (100 / denom)},${
                       50 - (value - 50) * 0.4
                     }`
                 )
-                .join(" ")}
+                .join(" ");
+              })()}
               className="opacity-50"
             />
           </svg>
         </div>
+      )}
+        </>
       )}
     </div>
   );

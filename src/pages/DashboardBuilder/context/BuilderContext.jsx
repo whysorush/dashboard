@@ -287,7 +287,6 @@ export const BuilderProvider = ({ children }) => {
         locked: false,
       };
 
-      console.log("ssssssssssssssssssss", newWidget.config.title);
 
       let next = [...widgets, newWidget];
       next = normalizeRowIndexing(next, targetRowId);
