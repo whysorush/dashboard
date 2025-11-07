@@ -1,7 +1,7 @@
 // src/pages/DashboardBuilder/hooks/useRowBasedLayout.js
 import { useMemo, useCallback } from 'react';
 import { useBuilder } from '../context/BuilderContext';
-import { KPI_WIDGET_TYPES } from '../constants';
+import { KPI_WIDGET_TYPES, TABLE_WIDGET_TYPES } from '../constants';
 
 export const useRowBasedLayout = () => {
   const { widgets, rows, updateWidgetProperty } = useBuilder();
@@ -90,6 +90,10 @@ export const useRowBasedLayout = () => {
     const kpiWidgets = rowWidgets.filter(w => KPI_WIDGET_TYPES.includes(w.type));
     const hasAnyKpi = kpiWidgets.length > 0;
     const hasAnyNonKpi = rowWidgets.some(w => !KPI_WIDGET_TYPES.includes(w.type));
+    const hasAnyTable = rowWidgets.some(w => TABLE_WIDGET_TYPES.includes(w.type));
+    
+    // If the row contains a table, it cannot accept any more widgets
+    if (hasAnyTable) return 0;
     
     if (hasAnyKpi) {
       // KPI rows can have up to 4 widgets total

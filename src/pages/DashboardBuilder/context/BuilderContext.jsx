@@ -9,7 +9,7 @@ import React, {
   memo,
 } from "react";
 import { generateUniqueId } from "../utils/gridHelpers";
-import { KPI_WIDGET_TYPES, WIDGET_TYPES } from "../constants";
+import { KPI_WIDGET_TYPES, TABLE_WIDGET_TYPES, WIDGET_TYPES } from "../constants";
 
 const BuilderContext = createContext();
 
@@ -163,9 +163,32 @@ export const BuilderProvider = ({ children }) => {
 
       // Enforce max widgets per row based on widget type
       const isKpi = KPI_WIDGET_TYPES.includes(type);
+      const isTable = TABLE_WIDGET_TYPES.includes(type);
       const hasAnyKpi = rowWidgets.some((w) =>
         KPI_WIDGET_TYPES.includes(w.type)
       );
+      const hasAnyTable = rowWidgets.some((w) =>
+        TABLE_WIDGET_TYPES.includes(w.type)
+      );
+
+      // Table exclusivity: a table must be alone in its row
+      if (isTable) {
+        if (rowWidgets.length > 0) {
+          showNotification({
+            title: "Table requires exclusive row",
+            message: "Table widgets cannot share a row with other widgets.",
+            type: "warning",
+          });
+          return null;
+        }
+      } else if (hasAnyTable) {
+        showNotification({
+          title: "Row contains a table",
+          message: "You cannot add other widgets to a row containing a table.",
+          type: "warning",
+        });
+        return null;
+      }
 
       if (isKpi || hasAnyKpi) {
         // KPI rows can have up to 4 widgets
@@ -362,12 +385,16 @@ export const BuilderProvider = ({ children }) => {
       if (!moving) return;
 
       const isKpi = KPI_WIDGET_TYPES.includes(moving.type);
+      const isTable = TABLE_WIDGET_TYPES.includes(moving.type);
       const isFilter = moving.type === WIDGET_TYPES.ADVANCED_FILTER_BAR;
       const destinationWidgets = widgets.filter(
         (w) => w.position.rowId === newRowId && w.id !== widgetId
       );
       const hasAnyKpi = destinationWidgets.some((w) =>
         KPI_WIDGET_TYPES.includes(w.type)
+      );
+      const hasAnyTable = destinationWidgets.some((w) =>
+        TABLE_WIDGET_TYPES.includes(w.type)
       );
       const hasAnyFilter = destinationWidgets.some(
         (w) => w.type === WIDGET_TYPES.ADVANCED_FILTER_BAR
@@ -377,6 +404,19 @@ export const BuilderProvider = ({ children }) => {
           !KPI_WIDGET_TYPES.includes(w.type) &&
           w.type !== WIDGET_TYPES.ADVANCED_FILTER_BAR
       );
+
+      // Table exclusivity on move
+      if (isTable) {
+        if (destinationWidgets.length > 0) {
+          if (typeof window !== "undefined")
+            window.alert("Table widgets must be alone in a row.");
+          return; // disallow move
+        }
+      } else if (hasAnyTable) {
+        if (typeof window !== "undefined")
+          window.alert("You cannot move a widget into a row containing a table.");
+        return; // disallow move
+      }
 
       // Enforce max widgets per row on destination based on widget type
       if (isKpi || hasAnyKpi) {
@@ -479,9 +519,27 @@ export const BuilderProvider = ({ children }) => {
 
       // Enforce max widgets per row on duplicate based on widget type
       const isKpi = KPI_WIDGET_TYPES.includes(base.type);
+      const isTable = TABLE_WIDGET_TYPES.includes(base.type);
       const hasAnyKpi = rowWidgets.some((w) =>
         KPI_WIDGET_TYPES.includes(w.type)
       );
+      const hasAnyTable = rowWidgets.some((w) =>
+        TABLE_WIDGET_TYPES.includes(w.type)
+      );
+
+      // Table exclusivity on duplicate
+      if (isTable) {
+        // Row already has at least the base table; duplicating would violate exclusivity
+        if (rowWidgets.length >= 1) {
+          if (typeof window !== "undefined")
+            window.alert("Cannot duplicate a table in the same row.");
+          return null;
+        }
+      } else if (hasAnyTable) {
+        if (typeof window !== "undefined")
+          window.alert("You cannot duplicate into a row containing a table.");
+        return null;
+      }
 
       if (isKpi || hasAnyKpi) {
         // KPI rows can have up to 4 widgets

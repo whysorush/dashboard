@@ -35,6 +35,12 @@ export const KPI_WIDGET_TYPES = [
   WIDGET_TYPES.CUSTOMERS_KPI,
 ];
 
+// Add a grouping to identify table widget types easily
+export const TABLE_WIDGET_TYPES = [
+  WIDGET_TYPES.DATA_TABLE,
+  WIDGET_TYPES.PROFESSIONAL_TABLE,
+];
+
 export const WIDGET_CATEGORIES = {
   // Professional widgets first
   // EXACT_DESIGN_WIDGETS: {

@@ -53,8 +53,17 @@ const Canvas = () => {
       const count = rowWidgets.length;
 
       const isKpi = KPI_WIDGET_TYPES.includes(widgetType);
+      const isTable = [WIDGET_TYPES.DATA_TABLE, WIDGET_TYPES.PROFESSIONAL_TABLE].includes(widgetType);
       const hasAnyKpi = rowWidgets.some(w => KPI_WIDGET_TYPES.includes(w.type));
+      const hasAnyTable = rowWidgets.some(w => [WIDGET_TYPES.DATA_TABLE, WIDGET_TYPES.PROFESSIONAL_TABLE].includes(w.type));
       const hasAnyNonKpi = rowWidgets.some(w => !KPI_WIDGET_TYPES.includes(w.type));
+
+      // Table exclusivity
+      if (isTable) {
+        if (count > 0) return;
+      } else if (hasAnyTable) {
+        return;
+      }
 
       // Row capacity check based on widget type
       if (isKpi || hasAnyKpi) {
@@ -126,8 +135,20 @@ const Canvas = () => {
                 // Exclusivity and capacity checks
                 const rowWidgets = widgets.filter(w => w.position.rowId === candidate.id);
                 const hasAnyKpi = rowWidgets.some(w => KPI_WIDGET_TYPES.includes(w.type));
+                const hasAnyTable = rowWidgets.some(w => [WIDGET_TYPES.DATA_TABLE, WIDGET_TYPES.PROFESSIONAL_TABLE].includes(w.type));
                 const hasAnyNonKpi = rowWidgets.some(w => !KPI_WIDGET_TYPES.includes(w.type));
                 const capacity = isKpi ? getMaxKPIWidgetsPerRow(candidate.id) : getMaxWidgetsPerRow(candidate.id);
+
+                // Table exclusivity on drop targeting
+                const isTable = [WIDGET_TYPES.DATA_TABLE, WIDGET_TYPES.PROFESSIONAL_TABLE].includes(item.type);
+                if (hasAnyTable) {
+                  // Row already has a table, block any additional widgets
+                  break;
+                }
+                if (isTable && rowWidgets.length > 0) {
+                  // Cannot drop a table into a non-empty row
+                  break;
+                }
 
                 if (capacity > 0 && !((isKpi && hasAnyNonKpi) || (!isKpi && hasAnyKpi))) {
                   targetRowId = candidate.id;
