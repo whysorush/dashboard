@@ -1,12 +1,12 @@
 // src/pages/DashboardBuilder/components/Canvas.jsx
 import React, { useCallback, useEffect, useRef, lazy, Suspense, memo, useMemo } from "react";
-import { useDrop } from "react-dnd";
+import { useDrop, useDrag } from "react-dnd";
 import { useBuilder } from "../context/BuilderContext";
 import useRowBasedLayout from "../hooks/useRowBasedLayout";
-import RowContainer from "./RowContainer";
 import DraggableRowContainer from "./DraggableRowContainer";
 import RowManager from "./RowManager";
 import { WIDGET_TYPES, KPI_WIDGET_TYPES } from "../constants";
+import { FiTrash2 } from "react-icons/fi";
 
 // Lazy load widgets for better performance
 const LineChartWidget = lazy(() => import("./widgets/LineChartWidget"));
@@ -41,6 +41,8 @@ const Canvas = () => {
     moveRowDown,
     canMoveRowUp,
     canMoveRowDown,
+    removeWidget,
+    updateWidgetRowPosition,
   } = useBuilder();
 
   const { widgetsByRow, calculateWidgetSizes, getMaxWidgetsPerRow, getMaxKPIWidgetsPerRow } =
@@ -258,6 +260,134 @@ const Canvas = () => {
     [selectedWidget, setSelectedWidget]
   );
 
+  const handleMoveWidget = useCallback(
+    (widgetId, targetRowId, desiredIndex) => {
+      const widgetToMove = widgets.find((w) => w.id === widgetId);
+      if (!widgetToMove) return;
+
+      const currentRowId = widgetToMove.position.rowId;
+      const currentIndex = widgetToMove.position.index ?? 0;
+
+      const destinationWidgets = widgets
+        .filter((w) => w.position.rowId === targetRowId && w.id !== widgetId)
+        .sort((a, b) => (a.position.index ?? 0) - (b.position.index ?? 0));
+
+      let nextIndex = Math.max(0, Math.floor(desiredIndex));
+
+      if (currentRowId === targetRowId && nextIndex > currentIndex) {
+        nextIndex = Math.max(0, nextIndex - 1);
+      }
+
+      if (nextIndex > destinationWidgets.length) {
+        nextIndex = destinationWidgets.length;
+      }
+
+      if (currentRowId === targetRowId && nextIndex === currentIndex) {
+        return;
+      }
+
+      updateWidgetRowPosition(widgetId, targetRowId, nextIndex);
+    },
+    [widgets, updateWidgetRowPosition]
+  );
+
+  const handleDeleteWidget = useCallback(
+    (widgetId) => {
+      removeWidget(widgetId);
+    },
+    [removeWidget]
+  );
+
+  const DraggableWidgetContainer = ({
+    widget,
+    rowId,
+    sizeClass,
+    style,
+    isSelected,
+    onMove,
+    onDelete,
+  }) => {
+    const containerRef = useRef(null);
+
+    const [{ isDragging }, drag] = useDrag({
+      type: "canvas-widget",
+      item: () => ({
+        widgetId: widget.id,
+        rowId,
+        index: widget.position.index ?? 0,
+      }),
+      collect: (monitor) => ({
+        isDragging: monitor.isDragging(),
+      }),
+    });
+
+    const [{ isOver, canDrop }, drop] = useDrop({
+      accept: "canvas-widget",
+      canDrop: (item) => item.widgetId !== widget.id,
+      drop: (item, monitor) => {
+        if (!containerRef.current || item.widgetId === widget.id) return;
+        const rect = containerRef.current.getBoundingClientRect();
+        const clientOffset = monitor.getClientOffset();
+        if (!clientOffset) return;
+        const offsetX = clientOffset.x - rect.left;
+        const offsetRatio = rect.width === 0 ? 0 : offsetX / rect.width;
+        const desiredIndex =
+          offsetRatio < 0.5
+            ? widget.position.index ?? 0
+            : (widget.position.index ?? 0) + 1;
+        onMove(item.widgetId, rowId, desiredIndex);
+      },
+      collect: (monitor) => ({
+        isOver:
+          monitor.isOver({ shallow: true }) &&
+          monitor.getItem()?.widgetId !== widget.id,
+        canDrop: monitor.canDrop(),
+      }),
+    });
+
+    const combinedRef = useCallback(
+      (node) => {
+        containerRef.current = node;
+        drag(node);
+        drop(node);
+      },
+      [drag, drop]
+    );
+
+    const handleDeleteClick = useCallback(
+      (event) => {
+        event.stopPropagation();
+        onDelete(widget.id);
+      },
+      [onDelete, widget.id]
+    );
+
+    return (
+      <div
+        ref={combinedRef}
+        className={`widget-container ${sizeClass} relative group transition-shadow duration-150 ${
+          isSelected ? "ring-3 ring-blue-500" : ""
+        } ${isOver && canDrop ? "ring-2 ring-blue-400" : ""}`}
+        style={{
+          ...style,
+          cursor: "move",
+          opacity: isDragging ? 0.6 : 1,
+        }}
+      >
+        <button
+          type="button"
+          onClick={handleDeleteClick}
+          onMouseDown={(event) => event.stopPropagation()}
+          className="absolute top-2 right-2 z-10 rounded-full bg-white/90 p-1.5 text-red-600 shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-300"
+          title="Delete chart"
+        >
+          <FiTrash2 size={14} />
+        </button>
+        {renderWidget(widget)}
+      </div>
+    );
+  };
+
   return (
     <div
       ref={drop}
@@ -317,27 +447,55 @@ const Canvas = () => {
                 onMoveDown={() => moveRowDown(row.id)}
                 canMoveUp={canMoveRowUp(row.id)}
                 canMoveDown={canMoveRowDown(row.id)}
+                onWidgetDrop={(widgetId, targetIndex) =>
+                  handleMoveWidget(widgetId, row.id, targetIndex ?? rowWidgets.length)
+                }
+                widgetCount={rowWidgets.length}
               >
                 {rowWidgets.map((widget) => (
-                  <div
-                    key={widget.id}
-                    className={`widget-container ${sizeClass} ${
-                      selectedWidget === widget.id ? "ring-3 ring-blue-500" : ""
-                    }`}
-                    style={{
-                      flexBasis:
-                        rowWidgets.length === 1
-                          ? "calc(100% - 8px)"
-                          : rowWidgets.length === 2
-                          ? "calc(50% - 16px)"
-                          : rowWidgets.length === 3
-                          ? "calc(33.333% - 16px)"
-                          : "calc(25% - 16px)",
-                      height: "100%",
-                    }}
-                  >
-                    {renderWidget(widget)}
-                  </div>
+                  WIDGET_TYPES.ADVANCED_FILTER_BAR === widget.type ? (
+                    <div
+                      key={widget.id}
+                      className={`widget-container ${sizeClass} ${
+                        selectedWidget === widget.id ? "ring-3 ring-blue-500" : ""
+                      }`}
+                      style={{
+                        flexBasis:
+                          rowWidgets.length === 1
+                            ? "calc(100% - 8px)"
+                            : rowWidgets.length === 2
+                            ? "calc(50% - 16px)"
+                            : rowWidgets.length === 3
+                            ? "calc(33.333% - 16px)"
+                            : "calc(25% - 16px)",
+                        height: "100%",
+                      }}
+                      onClick={() => setSelectedWidget(widget.id)}
+                    >
+                      {renderWidget(widget)}
+                    </div>
+                  ) : (
+                    <DraggableWidgetContainer
+                      key={widget.id}
+                      widget={widget}
+                      rowId={row.id}
+                      sizeClass={sizeClass}
+                      style={{
+                        flexBasis:
+                          rowWidgets.length === 1
+                            ? "calc(100% - 8px)"
+                            : rowWidgets.length === 2
+                            ? "calc(50% - 16px)"
+                            : rowWidgets.length === 3
+                            ? "calc(33.333% - 16px)"
+                            : "calc(25% - 16px)",
+                        height: "100%",
+                      }}
+                      isSelected={selectedWidget === widget.id}
+                      onMove={handleMoveWidget}
+                      onDelete={handleDeleteWidget}
+                    />
+                  )
                 ))}
               </DraggableRowContainer>
             );

@@ -1,8 +1,7 @@
 // src/pages/DashboardBuilder/components/DraggableRowContainer.jsx
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import {
-  FiPlus,
   FiMove,
   FiAlertCircle,
   FiEdit2,
@@ -26,6 +25,8 @@ const DraggableRowContainer = ({
   onMoveDown,
   canMoveUp,
   canMoveDown,
+  onWidgetDrop,
+  widgetCount = 0,
 }) => {
   const { setSelectedRow, updateRow, removeRow, reorderRows } = useBuilder();
   const { themeConfig, isDark } = useTheme();
@@ -42,7 +43,7 @@ const DraggableRowContainer = ({
     }),
   });
 
-  const [{ isOver, canDrop }, drop] = useDrop({
+  const [{ isOver, canDrop }, rowDrop] = useDrop({
     accept: "row",
     drop: (item, monitor) => {
       if (!monitor.didDrop()) {
@@ -60,28 +61,59 @@ const DraggableRowContainer = ({
     }),
   });
 
+  const [{ isWidgetOver }, widgetDrop] = useDrop({
+    accept: "canvas-widget",
+    drop: (item, monitor) => {
+      if (monitor.didDrop()) return;
+      if (!onWidgetDrop) return;
+      onWidgetDrop(item.widgetId, widgetCount);
+    },
+    collect: (monitor) => ({
+      isWidgetOver:
+        monitor.isOver({ shallow: true }) &&
+        monitor.getItemType() === "canvas-widget",
+    }),
+  });
+
+  const setContainerRef = useCallback(
+    (node) => {
+      rowDrop(node);
+      widgetDrop(node);
+      dragPreview(node);
+    },
+    [rowDrop, widgetDrop, dragPreview]
+  );
+
   // Dynamic styles based on theme
+  const borderColor = isWidgetOver
+    ? themeConfig?.primary || "#3b82f6"
+    : isSelected
+    ? themeConfig?.primary || "#3b82f6"
+    : isOver && canDrop
+    ? themeConfig?.accent || "#10b981"
+    : themeConfig?.border || (isDark ? "#374151" : "#e5e7eb");
+
+  const backgroundFill = isWidgetOver
+    ? isDark
+      ? "rgba(37, 99, 235, 0.12)"
+      : "rgba(37, 99, 235, 0.08)"
+    : isSelected
+    ? isDark
+      ? "rgba(59, 130, 246, 0.1)"
+      : "rgba(59, 130, 246, 0.05)"
+    : isOver && canDrop
+    ? isDark
+      ? "rgba(16, 185, 129, 0.1)"
+      : "rgba(16, 185, 129, 0.05)"
+    : "transparent";
+
   const containerStyles = {
     position: "relative",
     marginBottom: "16px",
     padding: "8px",
     borderRadius: "8px",
-    border: `2px dashed ${
-      isSelected
-        ? themeConfig?.primary || "#3b82f6"
-        : isOver && canDrop
-        ? themeConfig?.accent || "#10b981"
-        : themeConfig?.border || (isDark ? "#374151" : "#e5e7eb")
-    }`,
-    backgroundColor: isSelected
-      ? isDark
-        ? "rgba(59, 130, 246, 0.1)"
-        : "rgba(59, 130, 246, 0.05)"
-      : isOver && canDrop
-      ? isDark
-        ? "rgba(16, 185, 129, 0.1)"
-        : "rgba(16, 185, 129, 0.05)"
-      : "transparent",
+    border: `2px dashed ${borderColor}`,
+    backgroundColor: backgroundFill,
     transition: "all 0.2s ease",
     opacity: isDragging ? 0.5 : 1,
     transform: isDragging ? "rotate(2deg)" : "none",
@@ -287,7 +319,7 @@ const DraggableRowContainer = ({
 
   return (
     <div
-      ref={drop}
+      ref={setContainerRef}
       className={`row-container draggable-row ${isDragging ? "dragging" : ""} ${
         isOver && canDrop ? "drag-over" : ""
       }`}
@@ -302,7 +334,6 @@ const DraggableRowContainer = ({
           <div
             ref={(node) => {
               drag(node);
-              dragPreview(node);
             }}
             style={{
               ...iconStyles,
