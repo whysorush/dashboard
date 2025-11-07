@@ -122,7 +122,7 @@ export default function ExcelUploadWithHeaderDropdown({ onApply }) {
 
         // style={{ display: "flex", gap: 12, alignItems: "center" }}
         >
-          <div>
+          {/* <div>
             <label
               htmlFor="excel-file-input"
               style={{
@@ -149,6 +149,45 @@ export default function ExcelUploadWithHeaderDropdown({ onApply }) {
             accept=".xlsx,.xls"
             onChange={handleFileUpload}
             style={{ display: "none" }}
+          />
+          <small style={{ color: "var(--theme-textSecondary)" }}>
+            Supported: .xlsx, .xls
+          </small> */}
+
+          {/* ************************************** */}
+
+          <label
+            htmlFor="excel-file-input"
+            style={{
+              display: "block",
+              marginBottom: 8,
+              fontSize: "14px",
+              fontWeight: 500,
+              color: "var(--theme-text)",
+              transition: "color var(--style-animationDuration) ease",
+            }}
+          >
+            Upload Excel File
+          </label>
+          <input
+            id="excel-file-input"
+            type="file"
+            accept=".xlsx,.xls"
+            onChange={handleFileUpload}
+            style={{
+              display: "block",
+              width: "100%",
+              fontSize: "14px",
+              color: "var(--theme-text)",
+              border: "1px solid var(--theme-border)",
+              borderRadius: "var(--style-borderRadius)",
+              cursor: "pointer",
+              background: "var(--theme-surface)",
+              padding: "8px 12px",
+              outline: "none",
+              transition:
+                "border-color var(--style-animationDuration) ease, background var(--style-animationDuration) ease, color var(--style-animationDuration) ease",
+            }}
           />
           <small style={{ color: "var(--theme-textSecondary)" }}>
             Supported: .xlsx, .xls
@@ -258,8 +297,6 @@ export default function ExcelUploadWithHeaderDropdown({ onApply }) {
                         cursor: "pointer",
                         fontWeight: 600,
                         fontSize: "13px",
-
-
                       }}
                     >
                       Select All
@@ -275,8 +312,6 @@ export default function ExcelUploadWithHeaderDropdown({ onApply }) {
                         cursor: "pointer",
                         fontWeight: 600,
                         fontSize: "13px",
-
-
                       }}
                     >
                       Clear

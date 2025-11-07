@@ -75,6 +75,7 @@ const styles = {
     borderRight: "1px solid var(--border)",
     overflowY: "auto",
     height: "100vh",
+    margin: "10px auto",
   },
   canvas: {
     flex: 1,
@@ -127,7 +128,9 @@ const DashboardBuilderContentInner = () => {
   const handleExcelApply = (payload) => {
     // payload: { headers, selectedHeaders, rows, data, sheet }
     setExcelData(Array.isArray(payload?.data) ? payload.data : []);
-    setExcelHeaders(Array.isArray(payload?.selectedHeaders) ? payload.selectedHeaders : []);
+    setExcelHeaders(
+      Array.isArray(payload?.selectedHeaders) ? payload.selectedHeaders : []
+    );
   };
 
   return (
@@ -200,7 +203,6 @@ const DashboardBuilderContentInner = () => {
         </div>
         <div style={styles.sidebarLeft}>
           <ExcelUploadWithHeaderDropdown onApply={handleExcelApply} />
-          
         </div>
       </div>
 

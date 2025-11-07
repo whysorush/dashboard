@@ -244,6 +244,23 @@ const getCategoryNames = (count, type = "category") => {
     return months.slice(0, count);
   }
 
+  if (type === "weekly") {
+    const weeks = [];
+    for (let i = 1; i <= Math.min(count, 52); i++) {
+      weeks.push(`Week ${i}`);
+    }
+    return weeks;
+  }
+
+  if (type === "yearly") {
+    const years = [];
+    const currentYear = new Date().getFullYear();
+    for (let i = 0; i < count; i++) {
+      years.push(`${currentYear - (count - i - 1)}`);
+    }
+    return years;
+  }
+
   const categories = {
     products: [
       "Laptops",

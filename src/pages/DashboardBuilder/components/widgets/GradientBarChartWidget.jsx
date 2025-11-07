@@ -1,5 +1,5 @@
 // src/pages/DashboardBuilder/components/widgets/GradientBarChartWidget?.jsx
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -57,12 +57,31 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
 
   const config = useMemo(() => widget?.config || {}, [widget?.config]);
 
+  // State for time range selection
+  const [selectedTimeRange, setSelectedTimeRange] = useState(() => {
+    // Map config timeRange to dropdown value
+    const timeRangeMap = {
+      weekly: "Week",
+      monthly: "Month",
+      yearly: "Year",
+    };
+    return timeRangeMap[config.timeRange] || "Month";
+  });
+
   // Get theme-aware colors and styles
   const colors = getChartColors();
   const cssVariables = getCSSVariables();
   const chartHeight = getChartHeight(widget?.position?.size || "medium");
   const tooltipStyle = getTooltipStyle();
   const animationConfig = getAnimationConfig(config.animations !== false);
+
+  // Map dropdown value to timeRange parameter
+  const timeRangeMap = {
+    Week: "weekly",
+    Month: "monthly",
+    Year: "yearly",
+  };
+  const currentTimeRange = timeRangeMap[selectedTimeRange] || "monthly";
 
   // Build chart data from Excel when available, else fallback to mock
   const { chartData, categoryHeader, valueHeader } = useMemo(() => {
@@ -72,7 +91,7 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
       const fallback = generateMockData("categories", {
         categories: config.dataPoints || 10,
         includeComparison: config.comparisonPeriod,
-        timeRange: config.timeRange || "monthly",
+        timeRange: currentTimeRange,
         trend: config.trend || "random",
       });
       return { chartData: fallback, categoryHeader: "name", valueHeader: "value" };
@@ -119,7 +138,7 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
     }));
 
     return { chartData: mapped, categoryHeader: chosenCategory, valueHeader: chosenValue };
-  }, [excelData, excelHeaders, config]);
+  }, [excelData, excelHeaders, config, currentTimeRange]);
 
   const total = useMemo(() => {
     const sum = chartData.reduce((acc, item) => acc + (Number(item.value) || 0), 0);
@@ -144,10 +163,15 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
           <div style={styles.total}>{total}</div>
         </div>
 
-        <select style={styles.select} aria-label="Time range">
-          <option>Week</option>
-          <option>Month</option>
-          <option>Year</option>
+        <select
+          style={styles.select}
+          aria-label="Time range"
+          value={selectedTimeRange}
+          onChange={(e) => setSelectedTimeRange(e.target.value)}
+        >
+          <option value="Week">Week</option>
+          <option value="Month">Month</option>
+          <option value="Year">Year</option>
         </select>
       </div>
 
