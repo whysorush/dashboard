@@ -11,6 +11,35 @@ import {
 import { generateMockData } from "../../utils/mockDataGenerator";
 import { useThemeStyles } from "../../../../utils/themeUtils";
 
+const styles = {
+  container: {
+    background: "var(--stat-card-bg)",
+    border: "1px solid var(--border)",
+    borderRadius: 14,
+    padding: 16,
+  },
+  header: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  title: { margin: 0, fontSize: 16, color: "var(--text)" },
+  total: {
+    fontSize: 22,
+    fontWeight: 700,
+    margin: "6px 0 10px",
+    color: "var(--text)",
+  },
+  select: {
+    background: "var(--bg)",
+    color: "var(--text)",
+    border: "1px solid var(--border)",
+    borderRadius: 8,
+    padding: "6px 8px",
+  },
+};
+
 const FunnelChartWidget = ({ widget }) => {
   const {
     getChartColors,
@@ -26,7 +55,6 @@ const FunnelChartWidget = ({ widget }) => {
     });
   }, []);
 
-
   // Get theme-aware colors and styles
   const colors = getChartColors();
   const cssVariables = getCSSVariables();
@@ -34,37 +62,60 @@ const FunnelChartWidget = ({ widget }) => {
   const colorPalette = getColorPalette(5);
   const tooltipStyle = getTooltipStyle();
 
+  const total = useMemo(() => {
+    const sum = data.reduce((acc, item) => acc + item.value, 0);
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    }).format(sum);
+  }, [data]);
   return (
     <div
       style={{
         width: "100%",
-        height: chartHeight,
         ...cssVariables,
       }}
       className="chart-container"
     >
-      <ResponsiveContainer>
-        <FunnelChart>
-          <Tooltip contentStyle={tooltipStyle} />
-          <Funnel
-            dataKey="value"
-            data={data}
-            isAnimationActive={widget.config?.animations !== false}
-          >
-            <LabelList
-              position="center"
-              fill={colors.text}
-              formatter={(value) => `${value.toLocaleString()}`}
-            />
-            {data.map((entry, index) => (
-              <Cell
-                key={`cell-${index}`}
-                fill={colorPalette[index % colorPalette.length]}
+      <div style={styles.header}>
+        <div>
+          <h3 style={styles.title}>Funnel Chart</h3>
+          <div style={styles.total}>{total}</div>
+        </div>
+
+        <select style={styles.select}>
+          <option>Week</option>
+          <option>Month</option>
+          <option>Year</option>
+        </select>
+      </div>
+      <div style={{ width: "100%", height: chartHeight }}>
+        <ResponsiveContainer>
+          <FunnelChart>
+            <Tooltip contentStyle={tooltipStyle} />
+            <Funnel
+              dataKey="value"
+              data={data}
+              isAnimationActive={widget.config?.animations !== false}
+              width={600}
+            >
+              <LabelList
+                position="center"
+                fill={colors.text}
+                formatter={(value) => `${value.toLocaleString()}`}
+                style={{ fontFamily: "var(--font-family)", fontSize: "12px" }}
               />
-            ))}
-          </Funnel>
-        </FunnelChart>
-      </ResponsiveContainer>
+              {data.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={colorPalette[index % colorPalette.length]}
+                />
+              ))}
+            </Funnel>
+          </FunnelChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 };

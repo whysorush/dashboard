@@ -7,13 +7,33 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import BaseWidget from "./BaseWidget";
-import KPIDisplay from "./KPIDisplay";
-import FilterBar from "./FilterBar";
-import { generateMockData, calculateKPIs } from "../../utils/mockDataGenerator";
+import { generateMockData } from "../../utils/mockDataGenerator";
 import { useThemeStyles } from "../../../../utils/themeUtils";
 
-const PieChartWidget = memo(({ widget, isSelected, onClick }) => {
+const styles = {
+  header: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  title: { margin: 0, fontSize: 16, color: "var(--text)" },
+  total: {
+    fontSize: 22,
+    fontWeight: 700,
+    margin: "6px 0 10px",
+    color: "var(--text)",
+  },
+  select: {
+    background: "var(--bg)",
+    color: "var(--text)",
+    border: "1px solid var(--border)",
+    borderRadius: 8,
+    padding: "6px 8px",
+  },
+};
+
+const PieChartWidget = memo(({ widget }) => {
   const {
     getChartColors,
     getCSSVariables,
@@ -28,13 +48,9 @@ const PieChartWidget = memo(({ widget, isSelected, onClick }) => {
     });
   }, []);
 
-  const kpis = useMemo(() => {
-    return calculateKPIs(data, widget?.config);
-  }, [data, widget?.config]);
-
-  const handleFilterChange = useCallback((key, value) => {
-    console.log("Filter changed:", key, value);
-  }, []);
+  // const _kpis = useMemo(() => {
+  //   return calculateKPIs(data, widget?.config);
+  // }, [data, widget?.config]);
 
   // Get theme-aware colors and styles
   const colors = getChartColors();
@@ -44,6 +60,15 @@ const PieChartWidget = memo(({ widget, isSelected, onClick }) => {
   const animationConfig = getAnimationConfig(
     widget?.config?.animations !== false
   );
+
+  const total = useMemo(() => {
+    const sum = data.reduce((acc, item) => acc + (item?.value ?? 0), 0);
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    }).format(sum);
+  }, [data]);
 
   // Function to get colors dynamically based on percentage ranking
   const getDynamicColors = useCallback(
@@ -105,50 +130,62 @@ const PieChartWidget = memo(({ widget, isSelected, onClick }) => {
         </text>
       );
     },
-    []
+    [RADIAN]
   );
 
   return (
     <div
       style={{
         width: "100%",
-        height: chartHeight,
         ...cssVariables,
       }}
       className="chart-container"
     >
-      <ResponsiveContainer>
-        <PieChart>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="50%"
-            labelLine={false}
-            label={renderCustomizedLabel}
-            outerRadius={80}
-            fill={colors.primary}
-            dataKey="value"
-            animationDuration={animationConfig.duration}
-          >
-            {(() => {
-              // Get dynamic color mapping based on percentage ranking
-              const colorMap = getDynamicColors(data);
+      <div style={styles.header}>
+        <div>
+          <h3 style={styles.title}>Pie Chart</h3>
+          <div style={styles.total}>{total}</div>
+        </div>
+        <select style={styles.select}>
+          <option>Week</option>
+          <option>Month</option>
+          <option>Year</option>
+        </select>
+      </div>
+      <div style={{ width: "100%", height: chartHeight }}>
+        <ResponsiveContainer>
+          <PieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              labelLine={false}
+              label={renderCustomizedLabel}
+              outerRadius={80}
+              fill={colors.primary}
+              dataKey="value"
+              animationDuration={animationConfig.duration}
+            >
+              {(() => {
+                // Get dynamic color mapping based on percentage ranking
+                const colorMap = getDynamicColors(data);
 
-              return data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={colorMap[index]} />
-              ));
-            })()}
-          </Pie>
-          <Tooltip contentStyle={tooltipStyle} />
-          {widget?.config?.showLegend !== false && (
-            <Legend
-              wrapperStyle={{
-                color: colors.text,
-              }}
-            />
-          )}
-        </PieChart>
-      </ResponsiveContainer>
+                return data.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={colorMap[index]} />
+                ));
+              })()}
+            </Pie>
+            <Tooltip contentStyle={tooltipStyle} />
+            {widget?.config?.showLegend !== false && (
+              <Legend
+                wrapperStyle={{
+                  color: colors.text,
+                }}
+              />
+            )}
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 });

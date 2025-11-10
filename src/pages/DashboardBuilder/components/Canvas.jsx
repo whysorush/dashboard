@@ -43,6 +43,7 @@ const Canvas = () => {
     canMoveRowDown,
     removeWidget,
     updateWidgetRowPosition,
+    swapWidgets,
   } = useBuilder();
 
   const { widgetsByRow, calculateWidgetSizes, getMaxWidgetsPerRow, getMaxKPIWidgetsPerRow } =
@@ -298,6 +299,38 @@ const Canvas = () => {
     [removeWidget]
   );
 
+  const RowWidgetDropZone = ({ rowId, targetIndex, onMove }) => {
+    const [{ isOver, canDrop }, drop] = useDrop({
+      accept: "canvas-widget",
+      drop: (item, monitor) => {
+        if (monitor.didDrop()) return;
+        onMove(item.widgetId, rowId, targetIndex);
+      },
+      canDrop: () => true,
+      collect: (monitor) => ({
+        isOver: monitor.isOver({ shallow: true }),
+        canDrop: monitor.canDrop(),
+      }),
+    });
+
+    return (
+      <div
+        ref={drop}
+        className={`widget-drop-zone relative flex-shrink-0 transition-all duration-150 ${
+          isOver && canDrop ? "bg-blue-400/40" : "bg-transparent"
+        }`}
+        style={{
+          flexBasis: "4px",
+          width: "4px",
+          marginLeft: "-8px",
+          marginRight: "-8px",
+          minHeight: "100%",
+        }}
+        aria-hidden="true"
+      />
+    );
+  };
+
   const DraggableWidgetContainer = ({
     widget,
     rowId,
@@ -305,6 +338,7 @@ const Canvas = () => {
     style,
     isSelected,
     onMove,
+    onSwap,
     onDelete,
   }) => {
     const containerRef = useRef(null);
@@ -331,6 +365,13 @@ const Canvas = () => {
         if (!clientOffset) return;
         const offsetX = clientOffset.x - rect.left;
         const offsetRatio = rect.width === 0 ? 0 : offsetX / rect.width;
+
+        const sameRow = item.rowId === rowId;
+        if (sameRow && offsetRatio > 0.25 && offsetRatio < 0.75) {
+          onSwap(item.widgetId, widget.id);
+          return;
+        }
+
         const desiredIndex =
           offsetRatio < 0.5
             ? widget.position.index ?? 0
@@ -378,7 +419,7 @@ const Canvas = () => {
           type="button"
           onClick={handleDeleteClick}
           onMouseDown={(event) => event.stopPropagation()}
-          className="absolute top-2 right-2 z-10 rounded-full bg-white/90 p-1.5 text-red-600 shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-300"
+          className="absolute top-[-10px] right-2 z-10 rounded-full bg-white/90 p-1.5 text-red-600 shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-300"
           title="Delete chart"
         >
           <FiTrash2 size={14} />
@@ -452,50 +493,65 @@ const Canvas = () => {
                 }
                 widgetCount={rowWidgets.length}
               >
-                {rowWidgets.map((widget) => (
-                  WIDGET_TYPES.ADVANCED_FILTER_BAR === widget.type ? (
-                    <div
-                      key={widget.id}
-                      className={`widget-container ${sizeClass} ${
-                        selectedWidget === widget.id ? "ring-3 ring-blue-500" : ""
-                      }`}
-                      style={{
-                        flexBasis:
-                          rowWidgets.length === 1
-                            ? "calc(100% - 8px)"
-                            : rowWidgets.length === 2
-                            ? "calc(50% - 16px)"
-                            : rowWidgets.length === 3
-                            ? "calc(33.333% - 16px)"
-                            : "calc(25% - 16px)",
-                        height: "100%",
-                      }}
-                      onClick={() => setSelectedWidget(widget.id)}
-                    >
-                      {renderWidget(widget)}
-                    </div>
-                  ) : (
-                    <DraggableWidgetContainer
-                      key={widget.id}
-                      widget={widget}
-                      rowId={row.id}
-                      sizeClass={sizeClass}
-                      style={{
-                        flexBasis:
-                          rowWidgets.length === 1
-                            ? "calc(100% - 8px)"
-                            : rowWidgets.length === 2
-                            ? "calc(50% - 16px)"
-                            : rowWidgets.length === 3
-                            ? "calc(33.333% - 16px)"
-                            : "calc(25% - 16px)",
-                        height: "100%",
-                      }}
-                      isSelected={selectedWidget === widget.id}
-                      onMove={handleMoveWidget}
-                      onDelete={handleDeleteWidget}
-                    />
-                  )
+                {rowWidgets.map((widget, index) => (
+                  <React.Fragment key={widget.id}>
+                    {WIDGET_TYPES.ADVANCED_FILTER_BAR !== widget.type && (
+                      <RowWidgetDropZone
+                        rowId={row.id}
+                        targetIndex={index}
+                        onMove={handleMoveWidget}
+                      />
+                    )}
+                    {WIDGET_TYPES.ADVANCED_FILTER_BAR === widget.type ? (
+                      <div
+                        className={`widget-container ${sizeClass} ${
+                          selectedWidget === widget.id ? "ring-3 ring-blue-500" : ""
+                        }`}
+                        style={{
+                          flexBasis:
+                            rowWidgets.length === 1
+                              ? "calc(100% - 8px)"
+                              : rowWidgets.length === 2
+                              ? "calc(50% - 16px)"
+                              : rowWidgets.length === 3
+                              ? "calc(33.333% - 16px)"
+                              : "calc(25% - 16px)",
+                          height: "100%",
+                        }}
+                        onClick={() => setSelectedWidget(widget.id)}
+                      >
+                        {renderWidget(widget)}
+                      </div>
+                    ) : (
+                      <DraggableWidgetContainer
+                        widget={widget}
+                        rowId={row.id}
+                        sizeClass={sizeClass}
+                        style={{
+                          flexBasis:
+                            rowWidgets.length === 1
+                              ? "calc(100% - 8px)"
+                              : rowWidgets.length === 2
+                              ? "calc(50% - 16px)"
+                              : rowWidgets.length === 3
+                              ? "calc(33.333% - 16px)"
+                              : "calc(25% - 16px)",
+                          height: "100%",
+                        }}
+                        isSelected={selectedWidget === widget.id}
+                        onMove={handleMoveWidget}
+                        onSwap={swapWidgets}
+                        onDelete={handleDeleteWidget}
+                      />
+                    )}
+                    {WIDGET_TYPES.ADVANCED_FILTER_BAR !== widget.type && (
+                      <RowWidgetDropZone
+                        rowId={row.id}
+                        targetIndex={index + 1}
+                        onMove={handleMoveWidget}
+                      />
+                    )}
+                  </React.Fragment>
                 ))}
               </DraggableRowContainer>
             );

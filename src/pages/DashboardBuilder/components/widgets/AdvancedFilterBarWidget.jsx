@@ -5,6 +5,7 @@ import {
   FiFilter,
   FiX,
   FiMove,
+  FiTrash2,
 } from "react-icons/fi";
 import BaseWidget from "./BaseWidget";
 import { useBuilder } from "../../context/BuilderContext";
@@ -115,7 +116,7 @@ const AdvancedFilterBarWidget = ({
     const builderContext = useBuilder();
     updateWidgetProperty = builderContext.updateWidgetProperty;
     isInBuilderMode = true;
-  } catch (error) {
+  } catch {
     // useBuilder is not available (outside BuilderProvider)
     // This is expected when used in the main dashboard
     console.log(
@@ -294,21 +295,17 @@ const AdvancedFilterBarWidget = ({
         {isInBuilderMode && !isPreview && (
           <div style={controlsStyle}>
             <button
-              style={styles.controlButton}
+              type="button"
               onClick={(e) => handleDeleteSection(section.id, e)}
+              onMouseDown={(event) => event.stopPropagation()}
+              className="rounded-full bg-white/90 p-1.5 text-red-600 shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-300"
               title="Delete section"
-              onMouseEnter={(e) => {
-                e.target.style.background = "#dc2626";
-                e.target.style.transform = "scale(1.1)";
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = "#3b82f6";
-                e.target.style.transform = "scale(1)";
-              }}
             >
-              <FiX />
+              <FiTrash2 size={14} />
             </button>
-            <button
+
+            
+            {/* <button
               style={styles.controlButton}
               title="Drag to reorder"
               onMouseEnter={(e) => {
@@ -321,7 +318,7 @@ const AdvancedFilterBarWidget = ({
               }}
             >
               <FiMove />
-            </button>
+            </button> */}
           </div>
         )}
 
@@ -329,7 +326,7 @@ const AdvancedFilterBarWidget = ({
         <label style={styles.label}>{section.label}</label>
 
         {section.id === "date" && (
-          <div  style={styles.dateInputs}>
+          <div style={styles.dateInputs}>
             <input
               type="date"
               placeholder="From"

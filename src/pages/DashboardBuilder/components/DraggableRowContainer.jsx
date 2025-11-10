@@ -176,7 +176,6 @@ const DraggableRowContainer = ({
     gap: "16px",
     width: "100%",
     minHeight: "100px",
-    overflowX: "auto",
     alignItems: "stretch",
     padding: "8px 0",
   };

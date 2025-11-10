@@ -74,9 +74,7 @@ const BaseWidget = memo(
         )} */}
 
         {/* Widget Content */}
-        <div 
-        className="widget-content p-2 h-full overflow-auto"
-        >
+        <div className="widget-content p-2 h-full">
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">

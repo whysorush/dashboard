@@ -634,6 +634,60 @@ export const BuilderProvider = ({ children }) => {
     [widgets, saveToHistory]
   );
 
+  const swapWidgets = useCallback(
+    (sourceId, targetId) => {
+      if (sourceId === targetId) return;
+
+      const source = widgets.find((w) => w.id === sourceId);
+      const target = widgets.find((w) => w.id === targetId);
+
+      if (!source || !target) return;
+
+      const sourceRowId = source.position.rowId;
+      const targetRowId = target.position.rowId;
+
+      if (sourceRowId !== targetRowId) {
+        updateWidgetRowPosition(sourceId, targetRowId, target.position.index ?? 0);
+        return;
+      }
+
+      const rowId = sourceRowId;
+      const sourceIndex = source.position.index ?? 0;
+      const targetIndex = target.position.index ?? 0;
+
+      let next = widgets.map((w) => {
+        if (w.id === sourceId) {
+          return {
+            ...w,
+            position: {
+              ...w.position,
+              index: targetIndex,
+            },
+          };
+        }
+
+        if (w.id === targetId) {
+          return {
+            ...w,
+            position: {
+              ...w.position,
+              index: sourceIndex,
+            },
+          };
+        }
+
+        return w;
+      });
+
+      next = normalizeRowIndexing(next, rowId);
+      next = applyRowSizing(next, rowId);
+
+      setWidgets(next);
+      saveToHistory(next);
+    },
+    [widgets, updateWidgetRowPosition, saveToHistory]
+  );
+
   const toggleLockWidget = useCallback(
     (widgetId) => {
       const next = widgets.map((w) =>
@@ -851,6 +905,7 @@ export const BuilderProvider = ({ children }) => {
       updateWidget,
       updateWidgetProperty,
       updateWidgetRowPosition,
+      swapWidgets,
       duplicateWidget,
       toggleLockWidget,
       addRow,
@@ -877,6 +932,7 @@ export const BuilderProvider = ({ children }) => {
       updateWidget,
       updateWidgetProperty,
       updateWidgetRowPosition,
+      swapWidgets,
       duplicateWidget,
       toggleLockWidget,
       addRow,
