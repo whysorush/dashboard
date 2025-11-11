@@ -145,4 +145,3 @@ const WarningNotification = ({
 };
 
 export default WarningNotification;
-

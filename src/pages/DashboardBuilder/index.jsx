@@ -24,7 +24,6 @@ import StyleModeSelector from "../../components/StyleModeSelector";
 import ColorPalette from "../../components/ColorPalette";
 import UploadExcel from "./components/UploadExcel";
 import ExcelUploadWithHeaderDropdown from "./components/ExcelUploadWithHeaderDropdown";
-import InitialDataTable from "./components/InitialDataTable";
 import * as XLSX from "xlsx";
 import { ExcelDataProvider, useExcelData } from "./components/ExcelDataContext";
 

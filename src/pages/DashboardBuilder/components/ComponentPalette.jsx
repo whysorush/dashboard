@@ -43,6 +43,7 @@ const S = {
     border: `1px solid ${t.border}`,
     borderRadius: t.radius,
     padding: 10,
+    margin: 5,
     display: "flex",
     flexDirection: "column",
     gap: 10,
@@ -126,13 +127,13 @@ const S = {
       : hovered
       ? t.muted
       : t.card,
-    border: `1px solid ${
-      active
-        ? t.isDark
-          ? "rgba(37,99,235,0.45)"
-          : "rgba(37,99,235,0.35)"
-        : t.border
-    }`,
+    // border: `1px solid ${
+    //   active
+    //     ? t.isDark
+    //       ? "rgba(37,99,235,0.45)"
+    //       : "rgba(37,99,235,0.35)"
+    //     : t.border
+    // }`,
     borderRadius: 12,
     padding: active ? "5px" : "10px",
     cursor: "pointer",
@@ -166,7 +167,7 @@ const S = {
     border: `1px solid ${
       hovered || active
         ? t.isDark
-          ? "rgba(37,99,235,0.45)"
+          ? "#374151"
           : "rgba(37,99,235,0.35)"
         : t.border
     }`,
@@ -367,8 +368,10 @@ const ComponentPalette = ({ accordionMode = false }) => {
 
   return (
     <div
-    
-    style={(S.root(t), S.sectionWrap(t, true))}
+      style={
+        S.root(t)
+        // , S.sectionWrap(t, true))
+      }
     >
       <div style={S.header(t)}>
         <div style={S.headerLeft}>
