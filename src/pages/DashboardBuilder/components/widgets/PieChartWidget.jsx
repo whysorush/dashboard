@@ -9,6 +9,8 @@ import {
 } from "recharts";
 import { generateMockData } from "../../utils/mockDataGenerator";
 import { useThemeStyles } from "../../../../utils/themeUtils";
+import { useExcelData } from "../ExcelDataContext";
+import { prepareChartSeries } from "../../utils/excelDataTransforms";
 
 const styles = {
   header: {
@@ -41,16 +43,54 @@ const PieChartWidget = memo(({ widget }) => {
     getTooltipStyle,
     getAnimationConfig,
   } = useThemeStyles();
+  const config = widget?.config || {};
+  const { excelData, excelHeaders } = useExcelData();
+
+  const excelSeries = useMemo(
+    () =>
+      prepareChartSeries(excelData, excelHeaders, {
+        maxValueSeries: 1,
+      }),
+    [excelData, excelHeaders]
+  );
+
+  const fallbackData = useMemo(
+    () =>
+      generateMockData("pie", {
+        segments: 5,
+      }),
+    []
+  );
 
   const data = useMemo(() => {
-    return generateMockData("pie", {
-      segments: 5,
-    });
-  }, []);
+    if (!excelSeries.hasExcelData) {
+      return fallbackData;
+    }
+    const sorted = [...excelSeries.data].sort(
+      (a, b) => (b.value ?? 0) - (a.value ?? 0)
+    );
+    const maxSegments = config.maxSegments || 6;
+    if (sorted.length <= maxSegments) {
+      return sorted;
+    }
+    const visible = sorted.slice(0, maxSegments - 1);
+    const remainder = sorted.slice(maxSegments - 1);
+    const otherTotal = remainder.reduce(
+      (sum, item) => sum + (item.value ?? 0),
+      0
+    );
+    return [
+      ...visible,
+      {
+        name: "Other",
+        value: otherTotal,
+      },
+    ];
+  }, [excelSeries, fallbackData, config.maxSegments]);
 
   // const _kpis = useMemo(() => {
-  //   return calculateKPIs(data, widget?.config);
-  // }, [data, widget?.config]);
+  //   return calculateKPIs(data, config);
+  // }, [data, config]);
 
   // Get theme-aware colors and styles
   const colors = getChartColors();
@@ -58,7 +98,7 @@ const PieChartWidget = memo(({ widget }) => {
   const chartHeight = getChartHeight(widget?.position?.size || "medium");
   const tooltipStyle = getTooltipStyle();
   const animationConfig = getAnimationConfig(
-    widget?.config?.animations !== false
+    config.animations !== false
   );
 
   const total = useMemo(() => {
@@ -176,7 +216,7 @@ const PieChartWidget = memo(({ widget }) => {
               })()}
             </Pie>
             <Tooltip contentStyle={tooltipStyle} />
-            {widget?.config?.showLegend !== false && (
+            {config.showLegend !== false && (
               <Legend
                 wrapperStyle={{
                   color: colors.text,

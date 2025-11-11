@@ -10,6 +10,8 @@ import {
 } from "recharts";
 import { generateMockData } from "../../utils/mockDataGenerator";
 import { useThemeStyles } from "../../../../utils/themeUtils";
+import { useExcelData } from "../ExcelDataContext";
+import { prepareChartSeries } from "../../utils/excelDataTransforms";
 
 const styles = {
   container: {
@@ -48,12 +50,37 @@ const FunnelChartWidget = ({ widget }) => {
     getColorPalette,
     getTooltipStyle,
   } = useThemeStyles();
+  const config = widget?.config || {};
+  const { excelData, excelHeaders } = useExcelData();
+
+  const excelSeries = useMemo(
+    () =>
+      prepareChartSeries(excelData, excelHeaders, {
+        maxValueSeries: 1,
+      }),
+    [excelData, excelHeaders]
+  );
+
+  const fallbackData = useMemo(
+    () =>
+      generateMockData("funnel", {
+        stages: 5,
+      }),
+    []
+  );
 
   const data = useMemo(() => {
-    return generateMockData("funnel", {
-      stages: 5,
-    });
-  }, []);
+    if (!excelSeries.hasExcelData) {
+      return fallbackData;
+    }
+    const sorted = [...excelSeries.data].sort(
+      (a, b) => (b.value ?? 0) - (a.value ?? 0)
+    );
+    return sorted.slice(0, config.maxStages || 6).map((entry) => ({
+      ...entry,
+      value: Number.isFinite(entry.value) ? entry.value : 0,
+    }));
+  }, [excelSeries, fallbackData, config.maxStages]);
 
   // Get theme-aware colors and styles
   const colors = getChartColors();
@@ -63,7 +90,7 @@ const FunnelChartWidget = ({ widget }) => {
   const tooltipStyle = getTooltipStyle();
 
   const total = useMemo(() => {
-    const sum = data.reduce((acc, item) => acc + item.value, 0);
+    const sum = data.reduce((acc, item) => acc + (item.value ?? 0), 0);
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
@@ -97,7 +124,7 @@ const FunnelChartWidget = ({ widget }) => {
             <Funnel
               dataKey="value"
               data={data}
-              isAnimationActive={widget.config?.animations !== false}
+              isAnimationActive={config.animations !== false}
               width={600}
             >
               <LabelList

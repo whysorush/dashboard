@@ -25,8 +25,8 @@ const makeTheme = (theme, themeConfig, isDark) => {
     accentHover: themeConfig?.primary || "#1d4ed8",
     muted: isDark ? "#111827" : "#f1f5f9",
     pill: isDark ? "#111827" : "#f1f5f9",
-    shadow: isDark 
-      ? "0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.2)" 
+    shadow: isDark
+      ? "0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.2)"
       : "0 1px 2px rgba(0,0,0,0.05), 0 8px 24px rgba(0,0,0,0.08)",
     radius: 14,
     activeRing: isDark
@@ -54,8 +54,9 @@ const S = {
     padding: 14,
     alignItems: "center",
     justifyContent: "space-between",
-    boxShadow: t.shadow,
+    // boxShadow: t.shadow,
   }),
+
   headerLeft: {
     display: "flex",
     alignItems: "center",
@@ -64,6 +65,7 @@ const S = {
     fontSize: 18,
     height: 28,
   },
+
   addRowBtn: (t, hovered) => ({
     display: "inline-flex",
     alignItems: "center",
@@ -288,7 +290,10 @@ const CategorySection = ({
 const ComponentPalette = ({ accordionMode = false }) => {
   // Use global theme context instead of local styleMode
   const { theme, themeConfig, isDark } = useTheme();
-  const t = useMemo(() => makeTheme(theme, themeConfig, isDark), [theme, themeConfig, isDark]);
+  const t = useMemo(
+    () => makeTheme(theme, themeConfig, isDark),
+    [theme, themeConfig, isDark]
+  );
   const { addRow } = useBuilder();
 
   const initialExpanded = useMemo(
@@ -361,11 +366,9 @@ const ComponentPalette = ({ accordionMode = false }) => {
   const categories = useMemo(() => Object.entries(WIDGET_CATEGORIES), []);
 
   return (
-    <div 
+    <div
     
     style={(S.root(t), S.sectionWrap(t, true))}
-    
-    
     >
       <div style={S.header(t)}>
         <div style={S.headerLeft}>

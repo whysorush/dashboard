@@ -1,13 +1,15 @@
 // src/pages/DashboardBuilder/components/widgets/DataTableWidget.jsx
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { FiChevronUp, FiChevronDown, FiSearch } from "react-icons/fi";
 import BaseWidget from "./BaseWidget";
-import FilterBar from "./FilterBar";
 import { useThemeStyles } from "../../../../utils/themeUtils";
+import { useExcelData } from "../ExcelDataContext";
+import { coerceNumber } from "../../utils/excelDataTransforms";
 
 const DataTableWidget = ({ widget, isSelected, onClick }) => {
   const { getChartColors, getStyleProperties, getCSSVariables, isDark } =
     useThemeStyles();
+  const { excelData, excelHeaders } = useExcelData();
 
   // Get theme-aware colors and styles
   const colors = getChartColors();
@@ -21,8 +23,49 @@ const DataTableWidget = ({ widget, isSelected, onClick }) => {
   const [selectedRows, setSelectedRows] = useState(new Set());
   const itemsPerPage = 5;
 
-  // Mock data
-  const rawData = useMemo(
+  const hasExcelData =
+    Array.isArray(excelData) && excelData.length > 0 && Array.isArray(excelHeaders);
+
+  const excelRows = useMemo(() => {
+    if (!hasExcelData) return [];
+
+    return excelData.map((row, index) => {
+      const normalized = {};
+      Object.entries(row || {}).forEach(([key, value]) => {
+        normalized[String(key)] = value;
+      });
+
+      return {
+        ...normalized,
+        __rowKey: index,
+      };
+    });
+  }, [excelData, hasExcelData]);
+
+  const defaultColumns = useMemo(
+    () => [
+      { key: "name", label: "Name", sortable: true },
+      { key: "category", label: "Category", sortable: true },
+      { key: "sales", label: "Sales", sortable: true, format: "currency" },
+      { key: "growth", label: "Growth", sortable: true, format: "percentage" },
+      { key: "status", label: "Status", sortable: true },
+    ],
+    []
+  );
+
+  const columns = useMemo(() => {
+    if (!hasExcelData || !excelHeaders?.length) {
+      return defaultColumns;
+    }
+
+    return excelHeaders.map((header) => ({
+      key: header,
+      label: header,
+      sortable: true,
+    }));
+  }, [defaultColumns, excelHeaders, hasExcelData]);
+
+  const fallbackData = useMemo(
     () => [
       {
         id: 1,
@@ -92,11 +135,20 @@ const DataTableWidget = ({ widget, isSelected, onClick }) => {
     []
   );
 
+  const dataset = useMemo(() => {
+    if (hasExcelData) {
+      return excelRows;
+    }
+    return fallbackData;
+  }, [excelRows, fallbackData, hasExcelData]);
+
   // Filter and sort data
   const processedData = useMemo(() => {
-    let filtered = rawData.filter((item) =>
+    let filtered = dataset.filter((item) =>
       Object.values(item).some((val) =>
-        val.toString().toLowerCase().includes(searchTerm.toLowerCase())
+        String(val ?? "")
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
       )
     );
 
@@ -105,16 +157,25 @@ const DataTableWidget = ({ widget, isSelected, onClick }) => {
         const aVal = a[sortField];
         const bVal = b[sortField];
 
-        if (sortDirection === "asc") {
-          return aVal > bVal ? 1 : -1;
-        } else {
-          return aVal < bVal ? 1 : -1;
+        const aNum = coerceNumber(aVal);
+        const bNum = coerceNumber(bVal);
+
+        if (!Number.isNaN(aNum) && !Number.isNaN(bNum)) {
+          return sortDirection === "asc" ? aNum - bNum : bNum - aNum;
         }
+
+        const aStr = String(aVal ?? "");
+        const bStr = String(bVal ?? "");
+        const comparison = aStr.localeCompare(bStr, undefined, {
+          numeric: true,
+          sensitivity: "base",
+        });
+        return sortDirection === "asc" ? comparison : -comparison;
       });
     }
 
     return filtered;
-  }, [rawData, searchTerm, sortField, sortDirection]);
+  }, [dataset, searchTerm, sortField, sortDirection]);
 
   // Pagination
   const paginatedData = useMemo(() => {
@@ -134,9 +195,15 @@ const DataTableWidget = ({ widget, isSelected, onClick }) => {
     }
   };
 
-  const handleFilterChange = (key, value) => {
-    console.log("Filter changed:", key, value);
-  };
+  const getRowKey = useCallback((row) => {
+    if (!row || typeof row !== "object") return null;
+    if (Object.prototype.hasOwnProperty.call(row, "__rowKey")) {
+      return row.__rowKey;
+    }
+    if (row.id != null) return row.id;
+    if (row.__rowIndex != null) return row.__rowIndex;
+    return JSON.stringify(row);
+  }, []);
 
   const handleRowClick = (rowId) => {
     setSelectedRows(prev => {
@@ -154,33 +221,33 @@ const DataTableWidget = ({ widget, isSelected, onClick }) => {
     if (selectedRows.size === paginatedData.length) {
       setSelectedRows(new Set());
     } else {
-      setSelectedRows(new Set(paginatedData.map(r => r.id)));
+      setSelectedRows(new Set(paginatedData.map((r) => getRowKey(r))));
     }
   };
 
   const isRowSelected = (rowId) => selectedRows.has(rowId);
-  const isAllSelected = selectedRows.size === paginatedData.length && paginatedData.length > 0;
-
-  const columns = [
-    { key: "name", label: "Name", sortable: true },
-    { key: "category", label: "Category", sortable: true },
-    { key: "sales", label: "Sales", sortable: true, format: "currency" },
-    { key: "growth", label: "Growth", sortable: true, format: "percentage" },
-    { key: "status", label: "Status", sortable: true },
-  ];
+  const isAllSelected =
+    selectedRows.size === paginatedData.length && paginatedData.length > 0;
 
   const formatValue = (value, format) => {
     switch (format) {
       case "currency":
-        return `$${value.toLocaleString()}`;
-      case "percentage":
-        return `${value > 0 ? "+" : ""}${value}%`;
+        return Number.isFinite(coerceNumber(value))
+          ? `$${Number(coerceNumber(value)).toLocaleString()}`
+          : value;
+      case "percentage": {
+        if (!Number.isFinite(coerceNumber(value))) return value;
+        const numberValue = Number(coerceNumber(value));
+        const prefix = numberValue > 0 ? "+" : "";
+        return `${prefix}${numberValue}%`;
+      }
       default:
         return value;
     }
   };
 
   return (
+    <BaseWidget widget={widget} isSelected={isSelected} onClick={onClick}>
     <div>
       {/* Search Bar */}
       <div className="mb-4">
@@ -265,22 +332,26 @@ const DataTableWidget = ({ widget, isSelected, onClick }) => {
             </tr>
           </thead>
           <tbody style={{ backgroundColor: colors.background }}>
-            {paginatedData.map((row, index) => (
+            {paginatedData.map((row, index) => {
+              const rowKey = getRowKey(row);
+              const selected = isRowSelected(rowKey);
+
+              return (
               <tr
-                key={row.id}
+                key={rowKey ?? index}
                 className="border-b transition-all duration-200 cursor-pointer select-none"
                 style={{
                   borderBottomColor: colors.border,
                   transitionDuration: styleProps.animationDuration,
-                  backgroundColor: isRowSelected(row.id) ? colors.primary : 'transparent',
-                  color: isRowSelected(row.id) ? '#ffffff' : colors.text,
+                  backgroundColor: selected ? colors.primary : 'transparent',
+                  color: selected ? '#ffffff' : colors.text,
                   transform: 'scale(1)',
                   userSelect: 'none',
                   transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
-                onClick={() => handleRowClick(row.id)}
+                onClick={() => handleRowClick(rowKey)}
                 onMouseEnter={(e) => {
-                  if (!isRowSelected(row.id)) {
+                  if (!selected) {
                     e.currentTarget.style.backgroundColor = colors.hover || 'rgba(0, 0, 0, 0.05)';
                     e.currentTarget.style.transform = 'scale(1.01)';
                     e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
@@ -288,7 +359,7 @@ const DataTableWidget = ({ widget, isSelected, onClick }) => {
                   }
                 }}
                 onMouseLeave={(e) => {
-                  if (!isRowSelected(row.id)) {
+                  if (!selected) {
                     e.currentTarget.style.backgroundColor = 'transparent';
                     e.currentTarget.style.transform = 'scale(1)';
                     e.currentTarget.style.boxShadow = 'none';
@@ -299,19 +370,22 @@ const DataTableWidget = ({ widget, isSelected, onClick }) => {
                 <td className="py-3 px-4">
                   <input
                     type="checkbox"
-                    checked={isRowSelected(row.id)}
-                    onChange={() => handleRowClick(row.id)}
+                    checked={selected}
+                    onChange={() => handleRowClick(rowKey)}
                     onClick={(e) => e.stopPropagation()}
                     style={{ cursor: 'pointer' }}
                   />
                 </td>
-                {columns.map((column) => (
+                {columns.map((column) => {
+                  const cellValue = row[column.key];
+
+                  if (!hasExcelData && column.key === "status") {
+                    return (
                   <td
                     key={column.key}
                     className="py-3 px-4"
                     style={{ color: colors.text }}
                   >
-                    {column.key === "status" ? (
                       <span
                         className="inline-flex px-2 py-1 text-xs rounded-full"
                         style={{
@@ -332,7 +406,17 @@ const DataTableWidget = ({ widget, isSelected, onClick }) => {
                       >
                         {row[column.key]}
                       </span>
-                    ) : column.key === "growth" ? (
+                    </td>
+                    );
+                  }
+
+                  if (!hasExcelData && column.key === "growth") {
+                    return (
+                  <td
+                    key={column.key}
+                    className="py-3 px-4"
+                    style={{ color: colors.text }}
+                  >
                       <span
                         style={{
                           color: row[column.key] > 0 ? "#22c55e" : "#ef4444",
@@ -340,13 +424,36 @@ const DataTableWidget = ({ widget, isSelected, onClick }) => {
                       >
                         {formatValue(row[column.key], column.format)}
                       </span>
-                    ) : (
-                      formatValue(row[column.key], column.format)
-                    )}
                   </td>
-                ))}
+                    );
+                  }
+
+                  let displayValue;
+
+                  if (column.format) {
+                    displayValue = formatValue(cellValue, column.format);
+                  } else {
+                    const numericValue = coerceNumber(cellValue);
+                    if (!Number.isNaN(numericValue) && typeof cellValue !== "string") {
+                      displayValue = numericValue;
+                    } else {
+                      displayValue = cellValue ?? "";
+                    }
+                  }
+
+                  return (
+                  <td
+                    key={column.key}
+                    className="py-3 px-4"
+                    style={{ color: colors.text }}
+                  >
+                    {displayValue}
+                  </td>
+                  );
+                })}
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -396,6 +503,7 @@ const DataTableWidget = ({ widget, isSelected, onClick }) => {
         </div>
       </div>
     </div>
+    </BaseWidget>
   );
 };
 

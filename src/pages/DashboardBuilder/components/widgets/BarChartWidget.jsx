@@ -10,11 +10,12 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import BaseWidget from "./BaseWidget";
 import KPIDisplay from "./KPIDisplay";
 import FilterBar from "./FilterBar";
 import { generateMockData } from "../../utils/mockDataGenerator";
 import { useThemeStyles } from "../../../../utils/themeUtils";
+import { useExcelData } from "../ExcelDataContext";
+import { prepareChartSeries } from "../../utils/excelDataTransforms";
 
 const styles = {
   header: {
@@ -48,21 +49,71 @@ const BarChartWidget = ({ widget }) => {
     getTooltipStyle,
     getAnimationConfig,
   } = useThemeStyles();
+  const { excelData, excelHeaders } = useExcelData();
+
+  const config = widget?.config || {};
+
+  const neededSeries =
+    1 + (config.stacked ? 1 : 0) + (config.comparisonPeriod ? 1 : 0);
+
+  const excelSeries = useMemo(
+    () =>
+      prepareChartSeries(excelData, excelHeaders, {
+        maxValueSeries: neededSeries,
+        limit: config.dataPoints ? Math.max(1, config.dataPoints) : undefined,
+      }),
+    [excelData, excelHeaders, neededSeries, config.dataPoints]
+  );
 
   // Generate realistic data based on widget config
+  const fallbackData = useMemo(
+    () =>
+      generateMockData("categories", {
+        categories: config.dataPoints || 5,
+        includeComparison: config.comparisonPeriod,
+        timeRange: config.timeRange || "monthly",
+        trend: config.trend || "up",
+      }),
+    [config.dataPoints, config.comparisonPeriod, config.timeRange, config.trend]
+  );
+
   const data = useMemo(() => {
-    return generateMockData("categories", {
-      categories: widget.config?.dataPoints || 5,
-      includeComparison: widget.config?.comparisonPeriod,
-      timeRange: widget.config?.timeRange || "monthly",
-      trend: widget.config?.trend || "up",
+    if (!excelSeries.hasExcelData) {
+      return fallbackData;
+    }
+
+    const { data: seriesData, valueHeaders } = excelSeries;
+    const stackedIndex = config.stacked ? 1 : null;
+    const comparisonIndex =
+      config.comparisonPeriod && config.stacked ? 2 : config.comparisonPeriod ? 1 : null;
+
+    return seriesData.map((row, index, arr) => {
+      const enriched = { ...row };
+
+      if (config.stacked) {
+        enriched.value2 =
+          stackedIndex !== null && valueHeaders.length > stackedIndex
+            ? row[`value${stackedIndex + 1}`] ?? row.value2 ?? 0
+            : row.value2 ?? 0;
+      }
+
+      if (config.comparisonPeriod) {
+        if (comparisonIndex !== null && valueHeaders.length > comparisonIndex) {
+          const columnKey = comparisonIndex === 0 ? "value" : `value${comparisonIndex + 1}`;
+          enriched.previousValue = row[columnKey] ?? 0;
+        } else {
+          enriched.previousValue = index > 0 ? arr[index - 1].value : row.value;
+        }
+      }
+
+      return enriched;
     });
-  }, [widget.config]);
+  }, [excelSeries, fallbackData, config.stacked, config.comparisonPeriod]);
 
   // KPIs are available if needed in the future
   // const _kpis = useMemo(() => {
-  //   return calculateKPIs(data, widget.config);
-  // }, [data, widget.config]);
+  //   return calculateKPIs(data, config);
+  // }, [data, config]);
 
   // Get theme-aware colors and styles
   const colors = getChartColors();
@@ -72,7 +123,7 @@ const BarChartWidget = ({ widget }) => {
   // const _colorPalette = getColorPalette();
   const tooltipStyle = getTooltipStyle();
   const animationConfig = getAnimationConfig(
-    widget.config?.animations !== false
+    config.animations !== false
   );
 
   // Determine bar color and styles - prioritize global colors
@@ -115,7 +166,7 @@ const BarChartWidget = ({ widget }) => {
             barGap={5}
             barCategoryGap={10}
           >
-            {widget.config?.showGrid !== false && (
+            {config.showGrid !== false && (
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke={colors.grid}
@@ -144,7 +195,7 @@ const BarChartWidget = ({ widget }) => {
               contentStyle={tooltipStyle}
               cursor={{ fill: "rgba(0,0,0,0.05)" }}
             />
-            {widget.config?.showLegend !== false && (
+            {config.showLegend !== false && (
               <Legend
                 wrapperStyle={{
                   paddingTop: 10,
@@ -166,7 +217,7 @@ const BarChartWidget = ({ widget }) => {
               animationDuration={animationConfig.duration}
               maxBarSize={60}
             />
-            {widget.config?.comparisonPeriod && (
+            {config.comparisonPeriod && (
               <Bar
                 name="Previous Period"
                 dataKey="previousValue"
@@ -181,7 +232,7 @@ const BarChartWidget = ({ widget }) => {
                 maxBarSize={60}
               />
             )}
-            {widget.config?.stacked && (
+            {config.stacked && (
               <Bar
                 name="Secondary Metric"
                 dataKey="value2"

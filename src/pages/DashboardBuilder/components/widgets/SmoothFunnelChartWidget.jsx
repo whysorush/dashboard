@@ -8,9 +8,9 @@ import {
   Tooltip,
   Cell,
 } from "recharts";
-import BaseWidget from "./BaseWidget";
 import { useThemeStyles } from "../../../../utils/themeUtils";
-import { generateMockData } from "../../utils/mockDataGenerator";
+import { useExcelData } from "../ExcelDataContext";
+import { prepareChartSeries } from "../../utils/excelDataTransforms";
 
 const styles = {
   container: {
@@ -46,7 +46,6 @@ const styles = {
  */
 const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
   const {
-    styleMode,
     getChartColors,
     getCSSVariables,
     getChartHeight,
@@ -64,23 +63,65 @@ const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
       },
     [widget?.config]
   );
-  const data = useMemo(() => {
-    return generateMockData("categories", {
-      categories: config.dataPoints || 10,
-      includeComparison: config.comparisonPeriod,
-      timeRange: config.timeRange || "monthly",
-      trend: config.trend || "random",
-    });
-  }, [config]);
+  const { excelData, excelHeaders } = useExcelData();
+
+  const excelSeries = useMemo(
+    () =>
+      prepareChartSeries(excelData, excelHeaders, {
+        maxValueSeries: 1,
+        limit: config.dataPoints ? Math.max(1, config.dataPoints) : undefined,
+      }),
+    [excelData, excelHeaders, config.dataPoints]
+  );
+
+  const fallbackStageData = useMemo(
+    () => [
+      { name: "Manufacturing", value: 30000 },
+      { name: "Marketing", value: 25000 },
+      { name: "Branding", value: 35000 },
+      { name: "Sales", value: 20000 },
+      { name: "Distribution", value: 15000 },
+      { name: "Customer Service", value: 10000 },
+      { name: "Retention", value: 5000 },
+    ],
+    []
+  );
+
+  const chartData = useMemo(() => {
+    if (!excelSeries.hasExcelData) {
+      return fallbackStageData.map((entry) => ({
+        ...entry,
+        display: new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+          maximumFractionDigits: 0,
+        }).format(entry.value ?? 0),
+      }));
+    }
+
+    const sorted = [...excelSeries.data].sort(
+      (a, b) => (b.value ?? 0) - (a.value ?? 0)
+    );
+
+    return sorted.slice(0, config.maxStages || 7).map((entry) => ({
+      name: entry.name,
+      value: Number.isFinite(entry.value) ? entry.value : 0,
+      display: new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0,
+      }).format(entry.value ?? 0),
+    }));
+  }, [excelSeries, fallbackStageData, config.maxStages]);
 
   const total = useMemo(() => {
-    const sum = data.reduce((acc, item) => acc + item.value, 0);
+    const sum = chartData.reduce((acc, item) => acc + (item.value ?? 0), 0);
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
       maximumFractionDigits: 0,
     }).format(sum);
-  }, [data]);
+  }, [chartData]);
 
   // Get theme-aware colors and styles
   const colors = getChartColors();
@@ -90,19 +131,6 @@ const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
   const animationConfig = getAnimationConfig(config.animations !== false);
 
   // Stage data for the funnel (top -> bottom)
-  const stageData = useMemo(
-    () => [
-      { name: "Manufacturing", value: 30000, display: "30,000" },
-      { name: "Marketing", value: 25000, display: "25,000" },
-      { name: "Branding", value: 35000, display: "35,000" },
-      { name: "Sales", value: 20000, display: "20,000" },
-      { name: "Distribution", value: 15000, display: "15,000" },
-      { name: "Customer Service", value: 10000, display: "10,000" },
-      { name: "Retention", value: 5000, display: "5,000" },
-    ],
-    []
-  );
-
   // Colors using global theme colors
   const cellColors = useMemo(() => {
     return [
@@ -148,7 +176,7 @@ const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
                 }).format(val)
               }
             />
-            <Funnel dataKey="value" data={stageData} width={600}>
+            <Funnel dataKey="value" data={chartData} width={600}>
               <LabelList
                 position="inside"
                 fill={colors.text}
@@ -162,7 +190,7 @@ const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
                 fill={colors.textSecondary}
                 style={{ fontFamily: "var(--font-family)", fontSize: "12px" }}
               />
-              {stageData.map((entry, idx) => (
+              {chartData.map((entry, idx) => (
                 <Cell
                   key={`cell-${idx}`}
                   fill={cellColors[idx % cellColors.length]}

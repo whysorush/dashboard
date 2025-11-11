@@ -11,10 +11,11 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
-import BaseWidget from "./BaseWidget";
 import KPIDisplay from "./KPIDisplay";
 import FilterBar from "./FilterBar";
 import { generateMockData, calculateKPIs } from "../../utils/mockDataGenerator";
+import { useExcelData } from "../ExcelDataContext";
+import { prepareChartSeries } from "../../utils/excelDataTransforms";
 import { useTheme } from "../../../../context/ThemeContext";
 import { useGlobalColors } from "../../../../hooks/useGlobalColors";
 
@@ -42,41 +43,95 @@ const MultiLineChartWidget = ({ widget }) => {
     kpiPosition: widget?.config?.kpiPosition || "top",
   }), [widget?.config]);
 
-  // Generate mock data with multiple series - optimized with stable data generation
-  const data = useMemo(() => {
-    // Use a stable seed for consistent data generation
+  const { excelData, excelHeaders } = useExcelData();
+  const requiredSeries =
+    Math.max(1, config.seriesCount) + (config.includeComparison ? 1 : 0);
+
+  const excelSeries = useMemo(
+    () =>
+      prepareChartSeries(excelData, excelHeaders, {
+        maxValueSeries: requiredSeries,
+        limit: config.dataPoints ? Math.max(1, config.dataPoints) : undefined,
+      }),
+    [excelData, excelHeaders, requiredSeries, config.dataPoints]
+  );
+
+  const fallbackData = useMemo(() => {
     const seed = `${config.dataPoints}-${config.trend}-${config.timeRange}`;
     const baseData = generateMockData("time-series", {
       points: config.dataPoints,
       trend: config.trend,
       timeRange: config.timeRange,
       includeComparison: config.includeComparison,
-      seed, // Add seed for stable data generation
+      seed,
     });
 
-    // Pre-calculate series multipliers to avoid random calculations in map
     const seriesMultipliers = [];
     for (let i = 1; i < config.seriesCount && i < config.seriesNames.length; i++) {
       seriesMultipliers.push({
-        variation: 0.3 + (i * 0.1), // More predictable variation
+        variation: 0.3 + i * 0.1,
         trendMultiplier: i === 1 ? 0.8 : 0.6,
       });
     }
 
     return baseData.map((point) => {
       const multiLinePoint = { ...point };
-
-      // Add multiple data series with pre-calculated multipliers
       seriesMultipliers.forEach((multiplier, i) => {
         const seriesKey = `value${i + 2}`;
         multiLinePoint[seriesKey] = Math.round(
           point.value * multiplier.variation * multiplier.trendMultiplier
         );
       });
-
       return multiLinePoint;
     });
   }, [config]);
+
+  const lineKeys = useMemo(
+    () =>
+      Array.from({ length: Math.max(1, config.seriesCount) }, (_, idx) =>
+        idx === 0 ? "value" : `value${idx + 1}`
+      ),
+    [config.seriesCount]
+  );
+
+  const comparisonKeyIndex = useMemo(() => {
+    if (!config.includeComparison) return null;
+    return lineKeys.length;
+  }, [config.includeComparison, lineKeys]);
+
+  const data = useMemo(() => {
+    if (!excelSeries.hasExcelData) {
+      return fallbackData;
+    }
+
+    const { data: seriesData, valueHeaders } = excelSeries;
+    const comparisonKey =
+      comparisonKeyIndex !== null && valueHeaders.length > comparisonKeyIndex
+        ? comparisonKeyIndex === 0
+          ? "value"
+          : `value${comparisonKeyIndex + 1}`
+        : null;
+
+    return seriesData.map((row, index, arr) => {
+      const enriched = { ...row };
+
+      lineKeys.forEach((key) => {
+        if (enriched[key] === undefined) {
+          enriched[key] = 0;
+        }
+      });
+
+      if (config.includeComparison) {
+        if (comparisonKey && enriched[comparisonKey] !== undefined) {
+          enriched.previousValue = enriched[comparisonKey];
+        } else {
+          enriched.previousValue = index > 0 ? arr[index - 1].value : enriched.value;
+        }
+      }
+
+      return enriched;
+    });
+  }, [excelSeries, fallbackData, config.includeComparison, comparisonKeyIndex, lineKeys]);
 
   // Calculate KPIs from the primary data series - memoized with config
   const kpis = useMemo(() => {
@@ -94,6 +149,9 @@ const MultiLineChartWidget = ({ widget }) => {
     return size === "large" ? 350 : size === "medium" ? 300 : 250;
   }, [widget?.position?.size]);
 
+  const excelHasData = excelSeries.hasExcelData;
+  const excelValueHeaders = excelSeries.valueHeaders || [];
+
   // Memoize series configuration with global colors support
   const seriesConfig = useMemo(() => {
     // Use global colors with fallbacks
@@ -102,19 +160,34 @@ const MultiLineChartWidget = ({ widget }) => {
       globalColors.secondary,
       globalColors.accent,
     ];
-    
+
+    const derivedNames = excelHasData
+      ? lineKeys.map(
+          (_, idx) => excelValueHeaders[idx] || config.seriesNames[idx] || `Series ${idx + 1}`
+        )
+      : config.seriesNames;
+
     return {
       colors: widget?.config?.seriesColors || defaultColors,
       styles: widget?.config?.seriesStyles || ["solid", "dashed", "dotted"],
-      names: config.seriesNames,
+      names: derivedNames,
       count: config.seriesCount,
     };
-  }, [globalColors, widget?.config?.seriesColors, widget?.config?.seriesStyles, config]);
+  }, [
+    globalColors,
+    widget?.config?.seriesColors,
+    widget?.config?.seriesStyles,
+    config,
+    excelHasData,
+    excelValueHeaders,
+    lineKeys,
+  ]);
 
   // Calculate average for reference line (using primary series) - memoized
   const average = useMemo(() => {
-    if (!config.showAverage) return null;
-    return data.reduce((sum, item) => sum + item.value, 0) / data.length;
+    if (!config.showAverage || data.length === 0) return null;
+    const sum = data.reduce((sumAcc, item) => sumAcc + (item.value ?? 0), 0);
+    return sum / data.length;
   }, [data, config.showAverage]);
 
   // Memoized stroke dash array function

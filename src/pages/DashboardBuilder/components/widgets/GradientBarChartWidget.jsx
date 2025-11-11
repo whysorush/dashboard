@@ -9,10 +9,10 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import BaseWidget from "./BaseWidget";
 import { generateMockData } from "../../utils/mockDataGenerator";
 import { useThemeStyles } from "../../../../utils/themeUtils";
 import { useExcelData } from "../ExcelDataContext";
+import { prepareChartSeries } from "../../utils/excelDataTransforms";
 
 const styles = {
   container: {
@@ -84,61 +84,46 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
   const currentTimeRange = timeRangeMap[selectedTimeRange] || "monthly";
 
   // Build chart data from Excel when available, else fallback to mock
-  const { chartData, categoryHeader, valueHeader } = useMemo(() => {
-    const hasExcel = Array.isArray(excelData) && excelData.length > 0 && Array.isArray(excelHeaders) && excelHeaders.length > 0;
+  const excelSeries = useMemo(
+    () =>
+      prepareChartSeries(excelData, excelHeaders, {
+        maxValueSeries: config.comparisonPeriod ? 2 : 1,
+        limit: config.dataPoints ? Math.max(1, config.dataPoints) : undefined,
+      }),
+    [excelData, excelHeaders, config.comparisonPeriod, config.dataPoints]
+  );
 
-    if (!hasExcel) {
-      const fallback = generateMockData("categories", {
+  const fallbackData = useMemo(
+    () =>
+      generateMockData("categories", {
         categories: config.dataPoints || 10,
         includeComparison: config.comparisonPeriod,
         timeRange: currentTimeRange,
         trend: config.trend || "random",
-      });
-      return { chartData: fallback, categoryHeader: "name", valueHeader: "value" };
+      }),
+    [config.dataPoints, config.comparisonPeriod, config.trend, currentTimeRange]
+  );
+
+  const chartData = useMemo(() => {
+    if (!excelSeries.hasExcelData) {
+      return fallbackData;
     }
 
-    // Heuristic: choose a numeric column as value, else known names
-    const preferredValueNames = ["value", "amount", "order amount", "quantity", "qty", "total"];
-    const headerLc = excelHeaders.map((h) => String(h || "").toLowerCase());
+    const { data, valueHeaders } = excelSeries;
 
-    let chosenValue = null;
-    for (const p of preferredValueNames) {
-      const idx = headerLc.indexOf(p);
-      if (idx >= 0) {
-        chosenValue = excelHeaders[idx];
-        break;
-      }
+    if (!config.comparisonPeriod) {
+      return data;
     }
 
-    if (!chosenValue) {
-      // Pick the column with most numeric-like values
-      let bestHeader = null;
-      let bestScore = -1;
-      for (const h of excelHeaders) {
-        let score = 0;
-        for (let i = 0; i < Math.min(excelData.length, 20); i++) {
-          const v = excelData[i]?.[h];
-          const num = Number(v);
-          if (!Number.isNaN(num) && v !== "" && v !== null && v !== undefined) score++;
-        }
-        if (score > bestScore) {
-          bestScore = score;
-          bestHeader = h;
-        }
-      }
-      chosenValue = bestHeader || excelHeaders[0];
-    }
-
-    // Category: first non-value header
-    const chosenCategory = excelHeaders.find((h) => h !== chosenValue) || excelHeaders[0];
-
-    const mapped = excelData.map((row) => ({
-      name: String(row?.[chosenCategory] ?? ""),
-      value: Number(row?.[chosenValue] ?? 0) || 0,
+    return data.map((row, index, arr) => ({
+      ...row,
+      previousValue: valueHeaders.length > 1
+        ? row.value2 ?? row.value
+        : index > 0
+          ? arr[index - 1].value
+          : row.value,
     }));
-
-    return { chartData: mapped, categoryHeader: chosenCategory, valueHeader: chosenValue };
-  }, [excelData, excelHeaders, config, currentTimeRange]);
+  }, [excelSeries, fallbackData, config.comparisonPeriod]);
 
   const total = useMemo(() => {
     const sum = chartData.reduce((acc, item) => acc + (Number(item.value) || 0), 0);

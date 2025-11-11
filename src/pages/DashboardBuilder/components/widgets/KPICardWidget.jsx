@@ -1,12 +1,14 @@
 // src/pages/DashboardBuilder/components/widgets/KPICardWidget.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { FiTrendingUp, FiTrendingDown, FiActivity } from "react-icons/fi";
-import BaseWidget from "./BaseWidget";
 import { useThemeStyles } from "../../../../utils/themeUtils";
+import { useExcelData } from "../ExcelDataContext";
+import { computeKPIValues } from "../../utils/excelDataTransforms";
 
 const KPICardWidget = ({ widget, isSelected, onClick }) => {
   const { getChartColors, getStyleProperties, getCSSVariables } =
     useThemeStyles();
+  const { excelData, excelHeaders } = useExcelData();
 
   // Get theme-aware colors and styles
   const colors = getChartColors();
@@ -27,6 +29,28 @@ const KPICardWidget = ({ widget, isSelected, onClick }) => {
   const [error, setError] = useState(null);
 
   const apiUrl = widget?.config?.apiUrl;
+
+  const excelKpi = useMemo(
+    () =>
+      computeKPIValues(excelData, excelHeaders, {
+        valueHeaders: widget?.config?.valueHeaders,
+        aggregation: widget?.config?.aggregation || "total",
+      }),
+    [excelData, excelHeaders, widget?.config?.valueHeaders, widget?.config?.aggregation]
+  );
+
+  const excelDerivedData = useMemo(() => {
+    if (!excelKpi.hasExcelData) return null;
+    const sparklineValues = excelKpi.values.slice(-Math.max(12, excelKpi.values.length));
+
+    return {
+      value: excelKpi.primaryValue,
+      previousValue: excelKpi.previous,
+      label: widget.config?.title || excelKpi.valueHeader || "Total",
+      change: Number.isFinite(excelKpi.change) ? excelKpi.change.toFixed(1) : "0.0",
+      trend: sparklineValues.length ? sparklineValues : [excelKpi.primaryValue],
+    };
+  }, [excelKpi, widget.config?.title]);
 
   useEffect(() => {
     if (!apiUrl) {
@@ -96,7 +120,9 @@ const KPICardWidget = ({ widget, isSelected, onClick }) => {
   };
 
   // Decide which data to render
-  const effectiveData = apiUrl ? apiData : fallbackData;
+  const effectiveData = apiUrl
+    ? apiData
+    : excelDerivedData || fallbackData;
   const isBlank = apiUrl && !loading && (!effectiveData || error);
   const isPositive = !isBlank && parseFloat((effectiveData?.change ?? 0)) > 0;
 

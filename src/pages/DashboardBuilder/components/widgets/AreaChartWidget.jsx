@@ -12,6 +12,8 @@ import {
 } from "recharts";
 import { generateMockData } from "../../utils/mockDataGenerator";
 import { useThemeStyles } from "../../../../utils/themeUtils";
+import { useExcelData } from "../ExcelDataContext";
+import { prepareChartSeries } from "../../utils/excelDataTransforms";
 
 const styles = {
   header: {
@@ -44,13 +46,33 @@ const AreaChartWidget = ({ widget }) => {
     getTooltipStyle,
     getAnimationConfig,
   } = useThemeStyles();
+  const config = widget?.config || {};
+  const { excelData, excelHeaders } = useExcelData();
+
+  const excelSeries = useMemo(
+    () =>
+      prepareChartSeries(excelData, excelHeaders, {
+        maxValueSeries: 1,
+        limit: config.dataPoints ? Math.max(1, config.dataPoints) : undefined,
+      }),
+    [excelData, excelHeaders, config.dataPoints]
+  );
+
+  const fallbackData = useMemo(
+    () =>
+      generateMockData("time-series", {
+        points: config.dataPoints || 12,
+        trend: "increasing",
+      }),
+    [config.dataPoints]
+  );
 
   const data = useMemo(() => {
-    return generateMockData("time-series", {
-      points: widget.config?.dataPoints || 12,
-      trend: "increasing",
-    });
-  }, [widget.config?.dataPoints]);
+    if (!excelSeries.hasExcelData) {
+      return fallbackData;
+    }
+    return excelSeries.data;
+  }, [excelSeries, fallbackData]);
 
   const total = useMemo(() => {
     const sum = data.reduce((acc, item) => acc + (item?.value ?? 0), 0);
@@ -69,7 +91,7 @@ const AreaChartWidget = ({ widget }) => {
   // const _gradientColors = getGradientColors(colors.primary);
   const tooltipStyle = getTooltipStyle();
   const animationConfig = getAnimationConfig(
-    widget.config?.animations !== false
+    config.animations !== false
   );
 
   return (
@@ -97,7 +119,7 @@ const AreaChartWidget = ({ widget }) => {
             data={data}
             margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
           >
-            {widget.config?.showGrid !== false && (
+            {config.showGrid !== false && (
               <CartesianGrid strokeDasharray="3 3" stroke={colors.grid} />
             )}
             <XAxis
@@ -114,7 +136,7 @@ const AreaChartWidget = ({ widget }) => {
               }}
             />
             <Tooltip contentStyle={tooltipStyle} />
-            {widget.config?.showLegend !== false && (
+            {config.showLegend !== false && (
               <Legend
                 wrapperStyle={{
                   color: colors.text,
@@ -122,7 +144,7 @@ const AreaChartWidget = ({ widget }) => {
               />
             )}
             <Area
-              type={widget.config?.smoothCurves ? "monotone" : "linear"}
+              type={config.smoothCurves ? "monotone" : "linear"}
               dataKey="value"
               stroke={colors.primary}
               fill={colors.primary}

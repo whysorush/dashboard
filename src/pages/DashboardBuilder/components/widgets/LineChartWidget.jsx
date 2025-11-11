@@ -13,6 +13,8 @@ import {
 } from "recharts";
 import { generateMockData } from "../../utils/mockDataGenerator";
 import { useThemeStyles } from "../../../../utils/themeUtils";
+import { useExcelData } from "../ExcelDataContext";
+import { prepareChartSeries } from "../../utils/excelDataTransforms";
 
 const styles = {
   header: {
@@ -46,16 +48,45 @@ const LineChartWidget = ({ widget }) => {
     getTooltipStyle,
   } = useThemeStyles();
 
-  // Generate mock data based on configuration
-  const data = useMemo(() => {
-    return generateMockData("time-series", {
-      points: widget?.config?.dataPoints || 12,
-      trend: widget?.config?.trend || "up",
-      timeRange: widget?.config?.timeRange || "monthly",
-      includeComparison: widget?.config?.comparisonPeriod,
-    });
-  }, [widget?.config]);
+  const config = widget?.config || {};
+  const { excelData, excelHeaders } = useExcelData();
 
+  const excelSeries = useMemo(
+    () =>
+      prepareChartSeries(excelData, excelHeaders, {
+        maxValueSeries: config.comparisonPeriod ? 2 : 1,
+        limit: config.dataPoints ? Math.max(1, config.dataPoints) : undefined,
+      }),
+    [excelData, excelHeaders, config.comparisonPeriod, config.dataPoints]
+  );
+
+  const fallbackData = useMemo(
+    () =>
+      generateMockData("time-series", {
+        points: config.dataPoints || 12,
+        trend: config.trend || "up",
+        timeRange: config.timeRange || "monthly",
+        includeComparison: config.comparisonPeriod,
+      }),
+    [config.dataPoints, config.trend, config.timeRange, config.comparisonPeriod]
+  );
+
+  const data = useMemo(() => {
+    if (!excelSeries.hasExcelData) {
+      return fallbackData;
+    }
+
+    const { data: seriesData, valueHeaders } = excelSeries;
+    return seriesData.map((row, index, arr) => ({
+      ...row,
+      previousValue:
+        config.comparisonPeriod && valueHeaders.length > 1
+          ? row.value2 ?? row.value
+          : config.comparisonPeriod && index > 0
+          ? arr[index - 1].value
+          : undefined,
+    }));
+  }, [excelSeries, fallbackData, config.comparisonPeriod]);
 
   // Get theme-aware colors and styles
   const colors = getChartColors();
@@ -69,13 +100,17 @@ const LineChartWidget = ({ widget }) => {
 
   // Calculate average for reference line
   const average = useMemo(() => {
-    if (!widget?.config?.showAverage) return null;
-    return data.reduce((sum, item) => sum + item.value, 0) / data.length;
-  }, [data, widget?.config?.showAverage]);
+    if (!config.showAverage || data.length === 0) return null;
+    const sum = data.reduce(
+      (sumAcc, item) => sumAcc + (item.value ?? 0),
+      0
+    );
+    return sum / data.length;
+  }, [data, config.showAverage]);
 
   // Calculate total for header display
   const total = useMemo(() => {
-    const sum = data.reduce((acc, item) => acc + item.value, 0);
+    const sum = data.reduce((acc, item) => acc + (item.value ?? 0), 0);
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
@@ -105,7 +140,7 @@ const LineChartWidget = ({ widget }) => {
             data={data}
             margin={{ top: 10, right: 10, left: 0, bottom: 5 }}
           >
-            {widget?.config?.showGrid !== false && (
+            {config.showGrid !== false && (
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke={colors.grid}
@@ -143,7 +178,7 @@ const LineChartWidget = ({ widget }) => {
               }}
               formatter={(value) => [`${value.toLocaleString()}`, ""]}
             />
-            {widget?.config?.showLegend !== false && (
+            {config.showLegend !== false && (
               <Legend wrapperStyle={{ paddingTop: 10 }} iconType="circle" />
             )}
             {average !== null && (
@@ -162,31 +197,23 @@ const LineChartWidget = ({ widget }) => {
             )}
             <Line
               name="Current Period"
-              type={
-                widget?.config?.smoothCurves !== false ? "monotone" : "linear"
-              }
+              type={config.smoothCurves !== false ? "monotone" : "linear"}
               dataKey="value"
               stroke={primaryColor}
               strokeWidth={3}
-              dot={
-                widget?.config?.showDataPoints !== false
-                  ? { fill: primaryColor, strokeWidth: 2, r: 4 }
-                  : false
-              }
+              dot={config.showDataPoints !== false ? { fill: primaryColor, strokeWidth: 2, r: 4 } : false}
               activeDot={{
                 r: 6,
                 stroke: primaryColor,
                 strokeWidth: 2,
                 fill: "white",
               }}
-              animationDuration={widget?.config?.animations !== false ? 1500 : 0}
+              animationDuration={config.animations !== false ? 1500 : 0}
             />
-            {widget?.config?.comparisonPeriod && (
+            {config.comparisonPeriod && (
               <Line
                 name="Previous Period"
-                type={
-                  widget?.config?.smoothCurves !== false ? "monotone" : "linear"
-                }
+                type={config.smoothCurves !== false ? "monotone" : "linear"}
                 dataKey="previousValue"
                 stroke={secondaryColor}
                 strokeWidth={2}

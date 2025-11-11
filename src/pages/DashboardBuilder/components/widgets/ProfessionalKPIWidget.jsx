@@ -1,5 +1,5 @@
 // src/pages/DashboardBuilder/components/widgets/ProfessionalKPIWidget.jsx
-import React from "react";
+import React, { useMemo } from "react";
 import { PROFESSIONAL_WIDGET_CONFIGS } from "../../constants";
 import {
   FaArrowDown,
@@ -9,6 +9,8 @@ import {
   FaShoppingCart,
   FaUsers,
 } from "react-icons/fa";
+import { useExcelData } from "../ExcelDataContext";
+import { computeKPIValues } from "../../utils/excelDataTransforms";
 
 /**
  * Professional KPI Widget with exact design standards
@@ -40,17 +42,38 @@ const renderIcon = (icon) => {
 };
 const ProfessionalKPIWidget = ({ widget, isSelected, onClick }) => {
   const config = widget?.config || {};
+  const { excelData, excelHeaders } = useExcelData();
+
+  const excelKpi = useMemo(
+    () =>
+      computeKPIValues(excelData, excelHeaders, {
+        valueHeaders: config.valueHeaders,
+        aggregation: config.aggregation || "total",
+      }),
+    [excelData, excelHeaders, config.valueHeaders, config.aggregation]
+  );
+
+  const hasExcelData = excelKpi.hasExcelData;
 
   // Use default config or merge with widget config
-  const title = config.title || PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.title;
-  const value = config.value || PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.value;
+  const title =
+    config.title ||
+    (hasExcelData ? excelKpi.valueHeader : PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.title);
+  const resolvedValue = hasExcelData
+    ? excelKpi.primaryValue
+    : config.value || PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.value;
   const prefix = config.prefix || PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.prefix;
-  const growth = config.growth || PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.growth;
-  const growthDirection =
-    config.growthDirection ||
-    PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.growthDirection;
+  const resolvedChange = hasExcelData
+    ? Math.abs(Number(excelKpi.change || 0)).toFixed(1)
+    : config.growth || PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.growth;
+  const growthDirection = hasExcelData
+    ? (excelKpi.change ?? 0) >= 0
+      ? "up"
+      : "down"
+    : config.growthDirection || PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.growthDirection;
   const growthText =
-    config.growthText || PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.growthText;
+    config.growthText ||
+    (hasExcelData ? "vs previous row" : PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.growthText);
   const icon = config.icon || PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.icon;
   const iconBg = config.iconBg || PROFESSIONAL_WIDGET_CONFIGS.KPI_CARD.iconBg;
   const growthColor =
@@ -69,7 +92,7 @@ const ProfessionalKPIWidget = ({ widget, isSelected, onClick }) => {
         <div className="stat-change positive">
           <div className="stat-value">
             {prefix}
-            {value?.toLocaleString()}
+            {Number(resolvedValue || 0).toLocaleString()}
           </div>
           <div
             style={{ width: "50%", display: "flex", justifyContent: "right" }}
@@ -87,7 +110,7 @@ const ProfessionalKPIWidget = ({ widget, isSelected, onClick }) => {
                 }}
               >
                 {growthDirection === "up" ? <FaArrowUp /> : <FaArrowDown />}
-                {growth} <FaPercent />
+                {resolvedChange} <FaPercent />
               </p>
               <div> {growthText} </div>
             </div>
