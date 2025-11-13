@@ -88,9 +88,8 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
     () =>
       prepareChartSeries(excelData, excelHeaders, {
         maxValueSeries: config.comparisonPeriod ? 2 : 1,
-        limit: config.dataPoints ? Math.max(1, config.dataPoints) : undefined,
       }),
-    [excelData, excelHeaders, config.comparisonPeriod, config.dataPoints]
+    [excelData, excelHeaders, config.comparisonPeriod]
   );
 
   const fallbackData = useMemo(
@@ -134,6 +133,10 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
     }).format(sum);
   }, [chartData]);
 
+  const dataWidth = chartData.length * (config.barPixelWidth || 80);
+  const scrollWidth = Math.max(dataWidth, 600);
+  const shouldScroll = dataWidth > 600;
+
   return (
     <div
       style={{
@@ -160,14 +163,15 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
         </select>
       </div>
 
-      <div style={{ width: "100%", height: chartHeight }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
+      <div style={{ width: "100%", height: chartHeight, overflowX: shouldScroll ? "auto" : "visible" }}>
+        <div style={{ width: shouldScroll ? scrollWidth : "100%", minWidth: "100%", height: "100%" }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
             data={chartData}
             barCategoryGap="18%"
             barGap={6}
             margin={{ top: 4, right: 8, bottom: 0, left: 0 }}
-          >
+            >
             <CartesianGrid stroke={colors.grid} vertical={false} />
 
             <XAxis
@@ -217,8 +221,9 @@ const GradientBarChartWidget = ({ widget, isSelected, onClick }) => {
                 radius: [16, 16, 0, 0],
               }}
             />
-          </BarChart>
-        </ResponsiveContainer>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );

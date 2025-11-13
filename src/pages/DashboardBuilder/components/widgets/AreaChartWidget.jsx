@@ -53,9 +53,8 @@ const AreaChartWidget = ({ widget }) => {
     () =>
       prepareChartSeries(excelData, excelHeaders, {
         maxValueSeries: 1,
-        limit: config.dataPoints ? Math.max(1, config.dataPoints) : undefined,
       }),
-    [excelData, excelHeaders, config.dataPoints]
+    [excelData, excelHeaders]
   );
 
   const fallbackData = useMemo(
@@ -94,6 +93,11 @@ const AreaChartWidget = ({ widget }) => {
     config.animations !== false
   );
 
+  const dataLength = data.length;
+  const pointWidth = config.pointPixelWidth || 70;
+  const minWidth = Math.max(dataLength * pointWidth, 600);
+  const shouldScroll = dataLength * pointWidth > 600;
+
   return (
     <div
       style={{
@@ -113,12 +117,24 @@ const AreaChartWidget = ({ widget }) => {
           <option>Year</option>
         </select>
       </div>
-      <div style={{ width: "100%", height: chartHeight }}>
-        <ResponsiveContainer>
-          <AreaChart
+      <div
+        style={{
+          width: "100%",
+          overflowX: shouldScroll ? "auto" : "visible",
+        }}
+      >
+        <div
+          style={{
+            // width: shouldScroll ? minWidth : "100%",
+            minWidth: "100%",
+            height: chartHeight,
+          }}
+        >
+          <ResponsiveContainer>
+            <AreaChart
             data={data}
             margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
-          >
+            >
             {config.showGrid !== false && (
               <CartesianGrid strokeDasharray="3 3" stroke={colors.grid} />
             )}
@@ -151,8 +167,9 @@ const AreaChartWidget = ({ widget }) => {
               fillOpacity={0.6}
               animationDuration={animationConfig.duration}
             />
-          </AreaChart>
-        </ResponsiveContainer>
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );

@@ -60,9 +60,8 @@ const BarChartWidget = ({ widget }) => {
     () =>
       prepareChartSeries(excelData, excelHeaders, {
         maxValueSeries: neededSeries,
-        limit: config.dataPoints ? Math.max(1, config.dataPoints) : undefined,
       }),
-    [excelData, excelHeaders, neededSeries, config.dataPoints]
+    [excelData, excelHeaders, neededSeries]
   );
 
   // Generate realistic data based on widget config
@@ -139,6 +138,11 @@ const BarChartWidget = ({ widget }) => {
     }).format(sum);
   }, [data]);
 
+  const dataLength = data.length;
+  const barWidth = config.barPixelWidth || 80;
+  const minWidth = Math.max(dataLength * barWidth, 600);
+  const shouldScroll = dataLength * barWidth > 600;
+
   return (
     <div
       style={{
@@ -158,14 +162,26 @@ const BarChartWidget = ({ widget }) => {
           <option>Year</option>
         </select>
       </div>
-      <div style={{ width: "100%", height: chartHeight }}>
-        <ResponsiveContainer>
-          <BarChart
+      <div
+        style={{
+          width: "100%",
+          overflowX: shouldScroll ? "auto" : "visible",
+        }}
+      >
+        <div
+          style={{
+            // width: shouldScroll ? minWidth : "100%",
+            minWidth: "100%",
+            height: chartHeight,
+          }}
+        >
+          <ResponsiveContainer>
+            <BarChart
             data={data}
             margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
             barGap={5}
             barCategoryGap={10}
-          >
+            >
             {config.showGrid !== false && (
               <CartesianGrid
                 strokeDasharray="3 3"
@@ -246,8 +262,9 @@ const BarChartWidget = ({ widget }) => {
                 stackId="stack"
               />
             )}
-          </BarChart>
-        </ResponsiveContainer>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );

@@ -69,9 +69,8 @@ const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
     () =>
       prepareChartSeries(excelData, excelHeaders, {
         maxValueSeries: 1,
-        limit: config.dataPoints ? Math.max(1, config.dataPoints) : undefined,
       }),
-    [excelData, excelHeaders, config.dataPoints]
+    [excelData, excelHeaders]
   );
 
   const fallbackStageData = useMemo(
@@ -103,7 +102,7 @@ const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
       (a, b) => (b.value ?? 0) - (a.value ?? 0)
     );
 
-    return sorted.slice(0, config.maxStages || 7).map((entry) => ({
+    return sorted.map((entry) => ({
       name: entry.name,
       value: Number.isFinite(entry.value) ? entry.value : 0,
       display: new Intl.NumberFormat("en-US", {
@@ -129,6 +128,10 @@ const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
   const chartHeight = getChartHeight(widget?.position?.size || "medium");
   const tooltipStyle = getTooltipStyle();
   const animationConfig = getAnimationConfig(config.animations !== false);
+
+  const stageHeight = widget?.config?.stagePixelHeight || 100;
+  const innerHeight = Math.max(chartData.length * stageHeight, chartHeight);
+  const shouldScrollY = innerHeight > chartHeight;
 
   // Stage data for the funnel (top -> bottom)
   // Colors using global theme colors
@@ -163,9 +166,21 @@ const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
           <option>Year</option>
         </select>
       </div>
-      <div style={{ width: "100%", height: chartHeight }}>
-        <ResponsiveContainer>
-          <FunnelChart>
+      <div
+        style={{
+          width: "100%",
+          height: chartHeight,
+          overflowY: shouldScrollY ? "auto" : "visible",
+        }}
+      >
+        <div
+          style={{
+            height: innerHeight,
+            minHeight: "100%",
+          }}
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <FunnelChart>
             <Tooltip
               contentStyle={tooltipStyle}
               formatter={(val) =>
@@ -199,6 +214,7 @@ const SmoothFunnelChartWidget = ({ widget, isSelected, onClick }) => {
             </Funnel>
           </FunnelChart>
         </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );

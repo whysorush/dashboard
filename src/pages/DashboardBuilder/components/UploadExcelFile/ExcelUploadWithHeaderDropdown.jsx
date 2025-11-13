@@ -11,58 +11,6 @@ export default function ExcelUploadWithHeaderDropdown({ onApply }) {
   const [selectedHeaders, setSelectedHeaders] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const processingTimeoutRef = useRef(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [processingMessage, setProcessingMessage] = useState("");
-  const [processingProgress, setProcessingProgress] = useState(0);
-
-  const scheduleProcessingReset = (delay = 400) => {
-    if (processingTimeoutRef.current) {
-      clearTimeout(processingTimeoutRef.current);
-    }
-    processingTimeoutRef.current = setTimeout(() => {
-      setIsProcessing(false);
-      setProcessingMessage("");
-      setProcessingProgress(0);
-      processingTimeoutRef.current = null;
-    }, delay);
-  };
-
-  const beginProcessing = (message, initialProgress = 0) => {
-    if (processingTimeoutRef.current) {
-      clearTimeout(processingTimeoutRef.current);
-      processingTimeoutRef.current = null;
-    }
-    setProcessingMessage(message);
-    setProcessingProgress(Math.max(0, Math.min(100, initialProgress)));
-    setIsProcessing(true);
-  };
-
-  const updateProcessing = (progress, message) => {
-    setProcessingProgress((prev) => {
-      const resolved =
-        typeof progress === "function" ? progress(prev) : progress;
-      const next = Number.isFinite(resolved) ? resolved : prev;
-      return Math.max(0, Math.min(100, next));
-    });
-    if (message) {
-      setProcessingMessage(message);
-    }
-  };
-
-  const finishProcessing = (message) => {
-    if (message) {
-      setProcessingMessage(message);
-    }
-    setProcessingProgress(100);
-    scheduleProcessingReset();
-  };
-
-  const failProcessing = (message) => {
-    setProcessingMessage(message || "Unable to process file");
-    setProcessingProgress(100);
-    scheduleProcessingReset(1500);
-  };
 
   // ✅ Close dropdown when clicking outside
   useEffect(() => {
@@ -75,55 +23,21 @@ export default function ExcelUploadWithHeaderDropdown({ onApply }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    return () => {
-      if (processingTimeoutRef.current) {
-        clearTimeout(processingTimeoutRef.current);
-        processingTimeoutRef.current = null;
-      }
-    };
-  }, []);
-
   // 📂 Upload Excel
   const handleFileUpload = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    beginProcessing(`Loading ${file.name}...`, 5);
     const reader = new FileReader();
-    reader.onloadstart = () => {
-      updateProcessing(10, "Reading file...");
-    };
-    reader.onprogress = (evt) => {
-      if (evt.lengthComputable) {
-        const percent = 10 + (evt.loaded / evt.total) * 60;
-        updateProcessing(Math.min(80, percent));
-      } else {
-        updateProcessing((prev) => Math.min(80, prev + 5));
-      }
-    };
     reader.onload = (evt) => {
-      updateProcessing(85, "Parsing workbook...");
-      setTimeout(() => {
-        try {
-          const wb = XLSX.read(evt.target.result, { type: "binary" });
-          setWorkbook(wb);
-          setSheetNames(wb.SheetNames);
-          // Reset
-          setSelectedSheet("");
-          setHeaders([]);
-          setRows([]);
-          setChecks({});
-          setSelectedHeaders([]);
-          finishProcessing("Workbook ready");
-        } catch (error) {
-          console.error("Error parsing workbook:", error);
-          failProcessing("Failed to parse file");
-        }
-      }, 30);
-    };
-    reader.onerror = (err) => {
-      console.error("Error reading file:", err);
-      failProcessing("Error reading file");
+      const wb = XLSX.read(evt.target.result, { type: "binary" });
+      setWorkbook(wb);
+      setSheetNames(wb.SheetNames);
+      // Reset
+      setSelectedSheet("");
+      setHeaders([]);
+      setRows([]);
+      setChecks({});
+      setSelectedHeaders([]);
     };
     reader.readAsBinaryString(file);
   };
@@ -131,27 +45,17 @@ export default function ExcelUploadWithHeaderDropdown({ onApply }) {
   // 📑 Select Sheet
   const handleSheetSelect = (name) => {
     setSelectedSheet(name);
-    if (!workbook) return;
-    beginProcessing("Loading sheet...", 20);
-    setTimeout(() => {
-      try {
-        const ws = workbook.Sheets[name];
-        const grid = XLSX.utils.sheet_to_json(ws, { header: 1 });
-        const hdr = (grid[0] || []).map((h) => String(h ?? ""));
-        const body = grid.slice(1);
-        setHeaders(hdr);
-        setRows(body);
+    const ws = workbook.Sheets[name];
+    const grid = XLSX.utils.sheet_to_json(ws, { header: 1 });
+    const hdr = (grid[0] || []).map((h) => String(h ?? ""));
+    const body = grid.slice(1);
+    setHeaders(hdr);
+    setRows(body);
 
-        const init = {};
-        hdr.forEach((h) => (init[h] = false));
-        setChecks(init);
-        setSelectedHeaders([]);
-        finishProcessing("Sheet loaded");
-      } catch (error) {
-        console.error("Error loading sheet:", error);
-        failProcessing("Failed to load sheet");
-      }
-    }, 0);
+    const init = {};
+    hdr.forEach((h) => (init[h] = false));
+    setChecks(init);
+    setSelectedHeaders([]);
   };
 
   // ✅ Toggle header checkbox
@@ -171,9 +75,9 @@ export default function ExcelUploadWithHeaderDropdown({ onApply }) {
     const chosen = headers.filter((h) => checks[h]);
     setSelectedHeaders(chosen);
     setDropdownOpen(false);
-    beginProcessing("Processing selected data...", 35);
 
-    const processSelection = () => {
+    // Emit selected data as array of objects keyed by chosen headers
+    if (typeof onApply === "function") {
       const headerToIndex = new Map(headers.map((h, i) => [h, i]));
       const dataObjects = rows.map((row) => {
         const obj = {};
@@ -183,31 +87,14 @@ export default function ExcelUploadWithHeaderDropdown({ onApply }) {
         });
         return obj;
       });
-
-      if (typeof onApply === "function") {
-        const result = onApply({
-          headers,
-          selectedHeaders: chosen,
-          rows,
-          data: dataObjects,
-          sheet: selectedSheet,
-        });
-
-        if (result && typeof result.then === "function") {
-          result
-            .then(() => finishProcessing("Data applied"))
-            .catch((error) => {
-              console.error("Error applying data:", error);
-              failProcessing("Failed to apply data");
-            });
-          return;
-        }
-      }
-
-      finishProcessing("Data applied");
-    };
-
-    setTimeout(processSelection, 0);
+      onApply({
+        headers,
+        selectedHeaders: chosen,
+        rows,
+        data: dataObjects,
+        sheet: selectedSheet,
+      });
+    }
   };
 
   return (
@@ -485,83 +372,6 @@ export default function ExcelUploadWithHeaderDropdown({ onApply }) {
       </div>
 
       {/* Preview Table */}
-      {isProcessing && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(15, 23, 42, 0.35)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-            backdropFilter: "blur(1px)",
-          }}
-          role="status"
-          aria-live="assertive"
-        >
-          <div
-            style={{
-              width: "min(90%, 320px)",
-              background: "var(--theme-surface)",
-              color: "var(--theme-text)",
-              border: "1px solid var(--theme-border)",
-              borderRadius: "var(--style-borderRadius)",
-              boxShadow: "var(--style-shadow)",
-              padding: "20px 24px",
-              textAlign: "center",
-            }}
-          >
-            <p
-              style={{
-                marginBottom: 12,
-                fontWeight: 600,
-                fontSize: "15px",
-              }}
-            >
-              {processingMessage || "Processing data..."}
-            </p>
-            <div
-              style={{
-                width: "100%",
-                height: 10,
-                borderRadius: 999,
-                overflow: "hidden",
-                background: "var(--theme-border)",
-                position: "relative",
-              }}
-              aria-hidden="true"
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  height: "100%",
-                  width: `${Math.max(
-                    0,
-                    Math.min(100, Number(processingProgress) || 0)
-                  )}%`,
-                  background: "var(--theme-primary)",
-                  transition: "width 0.2s ease",
-                }}
-              />
-            </div>
-            <p
-              style={{
-                marginTop: 8,
-                fontSize: "12px",
-                color: "var(--theme-textSecondary)",
-                fontVariantNumeric: "tabular-nums",
-              }}
-            >
-              {`${Math.round(
-                Math.max(0, Math.min(100, Number(processingProgress) || 0))
-              )}%`}
-            </p>
-          </div>
-        </div>
-      )}
       {/* {selectedHeaders.length > 0 && (
         <div style={{ marginTop: 24 }}>
           <h4>Preview</h4>

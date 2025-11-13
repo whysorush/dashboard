@@ -30,23 +30,31 @@ const KPICardWidget = ({ widget, isSelected, onClick }) => {
 
   const apiUrl = widget?.config?.apiUrl;
 
-  const excelKpi = useMemo(
-    () =>
-      computeKPIValues(excelData, excelHeaders, {
-        valueHeaders: widget?.config?.valueHeaders,
-        aggregation: widget?.config?.aggregation || "total",
-      }),
-    [excelData, excelHeaders, widget?.config?.valueHeaders, widget?.config?.aggregation]
-  );
+  const excelKpi = useMemo(() => {
+    return computeKPIValues(excelData, excelHeaders, {
+      valueHeaders: widget?.config?.valueHeaders,
+      aggregation: widget?.config?.aggregation || "total",
+      allowedHeaders: [
+        "unit_cost_price",
+        "unit_sale_price",
+        "total_sale_price",
+      ],
+    });
+  }, [
+    excelData,
+    excelHeaders,
+    widget?.config?.valueHeaders,
+    widget?.config?.aggregation,
+  ]);
 
   const excelDerivedData = useMemo(() => {
-    if (!excelKpi.hasExcelData) return null;
+    if (!excelKpi.hasExcelData || excelKpi.rejectedByAllowedHeaders) return null;
     const sparklineValues = excelKpi.values.slice(-Math.max(12, excelKpi.values.length));
 
     return {
       value: excelKpi.primaryValue,
       previousValue: excelKpi.previous,
-      label: widget.config?.title || excelKpi.valueHeader || "Total",
+      label: widget.config?.title || "",
       change: Number.isFinite(excelKpi.change) ? excelKpi.change.toFixed(1) : "0.0",
       trend: sparklineValues.length ? sparklineValues : [excelKpi.primaryValue],
     };
@@ -122,8 +130,13 @@ const KPICardWidget = ({ widget, isSelected, onClick }) => {
   // Decide which data to render
   const effectiveData = apiUrl
     ? apiData
-    : excelDerivedData || fallbackData;
-  const isBlank = apiUrl && !loading && (!effectiveData || error);
+    : excelDerivedData || (excelKpi.rejectedByAllowedHeaders ? null : fallbackData);
+  const isBlank = apiUrl
+    ? !loading && (!effectiveData || error)
+    : !effectiveData;
+  const blankMessage = excelKpi.rejectedByAllowedHeaders
+    ? "Select unit_cost_price, unit_sale_price, or total_sale_price"
+    : "No data available";
   const isPositive = !isBlank && parseFloat((effectiveData?.change ?? 0)) > 0;
 
   return (
@@ -136,7 +149,7 @@ const KPICardWidget = ({ widget, isSelected, onClick }) => {
       {/* Blank state when API configured but no data or error */}
       {isBlank && (
         <div className="flex items-center justify-center h-24 text-sm text-gray-400">
-          No data available
+          {blankMessage}
         </div>
       )}
 
@@ -203,16 +216,15 @@ const KPICardWidget = ({ widget, isSelected, onClick }) => {
               stroke={colors.primary}
               strokeWidth="2"
               points={(() => {
-                const trendArray = (effectiveData?.trend || fallbackData.trend);
+                const trendArray = effectiveData?.trend || [];
+                if (!trendArray.length) return "";
                 const denom = Math.max(trendArray.length - 1, 1);
                 return trendArray
-                .map(
-                  (value, index) =>
-                    `${index * (100 / denom)},${
-                      50 - (value - 50) * 0.4
-                    }`
-                )
-                .join(" ");
+                  .map(
+                    (value, index) =>
+                      `${index * (100 / denom)},${50 - (value - 50) * 0.4}`
+                  )
+                  .join(" ");
               })()}
               className="opacity-50"
             />

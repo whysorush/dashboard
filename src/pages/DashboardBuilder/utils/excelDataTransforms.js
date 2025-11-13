@@ -40,6 +40,31 @@ const PREFERRED_CATEGORY_HEADERS = [
 ];
 
 const CLEAN_NUMERIC_CHARS_REGEX = /[^0-9.-]+/g;
+const TEMPORAL_KEYWORDS = [
+  "date",
+  "time",
+  "day",
+  "week",
+  "month",
+  "quarter",
+  "year",
+  "hour",
+  "minute",
+  "second",
+];
+const DISALLOWED_ID_KEYWORDS = [
+  "id",
+  "sku",
+  "customer",
+  "order",
+  "category",
+  "channel",
+  "code",
+  "state",
+  "name",
+  "particular",
+  "product",
+];
 
 export const coerceNumber = (value) => {
   if (value === null || value === undefined) return NaN;
@@ -268,7 +293,11 @@ export const prepareChartSeries = (
 export const computeKPIValues = (
   excelData,
   excelHeaders,
-  { valueHeaders: explicitValueHeaders, aggregation = "total" } = {}
+  {
+    valueHeaders: explicitValueHeaders,
+    aggregation = "total",
+    allowedHeaders = null,
+  } = {}
 ) => {
   const rows = getRowArray(excelData);
   const headers = sanitizeHeaders(excelHeaders);
@@ -283,15 +312,153 @@ export const computeKPIValues = (
       change: 0,
       average: 0,
       values: [],
+      rejectedByAllowedHeaders: false,
+      rejectedTemporalHeader: false,
+      rejectedByIdLikeHeader: false,
     };
   }
 
-  const { valueHeaders } = prepareChartSeries(rows, headers, {
-    valueHeaders: explicitValueHeaders,
-    maxValueSeries: 3,
-  });
+  const headerStats = headers.map((header) => computeHeaderStats(rows, header));
 
-  const valueHeader = valueHeaders[0];
+  const matchHeader = (target) => {
+    if (typeof target !== "string") return null;
+    const lower = target.trim().toLowerCase();
+    return headers.find((header) => header.toLowerCase() === lower) || null;
+  };
+
+  const allowedHeadersArray =
+    Array.isArray(allowedHeaders) && allowedHeaders.length > 0
+      ? allowedHeaders
+      : null;
+  const allowedSet = allowedHeadersArray
+    ? new Set(allowedHeadersArray.map((header) => header.toLowerCase()))
+    : null;
+  const allowedOrder = allowedHeadersArray
+    ? allowedHeadersArray.map((header) => header.toLowerCase())
+    : [];
+
+  const candidateHeaders = [];
+  const temporalBlocks = new Set();
+  const idBlocks = new Set();
+  const isTemporalHeader = (header) => {
+    if (!header) return false;
+    const lower = header.toLowerCase();
+    return TEMPORAL_KEYWORDS.some((keyword) => lower.includes(keyword));
+  };
+  const isIdLikeHeader = (header) => {
+    if (!header) return false;
+    const lower = header.toLowerCase();
+    return DISALLOWED_ID_KEYWORDS.some((keyword) => lower.includes(keyword));
+  };
+  const collectCandidate = (header) => {
+    if (!header) return;
+    const lower = header.toLowerCase();
+    if (allowedSet && !allowedSet.has(lower)) return;
+    if (candidateHeaders.some((existing) => existing.toLowerCase() === lower))
+      return;
+    if (isTemporalHeader(header)) {
+      temporalBlocks.add(header);
+      return;
+    }
+    if (!allowedSet && isIdLikeHeader(header)) {
+      idBlocks.add(header);
+      return;
+    }
+    candidateHeaders.push(header);
+  };
+
+  if (Array.isArray(explicitValueHeaders) && explicitValueHeaders.length > 0) {
+    explicitValueHeaders.forEach((header) => {
+      const matched = matchHeader(header);
+      collectCandidate(matched);
+    });
+  } else if (typeof explicitValueHeaders === "string") {
+    collectCandidate(matchHeader(explicitValueHeaders));
+  }
+
+  if (!candidateHeaders.length) {
+    if (allowedSet) {
+      const searchOrder = allowedOrder.length
+        ? allowedOrder
+        : Array.from(allowedSet);
+      searchOrder.some((allowedName) => {
+        const stat = headerStats.find(
+          (stats) =>
+            stats.header.toLowerCase() === allowedName &&
+            stats.numericCount > 0
+        );
+        if (stat) {
+          collectCandidate(stat.header);
+          return true;
+        }
+        return false;
+      });
+    } else {
+      const inferred = inferValueHeaders(headerStats, { maxSeries: 1 });
+      inferred.forEach(collectCandidate);
+    }
+  }
+
+  if (!candidateHeaders.length && !allowedSet) {
+    const firstNumeric = headerStats.find((stats) => stats.numericCount > 0);
+    if (firstNumeric) {
+      collectCandidate(firstNumeric.header);
+    }
+  }
+
+  if (candidateHeaders.length === 0 && temporalBlocks.size > 0) {
+    const blockedHeader = temporalBlocks.values().next().value || null;
+    return {
+      hasExcelData: true,
+      valueHeader: blockedHeader,
+      total: 0,
+      latest: 0,
+      previous: 0,
+      change: 0,
+      average: 0,
+      primaryValue: 0,
+      values: [],
+      rejectedByAllowedHeaders: false,
+      rejectedTemporalHeader: true,
+      rejectedByIdLikeHeader: idBlocks.size > 0,
+    };
+  }
+
+  if (allowedSet && candidateHeaders.length === 0) {
+    return {
+      hasExcelData: false,
+      valueHeader: null,
+      total: 0,
+      latest: 0,
+      previous: 0,
+      change: 0,
+      average: 0,
+      values: [],
+      rejectedByAllowedHeaders: true,
+      rejectedTemporalHeader: temporalBlocks.size > 0,
+      rejectedByIdLikeHeader: idBlocks.size > 0,
+    };
+  }
+
+  if (candidateHeaders.length === 0 && idBlocks.size > 0) {
+    const blockedHeader = idBlocks.values().next().value || null;
+    return {
+      hasExcelData: true,
+      valueHeader: blockedHeader,
+      total: 0,
+      latest: 0,
+      previous: 0,
+      change: 0,
+      average: 0,
+      primaryValue: 0,
+      values: [],
+      rejectedByAllowedHeaders: false,
+      rejectedTemporalHeader: temporalBlocks.size > 0,
+      rejectedByIdLikeHeader: true,
+    };
+  }
+
+  const valueHeader = candidateHeaders[0];
   if (!valueHeader) {
     return {
       hasExcelData: false,
@@ -302,6 +469,9 @@ export const computeKPIValues = (
       change: 0,
       average: 0,
       values: [],
+      rejectedByAllowedHeaders: false,
+      rejectedTemporalHeader: false,
+      rejectedByIdLikeHeader: false,
     };
   }
 
@@ -319,6 +489,9 @@ export const computeKPIValues = (
       change: 0,
       average: 0,
       values: [],
+      rejectedByAllowedHeaders: false,
+      rejectedTemporalHeader: false,
+      rejectedByIdLikeHeader: false,
     };
   }
 
@@ -348,6 +521,9 @@ export const computeKPIValues = (
     average,
     primaryValue,
     values,
+    rejectedByAllowedHeaders: false,
+    rejectedTemporalHeader: false,
+    rejectedByIdLikeHeader: false,
   };
 };
 

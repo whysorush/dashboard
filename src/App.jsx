@@ -64,7 +64,9 @@ const styles = {
     transition:
       "transform 0.25s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease",
   },
-  mainContent: {},
+  mainContent: {
+    margin: 10,
+  },
   chartsSection: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",

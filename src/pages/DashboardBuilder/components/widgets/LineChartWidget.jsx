@@ -55,9 +55,8 @@ const LineChartWidget = ({ widget }) => {
     () =>
       prepareChartSeries(excelData, excelHeaders, {
         maxValueSeries: config.comparisonPeriod ? 2 : 1,
-        limit: config.dataPoints ? Math.max(1, config.dataPoints) : undefined,
       }),
-    [excelData, excelHeaders, config.comparisonPeriod, config.dataPoints]
+    [excelData, excelHeaders, config.comparisonPeriod]
   );
 
   const fallbackData = useMemo(
@@ -118,6 +117,11 @@ const LineChartWidget = ({ widget }) => {
     }).format(sum);
   }, [data]);
 
+  const dataLength = data.length;
+  const pointWidth = config.pointPixelWidth || 70;
+  const minWidth = Math.max(dataLength * pointWidth, 600);
+  const shouldScroll = dataLength * pointWidth > 600;
+
   return (
     <div
       style={{ width: "100%", ...cssVariables }}
@@ -134,12 +138,24 @@ const LineChartWidget = ({ widget }) => {
           <option>Year</option>
         </select>
       </div>
-      <div style={{ width: "100%", height: chartHeight }}>
-        <ResponsiveContainer>
-          <LineChart
+      <div
+        style={{
+          width: "100%",
+          overflowX: shouldScroll ? "auto" : "visible",
+        }}
+      >
+        <div
+          style={{
+            // width: shouldScroll ? minWidth : "100%",
+            minWidth: "100%",
+            height: chartHeight,
+          }}
+        >
+          <ResponsiveContainer>
+            <LineChart
             data={data}
             margin={{ top: 10, right: 10, left: 0, bottom: 5 }}
-          >
+            >
             {config.showGrid !== false && (
               <CartesianGrid
                 strokeDasharray="3 3"
@@ -227,8 +243,9 @@ const LineChartWidget = ({ widget }) => {
                 }}
               />
             )}
-          </LineChart>
-        </ResponsiveContainer>
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );
